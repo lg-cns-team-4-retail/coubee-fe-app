@@ -119,7 +119,8 @@ async function handleTokenExpiredLogout() {
  */
 export async function loginUser(credentials) {
   try {
-    const response = await axiosInstance.post("/user/auth/login", formData);
+    const response = await axiosInstance.post("/user/auth/login", credentials);
+    console.log(response.data);
     return { success: true, data: response.data };
   } catch (error) {
     const errorMessage =

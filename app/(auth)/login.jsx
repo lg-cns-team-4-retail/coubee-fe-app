@@ -23,19 +23,23 @@ function LoginScreen() {
     console.log(username, password);
     try {
       const response = await loginUser({ username, password });
-      console.log(response);
+
       if (response.success) {
-        console.log(response);
+        console.log(response.data.data);
         await login(
-          response.data.accessRefreshToken.access.token,
-          response.data.accessRefreshToken.refresh.token,
-          response.data.userInfo.username
+          response.data.data.accessRefreshToken.access.token,
+          response.data.data.accessRefreshToken.refresh.token,
+          response.data.data.userInfo.username
         );
 
-        Alert.alert("성공", `${response.data.userInfo.username}님 환영합니다.`);
+        Alert.alert(
+          "성공",
+          `${response.data.data.userInfo.username} 로그인 성공하셨습니다`
+        );
       }
     } catch (error) {
-      Alert.alert("오류", error);
+      const errorMessage = error.message || "알 수 없는 오류가 발생했습니다.";
+      Alert.alert("오류", errorMessage);
     } finally {
       setIsLoading(false);
     }

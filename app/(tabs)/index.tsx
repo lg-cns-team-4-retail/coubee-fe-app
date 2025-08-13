@@ -42,6 +42,8 @@ export default function TabOneScreen() {
     }
   };
 
+  const storeId = 1242;
+
   return (
     <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
       <ToastControl />
@@ -81,11 +83,27 @@ export default function TabOneScreen() {
           <Button onPress={handleLogout} theme="red" size="$4">
             로그아웃
           </Button>
+          <XStack items="center" justify="center" flexWrap="wrap" gap="$1.5">
+            <Button
+              onPress={() => router.push("/store/123")}
+              theme="blue"
+              size="$4"
+            >
+              가게보기
+            </Button>
+          </XStack>
         </YStack>
       ) : (
         <XStack items="center" justify="center" flexWrap="wrap" gap="$1.5">
           <Button onPress={() => router.push("/login")} theme="blue" size="$4">
             로그인
+          </Button>
+          <Button
+            onPress={() => router.push(`/store/${storeId}`)}
+            theme="blue"
+            size="$4"
+          >
+            가게보기
           </Button>
         </XStack>
       )}

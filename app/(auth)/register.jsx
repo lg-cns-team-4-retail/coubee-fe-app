@@ -3,48 +3,47 @@ import { Alert, StyleSheet, useWindowDimensions } from "react-native";
 import { Text, Button, Input, YStack } from "tamagui";
 import { router } from "expo-router";
 import { Welcome } from "components/icons";
+import { registerUser } from "../services/api";
 
-// 이 컴포넌트는 사실상 회원가입 화면이므로 이름을 그에 맞게 변경하는 것이 좋습니다.
 function RegisterScreen() {
-  // 1. 모든 입력 값을 하나의 상태 객체에서 관리합니다.
   const [formData, setFormData] = useState({
     username: "",
-    nickname: "",
+    nickName: "",
     password: "",
     role: "USER",
   });
   const [isLoading, setIsLoading] = useState(false);
   const { width } = useWindowDimensions();
 
-  // 2. 각 입력창의 포커스 이동을 위해 Ref를 생성합니다.
   const nicknameInputRef = useRef(null);
   const passwordInputRef = useRef(null);
 
-  // 3. React Native 방식의 범용 핸들러 함수입니다.
   const handleChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleRegister = async () => {
-    const { username, password, nickname } = formData;
+    const { username, password, nickName } = formData;
 
-    if (!username || !password || !nickname) {
+    if (!username || !password || !nickName) {
+      console.log(nickName, username, password);
       Alert.alert("오류", "모든 정보를 입력해주세요.");
       return;
     }
 
-    console.log("API 호출 직전, 전송될 데이터:", formData);
-
     setIsLoading(true);
     try {
-      // 실제 회원가입 API 호출 (API 함수는 새로 만들어야 할 수 있습니다)
-      // const response = await registerUser(formData);
-      // if (response) { ... }
-      Alert.alert("성공", "회원가입이 완료되었습니다. 로그인 해주세요.");
-      router.push("/(auth)/login");
+      const response = await registerUser(formData);
+
+      if (response.success) {
+        Alert.alert("성공", "회원가입이 완료되었습니다.");
+        router.push("/(auth)/login");
+      } else {
+        Alert.alert("오류", response.message);
+      }
     } catch (error) {
-      console.error("Registration error:", error);
-      Alert.alert("오류", "회원가입 중 문제가 발생했습니다.");
+      const errorMessage = error.message || "알 수 없는 오류가 발생했습니다.";
+      Alert.alert("오류", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -81,8 +80,8 @@ function RegisterScreen() {
         ref={nicknameInputRef}
         width="100%"
         placeholder="닉네임"
-        value={formData.nickname}
-        onChangeText={(text) => handleChange("nickname", text)}
+        value={formData.nickName}
+        onChangeText={(text) => handleChange("nickName", text)}
         autoCapitalize="none"
         returnKeyType="next"
         onSubmitEditing={() => passwordInputRef.current?.focus()}
