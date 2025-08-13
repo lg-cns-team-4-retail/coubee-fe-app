@@ -8,10 +8,17 @@ const customColor = {
   // 라이트 테마 색상
   lightBg: "#F2F3F7",
   lightText: "#1A1A1A",
-  // 공통 색상 (폐하의 색상표)
-  main: "#8B5E56",
-  secondary: "#F5DEB3",
-  interactive: "#6495ED",
+
+  // --- 수정된 부분 ---
+  // 공통 색상 (다크 모드 기준)
+  main: "#4d332f",
+  secondary: "#EBDBC6", // 다크 모드용 Secondary
+  interactive: "#6495ED", // 다크 모드용 Interactive
+
+  // 라이트 모드용 조정 색상
+  lightSecondary: "#D1C5B4", // 라이트 모드용 Secondary
+  lightInteractive: "#4A7FE4", // 라이트 모드용 Interactive
+  // --- 여기까지 ---
 };
 
 export const tokens = createTokens({

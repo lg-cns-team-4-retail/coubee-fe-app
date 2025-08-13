@@ -99,7 +99,30 @@ function RootLayoutNav() {
               headerShown: false,
             }}
           />
-
+          <Stack.Screen
+            name="(auth)/login" // 경로는 '(auth)/login'으로 지정합니다.
+            options={{
+              title: "로그인", // 1. 헤더 중앙 제목을 '로그인'으로 변경
+              headerStyle: {
+                backgroundColor: theme.primary?.val,
+              }, // 2. 헤더 배경색을 테마에 맞춤
+              headerTintColor: "#fff", // 3. 헤더 제목과 아이콘 색상을 테마에 맞춤
+              headerBackTitle: "뒤로",
+              headerShadowVisible: false, // 헤더 아래의 그림자 제거
+            }}
+          />
+          <Stack.Screen
+            name="(auth)/register" // 경로는 '(auth)/login'으로 지정합니다.
+            options={{
+              title: "회원가입", // 1. 헤더 중앙 제목을 '로그인'으로 변경
+              headerStyle: {
+                backgroundColor: theme.primary?.val,
+              }, // 2. 헤더 배경색을 테마에 맞춤
+              headerTintColor: "#fff", // 3. 헤더 제목과 아이콘 색상을 테마에 맞춤
+              headerBackTitle: "뒤로",
+              headerShadowVisible: false, // 헤더 아래의 그림자 제거
+            }}
+          />
           <Stack.Screen
             name="modal"
             options={{
@@ -109,7 +132,7 @@ function RootLayoutNav() {
               gestureEnabled: true,
               gestureDirection: "horizontal",
               contentStyle: {
-                backgroundColor: theme.background.val,
+                backgroundColor: theme.background?.val,
               },
             }}
           />
