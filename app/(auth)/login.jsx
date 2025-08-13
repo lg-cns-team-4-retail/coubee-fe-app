@@ -22,24 +22,20 @@ function LoginScreen() {
     setIsLoading(true);
     console.log(username, password);
     try {
-      // 실제 로그인 API 호출
       const response = await loginUser({ username, password });
       console.log(response);
-      if (response) {
-        // AuthContext의 login 함수를 통해 상태 업데이트
+      if (response.success) {
+        console.log(response);
         await login(
           response.data.accessRefreshToken.access.token,
           response.data.accessRefreshToken.refresh.token,
           response.data.userInfo.username
         );
 
-        Alert.alert("성공", "로그인이 완료되었습니다.");
-        // AuthContext에서 자동으로 라우팅을 처리함
-      } else {
-        Alert.alert("오류", "사용자명 또는 비밀번호가 올바르지 않습니다.");
+        Alert.alert("성공", `${response.data.userInfo.username}님 환영합니다.`);
       }
     } catch (error) {
-      console.error("Login error:", error);
+      Alert.alert("오류", error);
     } finally {
       setIsLoading(false);
     }

@@ -112,41 +112,37 @@ async function handleTokenExpiredLogout() {
   }
 }
 
-// --- 개별 외교 임무 (API 함수들) ---
-
 /**
  * 로그인 API
  * @param {object} credentials - { username, password }
- * @returns {Promise<object|null>} 로그인 응답 데이터 또는 null
+ * @returns {Promise<object|null>}
  */
 export async function loginUser(credentials) {
   try {
-    const response = await axiosInstance.post("/user/auth/login", credentials);
-    return response.data;
+    const response = await axiosInstance.post("/user/auth/login", formData);
+    return { success: true, data: response.data };
   } catch (error) {
-    console.error(
-      "Login request failed:",
-      error.response?.data || error.message
-    );
-    return null;
+    const errorMessage =
+      error.response?.data?.message || "로그인 중 문제가 발생했습니다.";
+    console.error("Login request failed:", errorMessage);
+    return { success: false, message: errorMessage };
   }
 }
 
 /**
  * 회원가입 API
  * @param {object} formData - { username, nickname, password, role }
- * @returns {Promise<object|null>} 회원가입 응답 데이터 또는 null
+ * @returns {Promise<object|null>}
  */
 export async function registerUser(formData) {
   try {
-    const response = await axiosInstance.post("/user/auth/signup", formData); // 실제 회원가입 엔드포인트로 수정 필요
-    return response.data;
+    const response = await axiosInstance.post("/user/auth/signup", formData);
+    return { success: true, data: response.data };
   } catch (error) {
-    console.error(
-      "Registration request failed:",
-      error.response?.data || error.message
-    );
-    return null;
+    const errorMessage =
+      error.response?.data?.message || "회원가입 중 문제가 발생했습니다.";
+    console.error("Registration request failed:", errorMessage);
+    return { success: false, message: errorMessage };
   }
 }
 
