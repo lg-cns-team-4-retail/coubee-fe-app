@@ -112,6 +112,12 @@ function RootLayoutNav() {
             }}
           />
           <Stack.Screen
+            name="store/[storeId]"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="(auth)/register" // 경로는 '(auth)/login'으로 지정합니다.
             options={{
               title: "회원가입", // 1. 헤더 중앙 제목을 '로그인'으로 변경
