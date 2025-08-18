@@ -5,9 +5,11 @@ const customColor = {
   // 다크 테마 색상
   darkBg: "#1A1A1A",
   darkText: "#E5E5E5",
+  darkCardBg: "#000",
   // 라이트 테마 색상
   lightBg: "#F2F3F7",
   lightText: "#1A1A1A",
+  lightCardBg: "#fff",
 
   // --- 수정된 부분 ---
   // 공통 색상 (다크 모드 기준)

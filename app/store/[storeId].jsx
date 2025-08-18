@@ -1,12 +1,5 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  Image,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, SafeAreaView, StatusBar, Image } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -14,20 +7,34 @@ import Animated, {
   interpolate,
   interpolateColor,
 } from "react-native-reanimated";
+import { router } from "expo-router";
+
 import {
   ChevronLeft,
   Search,
   ShoppingCart,
   Share,
 } from "@tamagui/lucide-icons";
-
+import { Skeleton } from "moti/skeleton";
+import {
+  useTheme,
+  Button,
+  XStack,
+  YStack,
+  Text,
+  Input,
+  useThemeName,
+} from "tamagui";
+import { useDispatch, useSelector } from "react-redux";
+import { viewStoreDetail } from "../../redux/slices/viewStoreSlice";
+import backgroundSrc from "../../assets/images/background.jpg";
+import TestComponent from "./TestComponent";
 // --- 설정 값 ---
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
 const ANIMATION_END_Y = HEADER_IMAGE_HEIGHT * 0.8;
 
-// 1. 아이콘을 겹쳐놓고 투명도를 조절하기 위한 래퍼 컴포넌트
-// 이 컴포넌트는 흰색 아이콘과 검은색 아이콘을 받아 겹쳐놓고, 애니메이션 스타일에 따라 투명도를 조절합니다.
+// 아이콘을 겹쳐놓고 투명도를 조절하기 위한 래퍼 컴포넌트
 const CrossfadingIcon = ({
   WhiteIcon,
   BlackIcon,
@@ -36,48 +43,59 @@ const CrossfadingIcon = ({
   blackIconStyle,
 }) => {
   return (
-    <View style={{ width: size, height: size }}>
+    <Button
+      unstyled
+      chromeless
+      size="$2"
+      onPress={() => {
+        router.back();
+      }}
+    >
       <Animated.View style={[StyleSheet.absoluteFill, whiteIconStyle]}>
         <WhiteIcon size={size} color="#FFFFFF" />
       </Animated.View>
       <Animated.View style={[StyleSheet.absoluteFill, blackIconStyle]}>
-        <BlackIcon size={size} color="#000000" />
+        <BlackIcon size={size} color="#FFFFFF" />
       </Animated.View>
-    </View>
+    </Button>
   );
 };
 
-export default function StoreDetailPage() {
+export default function StorePage() {
   const scrollY = useSharedValue(0);
+  const theme = useTheme();
+  const themeName = useThemeName();
+  const dispatch = useDispatch();
 
+  const [searchQuery, setSearchQuery] = useState("");
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
 
-  // 헤더 배경색 애니메이션 스타일
+  // 3. 헤더 배경색 애니메이션 스타일
   const headerAnimatedStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       scrollY.value,
       [ANIMATION_START_Y, ANIMATION_END_Y],
-      ["rgba(255, 255, 255, 0)", "rgba(255, 255, 255, 1)"]
+      ["rgba(255, 255, 255, 0)", theme.primary.val]
     );
     return { backgroundColor };
   });
 
-  // 헤더 제목 투명도 애니메이션 스타일
+  // 4. 헤더 제목("장씨네 과일가게") 투명도 애니메이션 스타일
   const titleAnimatedStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
       [ANIMATION_START_Y, ANIMATION_END_Y],
-      [0, 1],
+      [0, 1], // 스크롤 시 점차 나타남 (투명도 0 -> 1)
       "clamp"
     );
     return { opacity };
   });
 
-  // 2. 흰색 아이콘의 투명도 스타일 (스크롤 시 1 -> 0 으로 사라짐)
+  // 흰색 아이콘의 투명도 스타일 (스크롤 시 사라짐)
   const whiteIconAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
@@ -89,7 +107,7 @@ export default function StoreDetailPage() {
     };
   });
 
-  // 3. 검은색 아이콘의 투명도 스타일 (스크롤 시 0 -> 1 로 나타남)
+  // 검은색 아이콘의 투명도 스타일 (스크롤 시 나타남)
   const blackIconAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
@@ -101,37 +119,39 @@ export default function StoreDetailPage() {
     };
   });
 
+  const handleSearchSubmit = () => {
+    // 입력된 내용이 없으면 아무것도 하지 않습니다.
+    if (!searchQuery.trim()) {
+      return;
+    }
+
+    console.log("입력된 검색어:", searchQuery);
+  };
+
+  useEffect(() => {
+    dispatch(viewStoreDetail(6));
+  }, []);
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar
+        barStyle={theme.name === "dark" ? "light-content" : "dark-content"}
+      />
 
       <Animated.View style={[styles.header, headerAnimatedStyle]}>
         <SafeAreaView style={{ flex: 1 }}>
           <View style={styles.headerContent}>
-            {/* 4. CrossfadingIcon 컴포넌트를 사용하여 아이콘을 렌더링합니다. */}
             <CrossfadingIcon
               WhiteIcon={ChevronLeft}
               BlackIcon={ChevronLeft}
               size={28}
+              whiteIconStyle={whiteIconAnimatedStyle}
+              blackIconStyle={blackIconAnimatedStyle}
             />
 
             <Animated.Text style={[styles.headerTitle, titleAnimatedStyle]}>
-              짬뽕매니아 신림점
+              장씨네 과일가게
             </Animated.Text>
-
-            <View style={styles.headerIcons}>
-              <CrossfadingIcon WhiteIcon={Share} BlackIcon={Share} size={24} />
-              <CrossfadingIcon
-                WhiteIcon={Search}
-                BlackIcon={Search}
-                size={24}
-              />
-              <CrossfadingIcon
-                WhiteIcon={ShoppingCart}
-                BlackIcon={ShoppingCart}
-                size={24}
-              />
-            </View>
           </View>
         </SafeAreaView>
       </Animated.View>
@@ -142,20 +162,60 @@ export default function StoreDetailPage() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: HEADER_IMAGE_HEIGHT }}
       >
-        <Image
-          source={{
-            uri: "https://images.unsplash.com/photo-1542654547-5349e3556f2d?q=80&w=2940",
-          }}
-          style={styles.headerImage}
-        />
+        <Image source={backgroundSrc} style={styles.headerImage} />
 
-        <View style={styles.content}>
-          <View style={styles.banner}>
-            <Text style={styles.bannerText}>✨ 배민클럽 가입하면 무료배달</Text>
-          </View>
-          <Text style={styles.storeTitle}>짬뽕매니아 신림점</Text>
-          <View style={styles.longContentPlaceholder} />
-        </View>
+        <YStack bg="$background" style={styles.content}>
+          <XStack
+            flex={1}
+            px="$2"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text style={styles.storeTitle}>장씨네 과일가게</Text>
+            <Button
+              color="#fff"
+              fontWeight={500}
+              backgroundColor="$primary"
+              borderRadius={22}
+              fontSize={13}
+              height="$3"
+              paddingHorizontal="$3"
+              my="$2"
+              onPress={() => router.push(`/storeInformation/${6}`)}
+            >
+              가게 정보
+            </Button>
+          </XStack>
+          <XStack
+            borderWidth={2}
+            borderColor="$borderColor"
+            borderRadius="$6"
+            paddingHorizontal="$3"
+            alignItems="center"
+            gap="$1"
+          >
+            <Search color="$color10" size="$1" />
+
+            <Input
+              flex={1}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="검색해보세요"
+              borderWidth={0}
+              fontWeight="700"
+              backgroundColor="transparent"
+              onSubmitEditing={handleSearchSubmit}
+            />
+          </XStack>
+
+          <Skeleton
+            width={"70%"}
+            height={24}
+            colorMode={themeName}
+            transition={{ type: "timing" }}
+          ></Skeleton>
+          <TestComponent />
+        </YStack>
       </Animated.ScrollView>
     </View>
   );
@@ -165,7 +225,6 @@ export default function StoreDetailPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   header: {
     position: "absolute",
@@ -187,12 +246,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
     position: "absolute",
     left: 0,
     right: 0,
     textAlign: "center",
-    zIndex: -1,
+    zIndex: -1, // 아이콘 뒤에 위치하도록 설정
   },
   headerIcons: {
     flexDirection: "row",
@@ -205,8 +264,9 @@ const styles = StyleSheet.create({
     top: 0,
   },
   content: {
+    borderRadius: 18,
+    marginTop: -20,
     padding: 16,
-    backgroundColor: "#fff",
   },
   banner: {
     backgroundColor: "#E6F3FF",
@@ -221,12 +281,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   storeTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
   },
   longContentPlaceholder: {
-    height: 1000,
+    marginTop: 10,
+    height: 1000, // 스크롤을 충분히 할 수 있도록 높이 설정
     backgroundColor: "#f0f0f0",
     borderRadius: 8,
   },

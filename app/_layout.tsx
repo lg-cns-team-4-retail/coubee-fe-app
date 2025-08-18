@@ -10,7 +10,7 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { Provider } from "components/Provider";
+import TProvider from "../components/Provider";
 import { useTheme } from "tamagui";
 import { AuthProvider } from "./contexts/AuthContext";
 import {
@@ -19,6 +19,9 @@ import {
   addNotificationResponseListener,
 } from "./services/notifications";
 import { handleNotificationNavigation } from "./services/notificationNavigation";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "../redux/store";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -75,14 +78,18 @@ export default function RootLayout() {
   }
 
   return (
-    <Providers>
-      <RootLayoutNav />
-    </Providers>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <Providers>
+          <RootLayoutNav />
+        </Providers>
+      </PersistGate>
+    </Provider>
   );
 }
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
-  return <Provider>{children}</Provider>;
+  return <TProvider>{children}</TProvider>;
 };
 
 function RootLayoutNav() {
@@ -100,33 +107,41 @@ function RootLayoutNav() {
             }}
           />
           <Stack.Screen
-            name="(auth)/login" // 경로는 '(auth)/login'으로 지정합니다.
+            name="(auth)/login"
             options={{
-              title: "로그인", // 1. 헤더 중앙 제목을 '로그인'으로 변경
+              title: "로그인",
               headerStyle: {
                 backgroundColor: theme.primary?.val,
-              }, // 2. 헤더 배경색을 테마에 맞춤
-              headerTintColor: "#fff", // 3. 헤더 제목과 아이콘 색상을 테마에 맞춤
+              },
+              headerTintColor: "#fff",
               headerBackTitle: "뒤로",
-              headerShadowVisible: false, // 헤더 아래의 그림자 제거
+              headerShadowVisible: false,
             }}
           />
           <Stack.Screen
             name="store/[storeId]"
             options={{
               headerShown: false,
+              headerShadowVisible: false,
             }}
           />
           <Stack.Screen
-            name="(auth)/register" // 경로는 '(auth)/login'으로 지정합니다.
+            name="storeInformation/[storeId]"
             options={{
-              title: "회원가입", // 1. 헤더 중앙 제목을 '로그인'으로 변경
+              headerShown: false,
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="(auth)/register"
+            options={{
+              title: "회원가입",
               headerStyle: {
                 backgroundColor: theme.primary?.val,
-              }, // 2. 헤더 배경색을 테마에 맞춤
-              headerTintColor: "#fff", // 3. 헤더 제목과 아이콘 색상을 테마에 맞춤
+              },
+              headerTintColor: "#fff",
               headerBackTitle: "뒤로",
-              headerShadowVisible: false, // 헤더 아래의 그림자 제거
+              headerShadowVisible: false,
             }}
           />
           <Stack.Screen

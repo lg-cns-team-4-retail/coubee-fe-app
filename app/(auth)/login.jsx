@@ -6,7 +6,7 @@ import { loginUser } from "../services/api";
 import { useAuthContext } from "../contexts/AuthContext";
 import { Welcome } from "components/icons";
 
-function LoginScreen() {
+const LoginScreen = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -107,7 +107,7 @@ function LoginScreen() {
       <Welcome />
     </YStack>
   );
-}
+};
 
 export default LoginScreen;
 

@@ -4,15 +4,11 @@ import { config } from "../config/env";
 
 const API_BASE_URL = config.apiBaseUrl;
 
-// --- Axios 외교 군단 창설 ---
-// 모든 API 요청을 처리할 기본 인스턴스를 생성합니다.
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
 
-// --- 1. 요청 파견 전 임무 (Request Interceptor) ---
-// 모든 요청이 보내지기 전에, 자동으로 인증서(토큰)를 첨부합니다.
 axiosInstance.interceptors.request.use(
   async (config) => {
     const token = await AuthService.getToken();
@@ -37,8 +33,6 @@ const addRefreshSubscriber = (cb) => {
   refreshSubscribers.push(cb);
 };
 
-// --- 2. 응답 수신 후 임무 (Response Interceptor) ---
-// 서버로부터 응답을 받은 후, 인증서 만료(401) 등의 특수 상황을 처리합니다.
 axiosInstance.interceptors.response.use(
   (response) => response, // 성공 응답은 그대로 통과
   async (error) => {
@@ -205,3 +199,5 @@ export async function handleUserLogout() {
     throw error;
   }
 }
+
+export default axiosInstance;

@@ -4,7 +4,7 @@ import { tokens } from "./tokens";
 export const light_theme = {
   background: tokens.color.lightBg,
   color: tokens.color.lightText,
-
+  cardBg: tokens.color.lightCardBg,
   // --- 수정된 부분 ---
   primary: tokens.color.main, // (유지) 높은 대비와 브랜드 일관성
   secondary: tokens.color.lightSecondary, // 라이트 모드용 색상으로 변경
@@ -21,6 +21,8 @@ export const light_theme = {
 export const dark_theme = {
   background: tokens.color.darkBg,
   color: tokens.color.darkText,
+  cardBg: tokens.color.darkCardBg,
+
   primary: tokens.color.main,
   secondary: tokens.color.secondary,
   interactive: tokens.color.interactive,

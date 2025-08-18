@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 import { XStack, YStack, Button, Text, Card } from "tamagui";
-import { ToastControl } from "components/CurrentToast";
+import { ToastControl } from "../../components/CurrentToast";
 import { getExpoPushToken } from "../services/notifications";
 import { useAuthContext } from "../contexts/AuthContext";
 import { router } from "expo-router";
@@ -45,7 +45,7 @@ export default function TabOneScreen() {
   const storeId = 1242;
 
   return (
-    <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
+    <YStack flex={1} gap="$8" px="$10" pt="$5" bg="$background">
       <ToastControl />
 
       <Card padding="$4" width="90%" backgroundColor="$background">
@@ -72,7 +72,7 @@ export default function TabOneScreen() {
       </Card>
 
       {isAuthenticated ? (
-        <YStack items="center" justify="center" flexWrap="wrap" gap="$4">
+        <YStack flexWrap="wrap" gap="$4">
           <Text>환영합니다!</Text>
           <Text>사용자명: {userId}</Text>
 
@@ -83,7 +83,7 @@ export default function TabOneScreen() {
           <Button onPress={handleLogout} theme="red" size="$4">
             로그아웃
           </Button>
-          <XStack items="center" justify="center" flexWrap="wrap" gap="$1.5">
+          <XStack flexWrap="wrap" gap="$1.5">
             <Button
               onPress={() => router.push("/store/123")}
               theme="blue"
@@ -94,7 +94,7 @@ export default function TabOneScreen() {
           </XStack>
         </YStack>
       ) : (
-        <XStack items="center" justify="center" flexWrap="wrap" gap="$1.5">
+        <XStack flexWrap="wrap" gap="$1.5">
           <Button onPress={() => router.push("/login")} theme="blue" size="$4">
             로그인
           </Button>

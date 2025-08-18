@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { Welcome } from "components/icons";
 import { registerUser } from "../services/api";
 
-function RegisterScreen() {
+const RegisterScreen = () => {
   const [formData, setFormData] = useState({
     username: "",
     nickName: "",
@@ -121,7 +121,7 @@ function RegisterScreen() {
       <Welcome />
     </YStack>
   );
-}
+};
 
 export default RegisterScreen;
 
