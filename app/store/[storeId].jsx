@@ -30,6 +30,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { viewStoreDetail } from "../../redux/slices/viewStoreSlice";
 import backgroundSrc from "../../assets/images/background.jpg";
+import ProductItemSection from "./ProductItemSection";
 // --- 설정 값 ---
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
@@ -70,11 +71,6 @@ export default function StorePage() {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -216,11 +212,10 @@ export default function StorePage() {
               onSubmitEditing={handleSearchSubmit}
             />
           </XStack>
-          <Skeleton width={"50%"} show={isLoading} height={125}>
-            <Text>테스트입니다</Text>
-          </Skeleton>
         </YStack>
       </Animated.ScrollView>
+
+      <ProductItemSection />
     </View>
   );
 }

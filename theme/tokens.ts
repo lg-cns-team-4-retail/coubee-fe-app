@@ -2,17 +2,16 @@ import { createTokens } from "tamagui";
 import { color, radius, size, space, zIndex } from "@tamagui/themes";
 
 const customColor = {
-  // 다크 테마 색상
   darkBg: "#1A1A1A",
   darkText: "#E5E5E5",
   darkCardBg: "#000",
-  // 라이트 테마 색상
+  darkBackgroundPress: "#333333",
+
   lightBg: "#F2F3F7",
   lightText: "#1A1A1A",
   lightCardBg: "#fff",
+  lightBackgroundPress: "#EEEEEE",
 
-  // --- 수정된 부분 ---
-  // 공통 색상 (다크 모드 기준)
   main: "#4d332f",
   secondary: "#EBDBC6", // 다크 모드용 Secondary
   interactive: "#6495ED", // 다크 모드용 Interactive

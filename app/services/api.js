@@ -60,23 +60,20 @@ axiosInstance.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        // 새 토큰 발급 요청
         const refreshResponse = await axios.post(
           `${API_BASE_URL}/user/auth/refresh`,
-          {},
-          {
-            headers: { Authorization: `Bearer ${refreshToken}` },
-          }
+          { token: refreshToken }
         );
 
         const newAccessToken = refreshResponse.data.data.access.token;
+        console.log(newAccessToken, "new access token created");
         await AuthService.setToken(newAccessToken);
 
         isRefreshing = false;
-        onRefreshed(newAccessToken); // 대기 중이던 다른 요청들을 실행시킵니다.
+        onRefreshed(newAccessToken);
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return axiosInstance(originalRequest); // 원래 요청을 새 토큰으로 재시도합니다.
+        return axiosInstance(originalRequest);
       } catch (refreshError) {
         console.error("Token refresh failed, logging out...", refreshError);
         isRefreshing = false;
@@ -90,7 +87,6 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-// --- 토큰 만료로 인한 자동 로그아웃 처리 ---
 async function handleTokenExpiredLogout() {
   try {
     const pushToken = await AuthService.getPushToken();

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, SafeAreaView, StatusBar, Image } from "react-native";
 import Animated, {
   useSharedValue,
@@ -7,6 +7,7 @@ import Animated, {
   interpolate,
   interpolateColor,
 } from "react-native-reanimated";
+import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft, MapPin, Clock, Info } from "@tamagui/lucide-icons";
 import {
   useTheme,
@@ -22,6 +23,10 @@ import backgroundSrc from "../../assets/images/background.jpg";
 import profileSrc from "../../assets/images/peach.png";
 import KakaoMap from "../../components/KakaoMap";
 import PhoneLink from "../../components/PhoneLink";
+import Skeleton from "../../components/Skeleton";
+import { viewStoreDetail } from "../../redux/slices/viewStoreSlice";
+import StoreTags from "./StoreTag";
+import StoreInfo from "./StoreInfo";
 // --- 설정 값 ---
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
@@ -82,7 +87,12 @@ const InfoSection = ({ title, children }) => (
 export default function StoreInformationPage() {
   const scrollY = useSharedValue(0);
   const theme = useTheme();
-
+  const dispatch = useDispatch();
+  const { loading, storeData } = useSelector((state) => state.viewStore);
+  useEffect(() => {
+    console.log("called");
+    dispatch(viewStoreDetail(1177));
+  }, [dispatch]);
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
@@ -173,79 +183,25 @@ export default function StoreInformationPage() {
           {/* 프로필 이미지 */}
           <Image source={profileSrc} style={styles.profileImage} />
           <YStack alignItems="center" gap="$1.5">
-            <Text fontSize={28} fontWeight="bold">
-              장씨네 과일가게
-            </Text>
+            <Skeleton
+              show={loading === "pending" || loading === "idle"}
+              width={80}
+            >
+              <Text fontSize={28} fontWeight="bold">
+                {storeData.storeName || "가게 이름 로딩"}
+              </Text>
+            </Skeleton>
           </YStack>
           <YStack alignItems="center" gap="$4" px="$4">
-            {/* 가게 이름 및 설명 */}
-
-            {/* 태그 */}
-            <XStack gap="$2" mt="$2">
-              <Button
-                backgroundColor="$primary"
-                fontWeight="700"
-                color="#fff"
-                size="$2"
-                theme="alt1"
-                borderRadius="$10"
-              >
-                최고 당도 보장
-              </Button>
-              <Button
-                backgroundColor="$primary"
-                fontWeight="700"
-                color="#fff"
-                size="$2"
-                theme="alt1"
-                borderRadius="$10"
-              >
-                과일가게
-              </Button>
-              <Button
-                backgroundColor="$primary"
-                fontWeight="700"
-                color="#fff"
-                size="$2"
-                theme="alt1"
-                borderRadius="$10"
-              >
-                신뢰성
-              </Button>
-            </XStack>
+            <StoreTags
+              loading={loading === "pending" || loading === "idle"}
+              tags={storeData?.storeTag}
+            />
           </YStack>
-
-          <YStack gap="$6" px="$4" mt="$8">
-            <InfoSection title="가게 소개">
-              <Text lineHeight={22}>
-                과일가게는 신선한 과일을 판매하는 곳입니다. 다양한 종류의 과일을
-                취급하며, 계절에 따라 제철 과일을 판매하기도 합니다. 일반적으로
-                과일가게는 도매시장에서 과일을 구매하여 소매로 판매하며, 일부
-                과일가게는 직접 재배한 과일을 판매하기도 합니다.
-              </Text>
-            </InfoSection>
-
-            <InfoSection title="가게 위치">
-              <KakaoMap
-                latitude={37.60234152778153}
-                longitude={127.02036133569128}
-              />
-              <Text>[04620] 서울특별시 중구 필동로 1길 30</Text>
-            </InfoSection>
-
-            <InfoSection title="영업 시간">
-              <Text>
-                평일: 오전 9:00 ~ 오후 9:00 (사정상 조기 종료할수있음)
-              </Text>
-              <Text>주말: 오전 11:00 ~ 오후 8:00</Text>
-            </InfoSection>
-
-            <InfoSection title="사업자 정보">
-              <Text>사업주: 장승원</Text>
-              <Text>사업자번호: 123456708</Text>
-              <PhoneLink phoneNumber={"010-1234-5678"} />
-            </InfoSection>
-          </YStack>
+          <StoreInfo
+            loading={loading === "pending" || loading === "idle"}
+            data={storeData}
+          />
         </YStack>
       </Animated.ScrollView>
     </View>

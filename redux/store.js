@@ -12,9 +12,11 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import devToolsEnhancer from "redux-devtools-expo-dev-plugin";
 import viewStoreReducer from "./slices/viewStoreSlice";
+import productStoreReducer from "./slices/productSlice";
 
 const rootReducer = combineReducers({
   viewStore: viewStoreReducer,
+  productStore: productStoreReducer,
 });
 
 const persistConfig = {
