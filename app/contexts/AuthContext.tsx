@@ -17,7 +17,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const segments = useSegments();
-  console.log(segments);
   // 페이지별 권한 설정
   const publicRoutes = [
     "login", // 로그인 페이지
@@ -60,8 +59,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (auth.isAuthenticated) {
         console.log("checked");
-        // 로그인됨
-        console.log(segments, "checking");
         if (
           isPublicRoute(segments) &&
           segments[0] === "(auth)" &&
@@ -80,12 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // 공개 경로에 있으면 그대로 유지
       }
 
-      console.log("Auth check:", {
+      /* console.log("Auth check:", {
         isAuthenticated: auth.isAuthenticated,
         currentPath,
         isProtected: isProtectedRoute(segments),
         isPublic: isPublicRoute(segments),
-      });
+      }); */
     }
   }, [auth.isAuthenticated, auth.isLoading, segments]);
 

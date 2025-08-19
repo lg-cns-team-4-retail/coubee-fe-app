@@ -15,7 +15,9 @@ import {
   ShoppingCart,
   Share,
 } from "@tamagui/lucide-icons";
-import { Skeleton } from "moti/skeleton";
+
+import Skeleton from "../../components/Skeleton";
+
 import {
   useTheme,
   Button,
@@ -28,7 +30,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { viewStoreDetail } from "../../redux/slices/viewStoreSlice";
 import backgroundSrc from "../../assets/images/background.jpg";
-import TestComponent from "./TestComponent";
 // --- 설정 값 ---
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
@@ -67,6 +68,13 @@ export default function StorePage() {
   const themeName = useThemeName();
   const dispatch = useDispatch();
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -74,7 +82,6 @@ export default function StorePage() {
     },
   });
 
-  // 3. 헤더 배경색 애니메이션 스타일
   const headerAnimatedStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       scrollY.value,
@@ -84,18 +91,16 @@ export default function StorePage() {
     return { backgroundColor };
   });
 
-  // 4. 헤더 제목("장씨네 과일가게") 투명도 애니메이션 스타일
   const titleAnimatedStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
       [ANIMATION_START_Y, ANIMATION_END_Y],
-      [0, 1], // 스크롤 시 점차 나타남 (투명도 0 -> 1)
+      [0, 1],
       "clamp"
     );
     return { opacity };
   });
 
-  // 흰색 아이콘의 투명도 스타일 (스크롤 시 사라짐)
   const whiteIconAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
@@ -107,7 +112,6 @@ export default function StorePage() {
     };
   });
 
-  // 검은색 아이콘의 투명도 스타일 (스크롤 시 나타남)
   const blackIconAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
@@ -120,7 +124,6 @@ export default function StorePage() {
   });
 
   const handleSearchSubmit = () => {
-    // 입력된 내용이 없으면 아무것도 하지 않습니다.
     if (!searchQuery.trim()) {
       return;
     }
@@ -129,8 +132,9 @@ export default function StorePage() {
   };
 
   useEffect(() => {
+    console.log("called");
     dispatch(viewStoreDetail(6));
-  }, []);
+  }, [dispatch]);
 
   return (
     <View style={styles.container}>
@@ -162,8 +166,13 @@ export default function StorePage() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: HEADER_IMAGE_HEIGHT }}
       >
-        <Image source={backgroundSrc} style={styles.headerImage} />
-
+        {isLoading ? (
+          <View style={styles.headerImage}>
+            <Skeleton show={true} width="100%" />
+          </View>
+        ) : (
+          <Image source={backgroundSrc} style={styles.headerImage} />
+        )}
         <YStack bg="$background" style={styles.content}>
           <XStack
             flex={1}
@@ -207,14 +216,9 @@ export default function StorePage() {
               onSubmitEditing={handleSearchSubmit}
             />
           </XStack>
-
-          <Skeleton
-            width={"70%"}
-            height={24}
-            colorMode={themeName}
-            transition={{ type: "timing" }}
-          ></Skeleton>
-          <TestComponent />
+          <Skeleton width={"50%"} show={isLoading} height={125}>
+            <Text>테스트입니다</Text>
+          </Skeleton>
         </YStack>
       </Animated.ScrollView>
     </View>
@@ -232,7 +236,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    borderBottomWidth: 1,
     borderColor: "rgba(0, 0, 0, 0.05)",
   },
   headerContent: {
@@ -251,7 +254,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: "center",
-    zIndex: -1, // 아이콘 뒤에 위치하도록 설정
+    zIndex: -1,
   },
   headerIcons: {
     flexDirection: "row",

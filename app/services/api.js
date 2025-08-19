@@ -37,11 +37,9 @@ axiosInstance.interceptors.response.use(
   (response) => response, // 성공 응답은 그대로 통과
   async (error) => {
     const { config: originalRequest, response } = error;
-
     // 401 오류이고, 아직 재시도 안했을 때
     if (response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
       if (isRefreshing) {
         // 이미 토큰 갱신이 진행 중이면, 갱신이 끝날 때까지 요청을 대기시킵니다.
         return new Promise((resolve) => {
@@ -56,6 +54,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         const refreshToken = await AuthService.getRefreshToken();
+        console.log(refreshToken, "check from token");
         if (!refreshToken) {
           await handleTokenExpiredLogout();
           return Promise.reject(error);

@@ -18,9 +18,10 @@ import {
   Separator,
 } from "tamagui";
 import { router } from "expo-router";
-import backgroundSrc from "../../assets/images/background.jpg"; // 배경 이미지 경로
-import profileSrc from "../../assets/images/peach.png"; // 프로필 이미지 경로 (새로 추가 필요)
-
+import backgroundSrc from "../../assets/images/background.jpg";
+import profileSrc from "../../assets/images/peach.png";
+import KakaoMap from "../../components/KakaoMap";
+import PhoneLink from "../../components/PhoneLink";
 // --- 설정 값 ---
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
@@ -225,6 +226,10 @@ export default function StoreInformationPage() {
             </InfoSection>
 
             <InfoSection title="가게 위치">
+              <KakaoMap
+                latitude={37.60234152778153}
+                longitude={127.02036133569128}
+              />
               <Text>[04620] 서울특별시 중구 필동로 1길 30</Text>
             </InfoSection>
 
@@ -238,7 +243,7 @@ export default function StoreInformationPage() {
             <InfoSection title="사업자 정보">
               <Text>사업주: 장승원</Text>
               <Text>사업자번호: 123456708</Text>
-              <Text>전화번호: 010-1234-5678</Text>
+              <PhoneLink phoneNumber={"010-1234-5678"} />
             </InfoSection>
           </YStack>
         </YStack>
