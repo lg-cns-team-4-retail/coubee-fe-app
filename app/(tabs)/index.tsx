@@ -85,7 +85,7 @@ export default function TabOneScreen() {
           </Button>
           <XStack flexWrap="wrap" gap="$1.5">
             <Button
-              onPress={() => router.push("/store/123")}
+              onPress={() => router.push("/store/1177")}
               theme="blue"
               size="$4"
             >

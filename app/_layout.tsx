@@ -22,6 +22,7 @@ import { handleNotificationNavigation } from "./services/notificationNavigation"
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "../redux/store";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -96,69 +97,78 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
-        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-        <Stack>
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="(auth)/login"
-            options={{
-              title: "로그인",
-              headerStyle: {
-                backgroundColor: theme.primary?.val,
-              },
-              headerTintColor: "#fff",
-              headerBackTitle: "뒤로",
-              headerShadowVisible: false,
-            }}
-          />
-          <Stack.Screen
-            name="store/[storeId]"
-            options={{
-              headerShown: false,
-              headerShadowVisible: false,
-            }}
-          />
-          <Stack.Screen
-            name="storeInformation/[storeId]"
-            options={{
-              headerShown: false,
-              headerShadowVisible: false,
-            }}
-          />
-          <Stack.Screen
-            name="(auth)/register"
-            options={{
-              title: "회원가입",
-              headerStyle: {
-                backgroundColor: theme.primary?.val,
-              },
-              headerTintColor: "#fff",
-              headerBackTitle: "뒤로",
-              headerShadowVisible: false,
-            }}
-          />
-          <Stack.Screen
-            name="modal"
-            options={{
-              title: "Tamagui + Expo",
-              presentation: "modal",
-              animation: "slide_from_right",
-              gestureEnabled: true,
-              gestureDirection: "horizontal",
-              contentStyle: {
-                backgroundColor: theme.background?.val,
-              },
-            }}
-          />
-        </Stack>
-      </AuthProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <AuthProvider>
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+          <Stack>
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="(auth)/login"
+              options={{
+                title: "로그인",
+                headerStyle: {
+                  backgroundColor: theme.primary?.val,
+                },
+                headerTintColor: "#fff",
+                headerBackTitle: "뒤로",
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="store/[storeId]"
+              options={{
+                headerShown: false,
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="storeInformation/[storeId]"
+              options={{
+                headerShown: false,
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="productView/[productId]"
+              options={{
+                headerShown: false,
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="(auth)/register"
+              options={{
+                title: "회원가입",
+                headerStyle: {
+                  backgroundColor: theme.primary?.val,
+                },
+                headerTintColor: "#fff",
+                headerBackTitle: "뒤로",
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="modal"
+              options={{
+                title: "Tamagui + Expo",
+                presentation: "modal",
+                animation: "slide_from_right",
+                gestureEnabled: true,
+                gestureDirection: "horizontal",
+                contentStyle: {
+                  backgroundColor: theme.background?.val,
+                },
+              }}
+            />
+          </Stack>
+        </AuthProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

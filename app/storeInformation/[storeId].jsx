@@ -141,7 +141,7 @@ export default function StoreInformationPage() {
   });
 
   return (
-    <View style={styles.container}>
+    <YStack bg="$background" style={styles.container}>
       <StatusBar barStyle={"light-content"} />
 
       {/* 스크롤 시 상단에 고정되는 헤더 */}
@@ -204,7 +204,7 @@ export default function StoreInformationPage() {
           />
         </YStack>
       </Animated.ScrollView>
-    </View>
+    </YStack>
   );
 }
 

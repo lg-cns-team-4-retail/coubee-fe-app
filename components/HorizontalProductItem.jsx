@@ -18,7 +18,8 @@ const HorizontalProductItem = ({ item, loading, onPress }) => {
 
   return (
     <XStack
-      p="$3"
+      px="$5"
+      py="$3"
       borderBottomWidth={1}
       borderColor="$borderColor"
       gap="$3"
@@ -38,7 +39,7 @@ const HorizontalProductItem = ({ item, loading, onPress }) => {
 
         {isSale ? (
           <XStack ai="flex-end" gap="$2" flexWrap="wrap">
-            <Text fos="$4" fow="bold">
+            <Text fos="$4" col="red" fow="bold">
               {discountRate}%
             </Text>
             <Text fos="$4" fow="bold">
@@ -63,11 +64,11 @@ const HorizontalProductItem = ({ item, loading, onPress }) => {
         <Image
           source={{
             uri: item?.productImg || "https://via.placeholder.com/100",
-            width: 100,
-            height: 100,
+            width: 90,
+            height: 90,
           }}
-          w={100}
-          h={100}
+          w={85}
+          h={85}
           br="$4"
           alt={item?.productName}
         />

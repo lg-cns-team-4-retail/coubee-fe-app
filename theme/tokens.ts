@@ -12,7 +12,7 @@ const customColor = {
   lightCardBg: "#fff",
   lightBackgroundPress: "#EEEEEE",
 
-  main: "#4d332f",
+  main: "#8E6559",
   secondary: "#EBDBC6", // 다크 모드용 Secondary
   interactive: "#6495ED", // 다크 모드용 Interactive
 

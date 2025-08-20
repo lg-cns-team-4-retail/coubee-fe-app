@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -14,10 +14,8 @@ import Animated, {
   interpolate,
   interpolateColor,
 } from "react-native-reanimated";
-import { router } from "expo-router";
-
+import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, Search } from "@tamagui/lucide-icons";
-import Skeleton from "../../components/Skeleton";
 import {
   useTheme,
   Button,
@@ -29,7 +27,11 @@ import {
 } from "tamagui";
 import { useDispatch, useSelector } from "react-redux";
 import { viewStoreDetail } from "../../redux/slices/viewStoreSlice";
-import { fetchProducts, clearProducts } from "../../redux/slices/productSlice";
+import {
+  fetchProducts,
+  clearProducts,
+  selectProducts,
+} from "../../redux/slices/productSlice";
 import backgroundSrc from "../../assets/images/background.jpg";
 import HorizontalProductItem from "../../components/HorizontalProductItem";
 
@@ -37,29 +39,25 @@ const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
 const ANIMATION_END_Y = HEADER_IMAGE_HEIGHT * 0.8;
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
-
-const CrossfadingIcon = ({
-  WhiteIcon,
-  BlackIcon,
-  size,
-  whiteIconStyle,
-  blackIconStyle,
-}) => (
-  <Button unstyled chromeless size="$2" onPress={() => router.back()}>
-    <Animated.View style={[StyleSheet.absoluteFill, whiteIconStyle]}>
-      <WhiteIcon size={size} color="#FFFFFF" />
-    </Animated.View>
-    <Animated.View style={[StyleSheet.absoluteFill, blackIconStyle]}>
-      <BlackIcon size={size} color="#000000" />
-    </Animated.View>
-  </Button>
+const CrossfadingIcon = React.memo(
+  ({ WhiteIcon, BlackIcon, size, whiteIconStyle, blackIconStyle }) => (
+    <Button unstyled chromeless size="$2" onPress={() => router.back()}>
+      <Animated.View style={[StyleSheet.absoluteFill, whiteIconStyle]}>
+        <WhiteIcon size={size} color="#FFFFFF" />
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, blackIconStyle]}>
+        <BlackIcon size={size} color="#FFFFFF" />
+      </Animated.View>
+    </Button>
+  )
 );
 
 export default function StorePage() {
   const scrollY = useSharedValue(0);
   const theme = useTheme();
   const dispatch = useDispatch();
+  const storeDetail = useSelector((state) => state.viewStore.storeData);
+  const { storeId } = useLocalSearchParams();
 
   const [searchQuery, setSearchQuery] = useState("");
   const { products, loading, currentPage, isLastPage } = useSelector(
@@ -67,22 +65,21 @@ export default function StorePage() {
   );
 
   useEffect(() => {
-    dispatch(viewStoreDetail(6));
-    dispatch(clearProducts());
-    dispatch(fetchProducts({ storeId: 1177, page: 0, size: 5 }));
-
+    if (storeId) {
+      dispatch(viewStoreDetail(storeId));
+      dispatch(clearProducts());
+      dispatch(fetchProducts({ storeId, page: 0, size: 5 }));
+    }
     return () => {
       dispatch(clearProducts());
     };
-  }, [dispatch]);
+  }, [dispatch, storeId]);
 
-  const loadMoreProducts = () => {
-    if (loading !== "pending" && !isLastPage) {
-      dispatch(
-        fetchProducts({ storeId: 1177, page: currentPage + 1, size: 5 })
-      );
+  const loadMoreProducts = useCallback(() => {
+    if (loading !== "pending" && !isLastPage && storeId) {
+      dispatch(fetchProducts({ storeId, page: currentPage + 1, size: 5 }));
     }
-  };
+  }, [dispatch, storeId, loading, isLastPage, currentPage]);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -126,62 +123,80 @@ export default function StorePage() {
     ),
   }));
 
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = useCallback(() => {
     if (!searchQuery.trim()) return;
     console.log("입력된 검색어:", searchQuery);
-  };
+  }, [searchQuery]);
 
-  const renderListHeader = () => (
-    <>
-      <Image source={backgroundSrc} style={styles.headerImage} />
-      <YStack bg="$background" style={styles.content}>
-        <XStack
-          flex={1}
-          px="$2"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Text style={styles.storeTitle}>장씨네 과일가게</Text>
-          <Button
-            color="#fff"
-            fontWeight="500"
-            backgroundColor="$primary"
-            borderRadius={22}
-            fontSize={13}
-            height="$3"
-            paddingHorizontal="$3"
-            my="$2"
-            onPress={() => router.push(`/storeInformation/${6}`)}
-          >
-            가게 정보
-          </Button>
-        </XStack>
-        <XStack
-          borderWidth={2}
-          borderColor="$borderColor"
-          borderRadius="$6"
-          paddingHorizontal="$3"
-          alignItems="center"
-          gap="$1"
-        >
-          <Search color="$color10" size="$1" />
-          <Input
+  const renderListHeader = useMemo(
+    () => (
+      <>
+        <Image source={backgroundSrc} style={styles.headerImage} />
+        <YStack bg="$background" style={styles.content}>
+          <XStack
             flex={1}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="검색해보세요"
-            borderWidth={0}
-            fontWeight="700"
-            backgroundColor="transparent"
-            onSubmitEditing={handleSearchSubmit}
-          />
-        </XStack>
-      </YStack>
-    </>
+            px="$2"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text style={styles.storeTitle}>{storeDetail.storeName}</Text>
+            <Button
+              color="#fff"
+              fontWeight="500"
+              backgroundColor="$primary"
+              borderRadius={22}
+              fontSize={13}
+              height="$3"
+              paddingHorizontal="$3"
+              my="$2"
+              onPress={() => router.push(`/storeInformation/${storeId}`)}
+            >
+              가게 정보
+            </Button>
+          </XStack>
+          <XStack
+            borderWidth={2}
+            borderColor="$borderColor"
+            borderRadius="$6"
+            paddingHorizontal="$3"
+            alignItems="center"
+            gap="$1"
+          >
+            <Search color="$color10" size="$1" />
+            <Input
+              flex={1}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="검색해보세요"
+              borderWidth={0}
+              fontWeight="700"
+              backgroundColor="transparent"
+              onSubmitEditing={handleSearchSubmit}
+            />
+          </XStack>
+        </YStack>
+      </>
+    ),
+    [searchQuery, storeId, handleSearchSubmit]
+  );
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <HorizontalProductItem
+        item={item}
+        loading={loading === "pending"}
+        onPress={() => {
+          console.log("Product pressed:", item.productId);
+          dispatch(selectProducts(item));
+          router.push(`/productView/${item.productId}`);
+        }}
+      />
+    ),
+    [loading]
   );
 
   return (
-    <View style={styles.container}>
+    <YStack bg="$background" style={styles.container}>
       <StatusBar
         barStyle={theme.name === "dark" ? "light-content" : "dark-content"}
       />
@@ -197,25 +212,19 @@ export default function StorePage() {
               blackIconStyle={blackIconAnimatedStyle}
             />
             <Animated.Text style={[styles.headerTitle, titleAnimatedStyle]}>
-              장씨네 과일가게
+              {storeDetail.storeName}
             </Animated.Text>
           </View>
         </SafeAreaView>
       </Animated.View>
 
-      <AnimatedFlatList
+      <Animated.FlatList
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: HEADER_IMAGE_HEIGHT }}
         data={products}
         keyExtractor={(item) => item.productId.toString()}
-        renderItem={({ item }) => (
-          <HorizontalProductItem
-            item={item}
-            onPress={() => console.log("메롱")}
-          />
-        )}
+        renderItem={renderItem}
         ListHeaderComponent={renderListHeader}
         onEndReached={loadMoreProducts}
         onEndReachedThreshold={0.5}
@@ -227,7 +236,7 @@ export default function StorePage() {
           ) : null
         }
       />
-    </View>
+    </YStack>
   );
 }
 
@@ -263,8 +272,6 @@ const styles = StyleSheet.create({
   headerImage: {
     width: "100%",
     height: HEADER_IMAGE_HEIGHT,
-    position: "absolute",
-    top: 0,
   },
   content: {
     borderRadius: 18,
