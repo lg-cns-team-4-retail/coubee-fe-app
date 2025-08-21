@@ -77,4 +77,4 @@ const HorizontalProductItem = ({ item, loading, onPress }) => {
   );
 };
 
-export default HorizontalProductItem;
+export default React.memo(HorizontalProductItem);

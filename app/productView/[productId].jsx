@@ -27,7 +27,7 @@ const CARD_INITIAL_Y_POSITION = 250;
 export default function ProductDetailPage() {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
-  const item = useSelector((state) => state.productStore.selectedProducts);
+  const item = useSelector((state) => state.ui.selectedProducts);
 
   const { height: screenHeight } = useWindowDimensions();
 

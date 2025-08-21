@@ -1,12 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  View,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  Image,
-  FlatList,
-} from "react-native";
+import React, { useState, useCallback, useMemo } from "react";
+import { View, StyleSheet, SafeAreaView, StatusBar, Image } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -25,15 +18,15 @@ import {
   Input,
   Spinner,
 } from "tamagui";
-import { useDispatch, useSelector } from "react-redux";
-import { viewStoreDetail } from "../../redux/slices/viewStoreSlice";
+import { useDispatch } from "react-redux";
+
 import {
-  fetchProducts,
-  clearProducts,
-  selectProducts,
-} from "../../redux/slices/productSlice";
-import backgroundSrc from "../../assets/images/background.jpg";
+  useGetProductsQuery,
+  useGetStoreDetailQuery,
+} from "../../redux/api/apiSlice";
+import { selectProducts } from "../../redux/slices/uiSlice";
 import HorizontalProductItem from "../../components/HorizontalProductItem";
+import backgroundSrc from "../../assets/images/background.jpg";
 
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
@@ -46,7 +39,7 @@ const CrossfadingIcon = React.memo(
         <WhiteIcon size={size} color="#FFFFFF" />
       </Animated.View>
       <Animated.View style={[StyleSheet.absoluteFill, blackIconStyle]}>
-        <BlackIcon size={size} color="#FFFFFF" />
+        <BlackIcon size={size} color="#ffffff" />
       </Animated.View>
     </Button>
   )
@@ -56,45 +49,47 @@ export default function StorePage() {
   const scrollY = useSharedValue(0);
   const theme = useTheme();
   const dispatch = useDispatch();
-  const storeDetail = useSelector((state) => state.viewStore.storeData);
   const { storeId } = useLocalSearchParams();
-
+  console.log(storeId, "check");
+  const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const { products, loading, currentPage, isLastPage } = useSelector(
-    (state) => state.productStore
-  );
 
-  useEffect(() => {
-    if (storeId) {
-      dispatch(viewStoreDetail(storeId));
-      dispatch(clearProducts());
-      dispatch(fetchProducts({ storeId, page: 0, size: 5 }));
-    }
-    return () => {
-      dispatch(clearProducts());
-    };
-  }, [dispatch, storeId]);
+  const { data: storeDetail } = useGetStoreDetailQuery(storeId, {
+    skip: !storeId,
+  });
 
-  const loadMoreProducts = useCallback(() => {
-    if (loading !== "pending" && !isLastPage && storeId) {
-      dispatch(fetchProducts({ storeId, page: currentPage + 1, size: 5 }));
-    }
-  }, [dispatch, storeId, loading, isLastPage, currentPage]);
+  const {
+    data: products,
+    isLoading,
+    isFetching,
+  } = useGetProductsQuery({ storeId, page, size: 20 }, { skip: !storeId });
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
+  const handleLoadMore = () => {
+    if (products) {
+      console.log(`products.last 값: ${products.last}`);
+    }
 
-  const headerAnimatedStyle = useAnimatedStyle(() => {
-    const backgroundColor = interpolateColor(
+    if (!isFetching && products && !products.last) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
+  const handleSearchSubmit = useCallback(() => {
+    if (!searchQuery.trim()) return;
+    console.log("입력된 검색어:", searchQuery);
+  }, [searchQuery]);
+
+  const headerAnimatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
       scrollY.value,
       [ANIMATION_START_Y, ANIMATION_END_Y],
       ["rgba(255, 255, 255, 0)", theme.primary.val]
-    );
-    return { backgroundColor };
-  });
+    ),
+  }));
 
   const titleAnimatedStyle = useAnimatedStyle(() => ({
     opacity: interpolate(
@@ -123,10 +118,19 @@ export default function StorePage() {
     ),
   }));
 
-  const handleSearchSubmit = useCallback(() => {
-    if (!searchQuery.trim()) return;
-    console.log("입력된 검색어:", searchQuery);
-  }, [searchQuery]);
+  const renderItem = useCallback(
+    ({ item }) => (
+      <HorizontalProductItem
+        item={item}
+        loading={isLoading}
+        onPress={() => {
+          dispatch(selectProducts(item));
+          router.push(`/productView/${item.productId}`);
+        }}
+      />
+    ),
+    [isLoading, dispatch]
+  );
 
   const renderListHeader = useMemo(
     () => (
@@ -139,7 +143,7 @@ export default function StorePage() {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Text style={styles.storeTitle}>{storeDetail.storeName}</Text>
+            <Text style={styles.storeTitle}>{storeDetail?.storeName}</Text>
             <Button
               color="#fff"
               fontWeight="500"
@@ -177,32 +181,15 @@ export default function StorePage() {
         </YStack>
       </>
     ),
-    [searchQuery, storeId, handleSearchSubmit]
-  );
-
-  const renderItem = useCallback(
-    ({ item }) => (
-      <HorizontalProductItem
-        item={item}
-        loading={loading === "pending"}
-        onPress={() => {
-          console.log("Product pressed:", item.productId);
-          dispatch(selectProducts(item));
-          router.push(`/productView/${item.productId}`);
-        }}
-      />
-    ),
-    [loading]
+    [searchQuery, storeId, handleSearchSubmit, storeDetail]
   );
 
   return (
-    <YStack bg="$background" style={styles.container}>
-      <StatusBar
-        barStyle={theme.name === "dark" ? "light-content" : "dark-content"}
-      />
+    <YStack bg="$background" flex={1}>
+      <StatusBar barStyle={"light-content"} />
 
       <Animated.View style={[styles.header, headerAnimatedStyle]}>
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView>
           <View style={styles.headerContent}>
             <CrossfadingIcon
               WhiteIcon={ChevronLeft}
@@ -212,30 +199,37 @@ export default function StorePage() {
               blackIconStyle={blackIconAnimatedStyle}
             />
             <Animated.Text style={[styles.headerTitle, titleAnimatedStyle]}>
-              {storeDetail.storeName}
+              {storeDetail?.storeName}
             </Animated.Text>
+            <View style={{ width: 28 }} />
           </View>
         </SafeAreaView>
       </Animated.View>
 
-      <Animated.FlatList
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
-        showsVerticalScrollIndicator={false}
-        data={products}
-        keyExtractor={(item) => item.productId.toString()}
-        renderItem={renderItem}
-        ListHeaderComponent={renderListHeader}
-        onEndReached={loadMoreProducts}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          loading === "pending" ? (
-            <YStack p="$4" ai="center">
-              <Spinner />
-            </YStack>
-          ) : null
-        }
-      />
+      {isLoading && !products ? (
+        <YStack flex={1} justifyContent="center" alignItems="center">
+          <Spinner />
+        </YStack>
+      ) : (
+        <Animated.FlatList
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+          data={products?.content || []}
+          keyExtractor={(item) => item.productId.toString()}
+          renderItem={renderItem}
+          ListHeaderComponent={renderListHeader}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetching ? (
+              <YStack p="$4" ai="center">
+                <Spinner />
+              </YStack>
+            ) : null
+          }
+        />
+      )}
     </YStack>
   );
 }
@@ -252,7 +246,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   headerContent: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -264,10 +257,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     position: "absolute",
-    left: 0,
-    right: 0,
+    left: 60,
+    right: 60,
     textAlign: "center",
-    zIndex: -1,
   },
   headerImage: {
     width: "100%",
