@@ -11,18 +11,21 @@ import {
 } from "redux-persist";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import devToolsEnhancer from "redux-devtools-expo-dev-plugin";
-import viewStoreReducer from "./slices/viewStoreSlice";
-import productStoreReducer from "./slices/productSlice";
+
+import { apiSlice } from "./api/apiSlice";
+import uiReducer from "./slices/uiSlice";
 
 const rootReducer = combineReducers({
-  viewStore: viewStoreReducer,
-  productStore: productStoreReducer,
+  [apiSlice.reducerPath]: apiSlice.reducer,
+  ui: uiReducer,
 });
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  whitelist: ["counter"],
+  // Do not persist the api slice.
+  // Persist other slices if needed, e.g., 'ui'
+  whitelist: ["ui"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -37,7 +40,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }).concat(apiSlice.middleware), // Add RTK Query middleware
 });
 
 export const persistor = persistStore(store);
