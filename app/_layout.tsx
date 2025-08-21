@@ -23,6 +23,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "../redux/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import GlobalModal from "../components/GlobalModal";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -167,6 +168,8 @@ function RootLayoutNav() {
               }}
             />
           </Stack>
+
+          <GlobalModal />
         </AuthProvider>
       </ThemeProvider>
     </GestureHandlerRootView>

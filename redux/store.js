@@ -14,18 +14,20 @@ import devToolsEnhancer from "redux-devtools-expo-dev-plugin";
 
 import { apiSlice } from "./api/apiSlice";
 import uiReducer from "./slices/uiSlice";
+import cartReducer from "./slices/cartSlice";
+import modalReducer from "./slices/modalSlice";
 
 const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   ui: uiReducer,
+  cart: cartReducer,
+  modal: modalReducer,
 });
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  // Do not persist the api slice.
-  // Persist other slices if needed, e.g., 'ui'
-  whitelist: ["ui"],
+  whitelist: ["ui", "cart"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -39,8 +41,10 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredActionPaths: ["payload.onConfirm"],
+        ignoredPaths: ["modal.onConfirm"],
       },
-    }).concat(apiSlice.middleware), // Add RTK Query middleware
+    }).concat(apiSlice.middleware),
 });
 
 export const persistor = persistStore(store);

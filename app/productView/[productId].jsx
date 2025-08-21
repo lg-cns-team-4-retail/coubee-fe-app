@@ -21,13 +21,19 @@ import Animated, {
 } from "react-native-reanimated";
 import { useWindowDimensions } from "react-native";
 import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { addItem } from "../../redux/slices/cartSlice";
+import { useAuthContext } from "../contexts/AuthContext";
+import { openModal } from "../../redux/slices/modalSlice";
 
 const CARD_INITIAL_Y_POSITION = 250;
 
 export default function ProductDetailPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const item = useSelector((state) => state.ui.selectedProducts);
+  const { isAuthenticated } = useAuthContext();
 
   const { height: screenHeight } = useWindowDimensions();
 
@@ -68,6 +74,34 @@ export default function ProductDetailPage() {
   const animatedContentStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
   }));
+
+  const handleAddToCart = () => {
+    console.log(item);
+    const request = {
+      productId: item.productId,
+      productName: item.productName,
+      description: item.description,
+      productImg: item.productImg,
+      originPrice: item.originPrice * quantity,
+      salePrice: item.salePrice * quantity,
+      storeId: item.storeId,
+      quantity,
+    };
+    if (!isAuthenticated) {
+      dispatch(
+        openModal({
+          title: "로그인이 필요해요!",
+          message: "로그인 후에 사용하실수있는 기능이에요",
+          onConfirm: () => {
+            router.replace("/login");
+          },
+        })
+      );
+    } else {
+      dispatch(addItem(request));
+      router.back();
+    }
+  };
 
   return (
     <YStack f={1} bg="$background">
@@ -168,11 +202,7 @@ export default function ProductDetailPage() {
                     bg="$primary"
                     color="white"
                     fontWeight={700}
-                    onPress={() =>
-                      alert(
-                        `${quantity}개, 총 ${totalPrice.toLocaleString()}원 담기 완료!`
-                      )
-                    }
+                    onPress={() => handleAddToCart()}
                   >
                     {totalPrice.toLocaleString() + "원 담기"}
                   </Button>

@@ -8,7 +8,7 @@ import Animated, {
   interpolateColor,
 } from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
-import { ChevronLeft, Search } from "@tamagui/lucide-icons";
+import { ChevronLeft, Search, ShoppingCart } from "@tamagui/lucide-icons";
 import {
   useTheme,
   Button,
@@ -27,7 +27,7 @@ import {
 import { selectProducts } from "../../redux/slices/uiSlice";
 import HorizontalProductItem from "../../components/HorizontalProductItem";
 import backgroundSrc from "../../assets/images/background.jpg";
-
+import ProductCheckoutBar from "./ProductCheckoutBar";
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
 const ANIMATION_END_Y = HEADER_IMAGE_HEIGHT * 0.8;
@@ -82,6 +82,10 @@ export default function StorePage() {
     if (!searchQuery.trim()) return;
     console.log("입력된 검색어:", searchQuery);
   }, [searchQuery]);
+
+  const handleCheckOut = () => {
+    console.log("hi");
+  };
 
   const headerAnimatedStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(
@@ -230,6 +234,8 @@ export default function StorePage() {
           }
         />
       )}
+
+      <ProductCheckoutBar currentStoreId={storeId} onPress={handleCheckOut} />
     </YStack>
   );
 }
@@ -273,5 +279,19 @@ const styles = StyleSheet.create({
   storeTitle: {
     fontSize: 20,
     fontWeight: "bold",
+  },
+  checkoutBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    elevation: 8, // 안드로이드 그림자
+    shadowColor: "#000", // iOS 그림자
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
 });

@@ -5,6 +5,8 @@ import { getExpoPushToken } from "../services/notifications";
 import { useAuthContext } from "../contexts/AuthContext";
 import { router } from "expo-router";
 import { useLocation } from "../hooks/useLocation";
+import { persistor } from "../../redux/store";
+import QRCode from "react-native-qrcode-svg";
 
 export default function TabOneScreen() {
   const { logout, userId, isAuthenticated } = useAuthContext();
@@ -42,6 +44,9 @@ export default function TabOneScreen() {
     }
   };
 
+  const handlePurge = async () => {
+    await persistor.purge();
+  };
   const storeId = 1242;
   const storeId2 = 1176;
 
@@ -113,8 +118,14 @@ export default function TabOneScreen() {
           >
             가게보기2
           </Button>
+          <Button onPress={handlePurge}>초기화</Button>
         </XStack>
       )}
+
+      <QRCode
+        logoSize={300}
+        value="https://www.notion.so/4-Honeycomb-225fef49d8d5807dac52ee9bd7ff82bc"
+      />
     </YStack>
   );
 }
