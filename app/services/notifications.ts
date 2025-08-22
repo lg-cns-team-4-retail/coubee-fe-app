@@ -54,7 +54,7 @@ export async function getExpoPushToken(): Promise<string | null> {
     }
 
     const token = await Notifications.getExpoPushTokenAsync({
-      projectId: "ccb50e7c-c280-47e9-86bb-959ea482b0c9",
+      projectId: "dbf04431-f71f-4fc0-8c8d-9e4491712c76",
     });
     return token.data;
   } catch (error) {
