@@ -1,10 +1,12 @@
 import { Alert } from "react-native";
 import { XStack, YStack, Button, Text, Card } from "tamagui";
-import { ToastControl } from "components/CurrentToast";
+import { ToastControl } from "../../components/CurrentToast";
 import { getExpoPushToken } from "../services/notifications";
 import { useAuthContext } from "../contexts/AuthContext";
 import { router } from "expo-router";
 import { useLocation } from "../hooks/useLocation";
+import { persistor } from "../../redux/store";
+import QRCode from "react-native-qrcode-svg";
 
 export default function TabOneScreen() {
   const { logout, userId, isAuthenticated } = useAuthContext();
@@ -42,8 +44,14 @@ export default function TabOneScreen() {
     }
   };
 
+  const handlePurge = async () => {
+    await persistor.purge();
+  };
+  const storeId = 1242;
+  const storeId2 = 1176;
+
   return (
-    <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
+    <YStack flex={1} gap="$8" px="$10" pt="$5" bg="$background">
       <ToastControl />
 
       <Card padding="$4" width="90%" backgroundColor="$background">
@@ -70,7 +78,7 @@ export default function TabOneScreen() {
       </Card>
 
       {isAuthenticated ? (
-        <YStack items="center" justify="center" flexWrap="wrap" gap="$4">
+        <YStack flexWrap="wrap" gap="$4">
           <Text>환영합니다!</Text>
           <Text>사용자명: {userId}</Text>
 
@@ -81,14 +89,43 @@ export default function TabOneScreen() {
           <Button onPress={handleLogout} theme="red" size="$4">
             로그아웃
           </Button>
+          <XStack flexWrap="wrap" gap="$1.5">
+            <Button
+              onPress={() => router.push("/store/1177")}
+              theme="blue"
+              size="$4"
+            >
+              가게보기
+            </Button>
+          </XStack>
         </YStack>
       ) : (
-        <XStack items="center" justify="center" flexWrap="wrap" gap="$1.5">
+        <XStack flexWrap="wrap" gap="$1.5">
           <Button onPress={() => router.push("/login")} theme="blue" size="$4">
             로그인
           </Button>
+          <Button
+            onPress={() => router.push(`/store/${storeId}`)}
+            theme="blue"
+            size="$4"
+          >
+            가게보기
+          </Button>
+          <Button
+            onPress={() => router.push(`/store/${storeId2}`)}
+            theme="blue"
+            size="$4"
+          >
+            가게보기2
+          </Button>
+          <Button onPress={handlePurge}>초기화</Button>
         </XStack>
       )}
+
+      <QRCode
+        logoSize={300}
+        value="https://www.notion.so/4-Honeycomb-225fef49d8d5807dac52ee9bd7ff82bc"
+      />
     </YStack>
   );
 }

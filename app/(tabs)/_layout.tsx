@@ -19,7 +19,6 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        // 모든 테마 값 뒤에 '!'를 붙여 타입스크립트를 안심시킵니다.
         tabBarActiveTintColor: theme.primary!.val,
         tabBarStyle: {
           backgroundColor: theme.background!.val,
