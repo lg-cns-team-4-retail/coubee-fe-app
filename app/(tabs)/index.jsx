@@ -119,6 +119,13 @@ export default function TabOneScreen() {
             가게보기2
           </Button>
           <Button onPress={handlePurge}>초기화</Button>
+          <Button
+            onPress={() => router.push("/checkout")}
+            theme="blue"
+            size="$4"
+          >
+            장바구니
+          </Button>
         </XStack>
       )}
 

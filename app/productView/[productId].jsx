@@ -9,9 +9,10 @@ import {
   Separator,
   Paragraph,
   View,
+  Spinner,
 } from "tamagui";
 import { ChevronLeft, Plus, Minus } from "@tamagui/lucide-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
@@ -25,6 +26,7 @@ import { useDispatch } from "react-redux";
 import { addItem } from "../../redux/slices/cartSlice";
 import { useAuthContext } from "../contexts/AuthContext";
 import { openModal } from "../../redux/slices/modalSlice";
+import { useGetProductDetailQuery } from "../../redux/api/apiSlice";
 
 const CARD_INITIAL_Y_POSITION = 250;
 
@@ -32,8 +34,23 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
-  const item = useSelector((state) => state.ui.selectedProducts);
+
   const { isAuthenticated } = useAuthContext();
+  const { productId } = useLocalSearchParams();
+  const {
+    data: item,
+    isLoading,
+    isError,
+    isFetching,
+    isSuccess,
+    error,
+  } = useGetProductDetailQuery(productId, { skip: !productId });
+
+  if (isLoading || isFetching) {
+    <YStack flex={1} justifyContent="center" alignItems="center">
+      <Spinner />
+    </YStack>;
+  }
 
   const { height: screenHeight } = useWindowDimensions();
 
@@ -53,21 +70,21 @@ export default function ProductDetailPage() {
     });
 
   const { isSale, discountRate } = useMemo(() => {
-    const sale = item.salePrice < item.originPrice;
+    const sale = item?.salePrice < item?.originPrice;
     const rate = sale
       ? Math.round(
-          ((item.originPrice - item.salePrice) / item.originPrice) * 100
+          ((item?.originPrice - item?.salePrice) / item?.originPrice) * 100
         )
       : 0;
     return { isSale: sale, discountRate: rate };
-  }, [item.originPrice, item.salePrice]);
+  }, [item?.originPrice, item?.salePrice]);
   const totalPrice = useMemo(
-    () => item.salePrice * quantity,
-    [item.salePrice, quantity]
+    () => item?.salePrice * quantity,
+    [item?.salePrice, quantity]
   );
   const handleIncreaseQuantity = useCallback(() => {
-    setQuantity((prev) => Math.min(prev + 1, item.stock));
-  }, [item.stock]);
+    setQuantity((prev) => Math.min(prev + 1, item?.stock));
+  }, [item?.stock]);
   const handleDecreaseQuantity = useCallback(() => {
     setQuantity((prev) => Math.max(prev - 1, 1));
   }, []);
@@ -76,15 +93,16 @@ export default function ProductDetailPage() {
   }));
 
   const handleAddToCart = () => {
-    console.log(item);
     const request = {
-      productId: item.productId,
-      productName: item.productName,
-      description: item.description,
-      productImg: item.productImg,
-      originPrice: item.originPrice * quantity,
-      salePrice: item.salePrice * quantity,
-      storeId: item.storeId,
+      productId: item?.productId,
+      productName: item?.productName,
+      description: item?.description,
+      productImg: item?.productImg,
+      originPrice: item?.originPrice,
+      salePrice: item?.salePrice,
+      totalOriginPrice: item?.originPrice * quantity,
+      totalSalePrice: item?.salePrice * quantity,
+      storeId: item?.storeId,
       quantity,
     };
     if (!isAuthenticated) {
@@ -135,7 +153,7 @@ export default function ProductDetailPage() {
               <YStack f={1} bg="$background" borderRadius={20}>
                 <XStack ai="center" jc="center">
                   <Image
-                    source={{ uri: item.productImg, width: 200, height: 200 }}
+                    source={{ uri: item?.productImg, width: 200, height: 200 }}
                     br="$4"
                     mt={-100}
                   />
@@ -145,7 +163,7 @@ export default function ProductDetailPage() {
                   <XStack jc="space-between" ai="center">
                     <YStack f={1} mr="$2">
                       <Text fontSize={24} fontWeight="bold">
-                        {item.productName}
+                        {item?.productName}
                       </Text>
                     </YStack>
                     <XStack
@@ -178,11 +196,11 @@ export default function ProductDetailPage() {
                       </Text>
                     )}
                     <Text fontSize={22} fontWeight="bold">
-                      {item.salePrice.toLocaleString()}원
+                      {item?.salePrice.toLocaleString()}원
                     </Text>
                     {isSale && (
                       <Text textDecorationLine="line-through" color="$gray10">
-                        {item.originPrice.toLocaleString()}원
+                        {item?.originPrice.toLocaleString()}원
                       </Text>
                     )}
                   </XStack>
@@ -192,9 +210,9 @@ export default function ProductDetailPage() {
                       상품 정보
                     </Text>
                     <Text my="$2" fos="$4" color="gray">
-                      {item.description}
+                      {item?.description}
                     </Text>
-                    <Text color="$gray10">남은 수량: {item.stock}개</Text>
+                    <Text color="$gray10">남은 수량: {item?.stock}개</Text>
                   </YStack>
                   <YStack f={1} />
                   <Button

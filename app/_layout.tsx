@@ -143,6 +143,14 @@ function RootLayoutNav() {
               }}
             />
             <Stack.Screen
+              name="checkout"
+              options={{
+                title: "주문하기",
+                headerShown: true,
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
               name="(auth)/register"
               options={{
                 title: "회원가입",

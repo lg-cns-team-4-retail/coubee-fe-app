@@ -28,7 +28,7 @@ export const apiSlice = createApi({
   baseQuery: axiosBaseQuery({
     baseUrl: "",
   }),
-  tagTypes: ["Store", "Products"],
+  tagTypes: ["Store", "Products", "Product"],
   endpoints: (builder) => ({
     getStoreDetail: builder.query({
       query: (storeId) => ({
@@ -38,6 +38,16 @@ export const apiSlice = createApi({
       transformResponse: (response) => response.data,
       providesTags: (result, error, storeId) => [
         { type: "Store", id: storeId },
+      ],
+    }),
+    getProductDetail: builder.query({
+      query: (productId) => ({
+        url: `/product/detail/${productId}`,
+        method: "GET",
+      }),
+      transformResponse: (response) => response.data,
+      providesTags: (result, error, productId) => [
+        { type: "Product", id: productId },
       ],
     }),
     getProducts: builder.query({
@@ -71,4 +81,8 @@ export const apiSlice = createApi({
   }),
 });
 
-export const { useGetStoreDetailQuery, useGetProductsQuery } = apiSlice;
+export const {
+  useGetStoreDetailQuery,
+  useGetProductsQuery,
+  useGetProductDetailQuery,
+} = apiSlice;

@@ -16,9 +16,8 @@ import { useLocalSearchParams } from "expo-router";
 const ProductCheckoutBar = ({ currentStoreId, onPress }) => {
   const { bottom } = useSafeAreaInsets();
 
-  const { originPrice, salePrice, totalQuantity, storeId, items } = useSelector(
-    (state) => state.cart
-  );
+  const { totalOriginPrice, totalSalePrice, totalQuantity, storeId, items } =
+    useSelector((state) => state.cart);
 
   console.log(currentStoreId, storeId, "diff check");
   if (items.length === 0 || Number(storeId) !== Number(currentStoreId)) {
@@ -48,24 +47,24 @@ const ProductCheckoutBar = ({ currentStoreId, onPress }) => {
       <YStack>
         <XStack alignItems="flex-end" gap="$2">
           <Text fontSize={22} fontWeight="bold">
-            {salePrice.toLocaleString()}원
+            {totalSalePrice.toLocaleString()}원
           </Text>
-          {originPrice !== salePrice && (
+          {totalOriginPrice !== totalSalePrice && (
             <Text
               fontSize={15}
               color="$descriptionText"
               textDecorationLine="line-through"
             >
-              {originPrice.toLocaleString()}원
+              {totalOriginPrice.toLocaleString()}원
             </Text>
           )}
         </XStack>
         <XStack alignItems="center" space="$1.5" marginTop="$1">
-          {originPrice !== salePrice && (
+          {totalOriginPrice !== totalSalePrice && (
             <>
               <CoubeeSvgClick fontSize={6} />
               <Text fontSize={14} color="$primary" fontWeight="700">
-                {(originPrice - salePrice).toLocaleString()}원 할인!
+                {(totalOriginPrice - totalSalePrice).toLocaleString()}원 할인!
               </Text>
             </>
           )}
