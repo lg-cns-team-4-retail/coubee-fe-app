@@ -85,6 +85,7 @@ export default function StorePage() {
 
   const handleCheckOut = () => {
     console.log("hi");
+    router.push("/checkout");
   };
 
   const headerAnimatedStyle = useAnimatedStyle(() => ({

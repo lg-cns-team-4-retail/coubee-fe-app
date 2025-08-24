@@ -4,7 +4,7 @@ import { Zap } from "@tamagui/lucide-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CoubeeSvgClick from "../../components/icons/CoubeeSvgClick";
 import { useSelector } from "react-redux";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 /**
  * 상품 상세 페이지 등에서 사용하는 하단 주문 바 컴포넌트
  * @param {object} props
