@@ -19,7 +19,6 @@ const ProductCheckoutBar = ({ currentStoreId, onPress }) => {
   const { totalOriginPrice, totalSalePrice, totalQuantity, storeId, items } =
     useSelector((state) => state.cart);
 
-  console.log(currentStoreId, storeId, "diff check");
   if (items.length === 0 || Number(storeId) !== Number(currentStoreId)) {
     return null;
   }

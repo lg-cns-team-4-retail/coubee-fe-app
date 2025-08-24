@@ -58,7 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const currentPath = segments.join("/");
 
       if (auth.isAuthenticated) {
-        console.log("checked");
         if (
           isPublicRoute(segments) &&
           segments[0] === "(auth)" &&

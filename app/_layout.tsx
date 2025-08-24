@@ -151,6 +151,14 @@ function RootLayoutNav() {
               }}
             />
             <Stack.Screen
+              name="payment"
+              options={{
+                title: "결제하기",
+                headerShown: true,
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
               name="(auth)/register"
               options={{
                 title: "회원가입",
