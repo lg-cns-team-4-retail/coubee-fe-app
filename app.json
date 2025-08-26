@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Coubee",
-    "slug": "Coubee",
+    "slug": "coubee-fe-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/coubee.svg",
@@ -16,8 +16,45 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "이 앱은 사용자의 현재 위치를 확인하여 서비스를 제공하기 위해 위치 정보에 접근합니다."
-      }
+        "NSLocationWhenInUseUsageDescription": "이 앱은 사용자의 현재 위치를 확인하여 서비스를 제공하기 위해 위치 정보에 접근합니다.",
+        "LSApplicationQueriesSchemes": [
+          "kftc-bankpay",
+          "ispmobile",
+          "itms-apps",
+          "hdcardappcardansimclick",
+          "smhyundaiansimclick",
+          "shinhan-sr-ansimclick",
+          "smshinhanansimclick",
+          "kb-acp",
+          "mpocket.online.ansimclick",
+          "ansimclickscard",
+          "ansimclickipcollect",
+          "vguardstart",
+          "samsungpay",
+          "scardcertiapp",
+          "lottesmartpay",
+          "lotteappcard",
+          "cloudpay",
+          "nhappcardansimclick",
+          "nonghyupcardansimclick",
+          "citispay",
+          "citicardappkr",
+          "citimobileapp",
+          "kakaotalk",
+          "payco",
+          "chaipayment",
+          "kb-auth",
+          "hyundaicardappcardid",
+          "com.wooricard.wcard",
+          "lmslpay",
+          "lguthepay-xpay",
+          "liivbank",
+          "supertoss",
+          "newsmartpib"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.hoobastank87.coubeefeapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -44,6 +81,7 @@
           }
         }
       ],
+      "@portone/react-native-sdk/plugin",
       "expo-web-browser",
       "expo-secure-store"
     ],

@@ -44,19 +44,28 @@ export default function PaymentScreen() {
 
   // 결제 완료 처리
   const handlePaymentComplete = (response) => {
+    console.log("payment success", response);
+
+    Alert.alert(
+      "결제 응답 확인", // Alert 제목
+      JSON.stringify(response, null, 2), // response 객체를 읽기 쉬운 JSON 문자열로 변환
+      [{ text: "확인" }]
+    );
     if (response.code != null) {
       Alert.alert("결제 실패", response.message || "결제가 실패했습니다.");
       router.back(); // 결제 실패 시 주문확인 페이지로 복귀
     } else {
-      Alert.alert("결제 성공", "결제가 완료되었습니다!");
+      console.log(response, "payment detail check");
+      Alert.alert("결제 성공", "결제가 완료되었습니다!!!!!!");
       dispatch(clearCart()); // 결제 성공 시 장바구니 비우기
-      // TODO: QR 코드 생성 및 결과 페이지로 이동하는 로직 추가
-      router.replace("/(tabs)"); // 우선 홈으로 이동
+      /* // TODO: QR 코드 생성 및 결과 페이지로 이동하는 로직 추가
+      router.replace("/(tabs)"); // 우선 홈으로 이동 */
     }
   };
 
   // 결제 오류 처리
   const handlePaymentError = (error) => {
+    console.log("payment error", error);
     Alert.alert("결제 오류", error.message || "결제 중 오류가 발생했습니다.");
     router.back();
   };

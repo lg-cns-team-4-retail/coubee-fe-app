@@ -22,7 +22,7 @@ export default function PaymentScreen() {
   const dispatch = useDispatch();
   // checkout 페이지에서 navigate 하며 전달한 파라미터를 받습니다.
   const { paymentInfo, paymentConfig } = useLocalSearchParams();
-
+  console.log(paymentInfo, "pay info detail");
   // 전달된 파라미터가 없거나, JSON 파싱에 실패하면 이전 화면으로 돌려보냅니다.
   if (!paymentInfo || !paymentConfig) {
     Alert.alert("오류", "결제 정보가 올바르지 않습니다.", [
@@ -44,14 +44,15 @@ export default function PaymentScreen() {
 
   // 결제 완료 처리
   const handlePaymentComplete = (response) => {
+    console.log(response.paymentId, "check from the code ");
     if (response.code != null) {
       Alert.alert("결제 실패", response.message || "결제가 실패했습니다.");
-      router.back(); // 결제 실패 시 주문확인 페이지로 복귀
+      /* router.back(); // 결제 실패 시 주문확인 페이지로 복귀 */
     } else {
-      Alert.alert("결제 성공", "결제가 완료되었습니다!");
+      Alert.alert("결제 성공", "결제가!");
       dispatch(clearCart()); // 결제 성공 시 장바구니 비우기
-      // TODO: QR 코드 생성 및 결과 페이지로 이동하는 로직 추가
-      router.replace("/(tabs)"); // 우선 홈으로 이동
+      /* // TODO: QR 코드 생성 및 결과 페이지로 이동하는 로직 추가
+      router.replace("/(tabs)"); // 우선 홈으로 이동 */
     }
   };
 
@@ -68,6 +69,8 @@ export default function PaymentScreen() {
     return null;
   }
 
+  console.log(parsedPaymentInfo, "payment detail");
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Payment
@@ -79,6 +82,7 @@ export default function PaymentScreen() {
           totalAmount: parsedPaymentInfo.amount,
           currency: "KRW",
           payMethod: getPortOnePayMethod(parsedPaymentInfo.paymentMethod),
+          appScheme: "coubee",
           customer: {
             // TODO: 실제 고객 정보로 변경 필요
             fullName: "테스트 고객",

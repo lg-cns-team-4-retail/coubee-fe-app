@@ -48,8 +48,6 @@ export default function KakaoMap({ latitude, longitude }) {
     </html>
   `;
 
-  console.log(KAKAO_MAP_JS_KEY);
-
   return (
     <View style={styles.container}>
       <WebView
@@ -73,7 +71,8 @@ export default function KakaoMap({ latitude, longitude }) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 150,
+    height: 450,
+    width: "100%",
     marginTop: 20,
     borderWidth: 1,
     borderColor: "#ddd",

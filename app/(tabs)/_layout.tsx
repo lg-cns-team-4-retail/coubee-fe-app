@@ -50,6 +50,10 @@ export default function TabLayout() {
         options={{
           title: "검색",
           tabBarIcon: ({ color }) => <Search color={color as any} />,
+          tabBarStyle: {
+            display: "none",
+          },
+          headerShown: false,
         }}
       />
       <Tabs.Screen

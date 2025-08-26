@@ -49,6 +49,7 @@ export default function TabOneScreen() {
   };
   const storeId = 1242;
   const storeId2 = 1176;
+  const storeId3 = 1276;
 
   return (
     <YStack flex={1} gap="$8" px="$10" pt="$5" bg="$background">
@@ -97,6 +98,13 @@ export default function TabOneScreen() {
             >
               가게보기
             </Button>
+            <Button
+              onPress={() => router.push(`/store/${storeId3}`)}
+              theme="blue"
+              size="$4"
+            >
+              {"가게보기" + storeId3}
+            </Button>
           </XStack>
         </YStack>
       ) : (
@@ -125,6 +133,13 @@ export default function TabOneScreen() {
             size="$4"
           >
             장바구니
+          </Button>
+          <Button
+            onPress={() => router.push(`/orderDetail/${1144}`)}
+            theme="blue"
+            size="$4"
+          >
+            주문내역
           </Button>
         </XStack>
       )}

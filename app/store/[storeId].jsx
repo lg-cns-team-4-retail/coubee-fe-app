@@ -25,9 +25,10 @@ import {
   useGetStoreDetailQuery,
 } from "../../redux/api/apiSlice";
 import { selectProducts } from "../../redux/slices/uiSlice";
-import HorizontalProductItem from "../../components/HorizontalProductItem";
+import ProductItem from "../../components/ProductItem";
 import backgroundSrc from "../../assets/images/background.jpg";
 import ProductCheckoutBar from "./ProductCheckoutBar";
+import HorizontalSection from "./HorizontalSection";
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
 const ANIMATION_END_Y = HEADER_IMAGE_HEIGHT * 0.8;
@@ -50,7 +51,7 @@ export default function StorePage() {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { storeId } = useLocalSearchParams();
-  console.log(storeId, "check");
+
   const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -60,6 +61,7 @@ export default function StorePage() {
 
   const {
     data: products,
+    totalElements,
     isLoading,
     isFetching,
   } = useGetProductsQuery({ storeId, page, size: 20 }, { skip: !storeId });
@@ -125,7 +127,7 @@ export default function StorePage() {
 
   const renderItem = useCallback(
     ({ item }) => (
-      <HorizontalProductItem
+      <ProductItem
         item={item}
         loading={isLoading}
         onPress={() => {
@@ -141,7 +143,7 @@ export default function StorePage() {
     () => (
       <>
         <Image source={backgroundSrc} style={styles.headerImage} />
-        <YStack bg="$background" style={styles.content}>
+        <YStack bg="$background" style={styles.content} px="$4">
           <XStack
             flex={1}
             px="$2"
@@ -183,6 +185,14 @@ export default function StorePage() {
               onSubmitEditing={handleSearchSubmit}
             />
           </XStack>
+
+          <HorizontalSection />
+
+          <YStack py="$4" gap="$4">
+            <Text fontSize="$4" fontWeight="bold">
+              {`전체상품 (${products?.totalElements})개`}
+            </Text>
+          </YStack>
         </YStack>
       </>
     ),
@@ -275,7 +285,6 @@ const styles = StyleSheet.create({
   content: {
     borderRadius: 18,
     marginTop: -20,
-    padding: 16,
   },
   storeTitle: {
     fontSize: 20,

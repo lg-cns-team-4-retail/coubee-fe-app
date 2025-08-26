@@ -28,7 +28,7 @@ export const apiSlice = createApi({
   baseQuery: axiosBaseQuery({
     baseUrl: "",
   }),
-  tagTypes: ["Store", "Products", "Product"],
+  tagTypes: ["Store", "Products", "Product", "Orders"],
   endpoints: (builder) => ({
     getStoreDetail: builder.query({
       query: (storeId) => ({
@@ -78,6 +78,43 @@ export const apiSlice = createApi({
         return currentArg !== previousArg;
       },
     }),
+    getOrders: builder.query({
+      query: ({ page, size }) => ({
+        url: `/order/users/me/orders`,
+        method: "GET",
+        params: { page, size },
+      }),
+      transformResponse: (response) => response.data,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.content.map(({ orderId }) => ({
+                type: "Orders",
+                id: orderId,
+              })),
+              { type: "Orders", id: "LIST" },
+            ]
+          : [{ type: "Orders", id: "LIST" }],
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName;
+      },
+      merge: (currentCache, newItems) => {
+        const existingOrderIds = new Set(
+          currentCache.content.map((order) => order.orderId)
+        );
+
+        const uniqueNewItems = newItems.content.filter(
+          (order) => !existingOrderIds.has(order.orderId)
+        );
+
+        currentCache.content.push(...uniqueNewItems);
+
+        currentCache.last = newItems.last;
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.page !== previousArg?.page;
+      },
+    }),
   }),
 });
 
@@ -85,4 +122,5 @@ export const {
   useGetStoreDetailQuery,
   useGetProductsQuery,
   useGetProductDetailQuery,
+  useGetOrdersQuery,
 } = apiSlice;

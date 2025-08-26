@@ -30,6 +30,7 @@
     "babel-preset-expo": "~13.0.0",
     "base-64": "^1.0.0",
     "burnt": "^0.12.2",
+    "dayjs": "^1.11.13",
     "expo": "53.0.20",
     "expo-build-properties": "~0.14.8",
     "expo-font": "~13.3.2",
