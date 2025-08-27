@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import { useLocation } from "../hooks/useLocation";
 import { persistor } from "../../redux/store";
 import QRCode from "react-native-qrcode-svg";
+import NewOrderListItem from "../../components/NewOrderListItem";
 
 export default function TabOneScreen() {
   const { logout, userId, isAuthenticated } = useAuthContext();
@@ -50,7 +51,29 @@ export default function TabOneScreen() {
   const storeId = 1242;
   const storeId2 = 1176;
   const storeId3 = 1276;
-
+  const testOrderId = "order_36d4941cdd7546bb8a437d324fd72be5";
+  const testOrder2 = {
+    orderId: 12345,
+    status: "PAID",
+    createdAt: "2025-07-24T10:30:00Z",
+    totalAmount: 39800,
+    discountRate: 13, // 할인율 (없으면 0)
+    store: {
+      storeName: "장씨네 과일가게 동국대점",
+    },
+    items: [
+      {
+        productId: 1,
+        productName: "딱딱한 물복숭아",
+        quantity: 9,
+      },
+      {
+        productId: 2,
+        productName: "따뜻한 수박",
+        quantity: 3,
+      },
+    ],
+  };
   return (
     <YStack flex={1} gap="$8" px="$10" pt="$5" bg="$background">
       <ToastControl />
@@ -78,6 +101,8 @@ export default function TabOneScreen() {
         </YStack>
       </Card>
 
+      {/* <NewOrderListItem order={testOrder2} /> */}
+
       {isAuthenticated ? (
         <YStack flexWrap="wrap" gap="$4">
           <Text>환영합니다!</Text>
@@ -104,6 +129,13 @@ export default function TabOneScreen() {
               size="$4"
             >
               {"가게보기" + storeId3}
+            </Button>
+            <Button
+              onPress={() => router.push(`/orderDetail/${testOrderId}`)}
+              theme="blue"
+              size="$4"
+            >
+              주문내역
             </Button>
           </XStack>
         </YStack>

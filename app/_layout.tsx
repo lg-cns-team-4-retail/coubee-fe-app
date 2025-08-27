@@ -171,6 +171,18 @@ function RootLayoutNav() {
               }}
             />
             <Stack.Screen
+              name="orderDetail/[orderId]"
+              options={{
+                title: "주문상세보기",
+                headerStyle: {
+                  backgroundColor: theme.primary?.val,
+                },
+                headerTintColor: "#fff",
+                headerBackTitle: "뒤로",
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
               name="modal"
               options={{
                 title: "Tamagui + Expo",

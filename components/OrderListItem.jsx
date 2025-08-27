@@ -25,7 +25,7 @@ const getStatusProps = (status) => {
 
 export default function OrderListItem({ order }) {
   if (!order) return null;
-  console.log(order);
+
   const { text: statusText, themeColor } = getStatusProps(order.status);
   const firstItem = order.items?.[0];
   const representativeImage =
@@ -41,7 +41,6 @@ export default function OrderListItem({ order }) {
       marginHorizontal="$4"
       marginBottom="$4"
       padding="$4"
-      // Card는 자동으로 테마의 cardBg, borderColor 등을 상속받습니다.
       onPress={() => router.push(`/order/detail/${order.orderId}`)}
       animation="bouncy"
       hoverStyle={{ scale: 0.975 }}
@@ -55,18 +54,13 @@ export default function OrderListItem({ order }) {
           </Text>
           <YStack
             borderWidth={1}
-            borderColor={themeColor} // 👈 테마에 맞는 테두리 색상
-            borderRadius="$5" // 👈 둥근 모서리 정도 (토큰 값 사용)
-            paddingHorizontal="$1.5" // 👈 좌우 여백
-            paddingVertical="$1.5" // 👈 상하 여백
-            alignSelf="flex-start" // 👈 내용물 크기에 맞게 자동 조절
+            borderColor={themeColor}
+            borderRadius="$5"
+            paddingHorizontal="$1.5"
+            paddingVertical="$1.5"
+            alignSelf="flex-start"
           >
-            <Text
-              fontSize="$3"
-              // borderTopColor 속성은 YStack으로 옮겨졌으므로 삭제합니다.
-              fontWeight="bold"
-              color={themeColor}
-            >
+            <Text fontSize="$3" fontWeight="bold" color={themeColor}>
               {statusText}
             </Text>
           </YStack>
@@ -78,7 +72,7 @@ export default function OrderListItem({ order }) {
             width={80}
             height={80}
             borderRadius="$4"
-            backgroundColor="$backgroundPress" // 👈 수정
+            backgroundColor="$backgroundPress"
           />
           <YStack flex={1} space="$1">
             <Text

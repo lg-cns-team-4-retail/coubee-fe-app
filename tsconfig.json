@@ -12,5 +12,5 @@
     "app/(auth)/login.jsx",
     "app/(auth)/register.jsx",
     "theme/tokens.js"
-  ]
+, "app/(tabs)/Search.jsx"  ]
 }

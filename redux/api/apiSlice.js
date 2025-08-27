@@ -1,4 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+
 import axiosInstance from "../../app/services/api";
 
 const axiosBaseQuery =
@@ -29,6 +30,7 @@ export const apiSlice = createApi({
     baseUrl: "",
   }),
   tagTypes: ["Store", "Products", "Product", "Orders"],
+
   endpoints: (builder) => ({
     getStoreDetail: builder.query({
       query: (storeId) => ({
@@ -40,6 +42,7 @@ export const apiSlice = createApi({
         { type: "Store", id: storeId },
       ],
     }),
+    //
     getProductDetail: builder.query({
       query: (productId) => ({
         url: `/product/detail/${productId}`,
@@ -50,6 +53,7 @@ export const apiSlice = createApi({
         { type: "Product", id: productId },
       ],
     }),
+    //
     getProducts: builder.query({
       query: ({ storeId, page, size }) => ({
         url: `/product/list`,
@@ -58,26 +62,24 @@ export const apiSlice = createApi({
       }),
       transformResponse: (response) => response.data,
       serializeQueryArgs: ({ queryArgs }) => {
-        const { page, ...rest } = queryArgs; // page를 제외한 { storeId, size }를 키로 사용
+        const { page, ...rest } = queryArgs;
         return rest;
       },
       merge: (currentCache, newItems) => {
         const existingProductIds = new Set(
           currentCache.content.map((p) => p.productId)
         );
-
         const uniqueNewItems = newItems.content.filter(
           (p) => !existingProductIds.has(p.productId)
         );
-
         currentCache.content.push(...uniqueNewItems);
-
         currentCache.last = newItems.last;
       },
       forceRefetch({ currentArg, previousArg }) {
         return currentArg !== previousArg;
       },
     }),
+    //
     getOrders: builder.query({
       query: ({ page, size }) => ({
         url: `/order/users/me/orders`,
@@ -102,7 +104,6 @@ export const apiSlice = createApi({
         const existingOrderIds = new Set(
           currentCache.content.map((order) => order.orderId)
         );
-
         const uniqueNewItems = newItems.content.filter(
           (order) => !existingOrderIds.has(order.orderId)
         );
@@ -115,6 +116,17 @@ export const apiSlice = createApi({
         return currentArg?.page !== previousArg?.page;
       },
     }),
+    //
+    getOrderDetail: builder.query({
+      query: (orderId) => ({
+        url: `/order/orders/${orderId}`,
+        method: "GET",
+      }),
+      transformResponse: (response) => response.data,
+      providesTags: (result, error, orderId) => [
+        { type: "Orders", id: orderId },
+      ],
+    }),
   }),
 });
 
@@ -123,4 +135,5 @@ export const {
   useGetProductsQuery,
   useGetProductDetailQuery,
   useGetOrdersQuery,
+  useGetOrderDetailQuery,
 } = apiSlice;

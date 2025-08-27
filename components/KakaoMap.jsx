@@ -1,12 +1,19 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
-
 import { config } from "../app/config/env";
-
+// 이 부분은 전하의 환경에 맞게 설정하셔야 합니다.
+// import { config } from "../app/config/env";
+// const KAKAO_MAP_JS_KEY = config.kakaoJSKey;
 const KAKAO_MAP_JS_KEY = config.kakaoJSKey;
-console.log(KAKAO_MAP_JS_KEY);
-export default function KakaoMap({ latitude, longitude }) {
+
+export default function KakaoMap({
+  latitude,
+  longitude,
+  width = "100%",
+  height = 450,
+}) {
+  console.log(latitude, longitude);
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -14,8 +21,7 @@ export default function KakaoMap({ latitude, longitude }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_JS_KEY}&libraries=services"></script>
         <style>
-          body { margin: 0; padding: 0; height: 100%; }
-          html { height: 100%; }
+          html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
           #map { width: 100%; height: 100%; }
         </style>
       </head>
@@ -23,9 +29,7 @@ export default function KakaoMap({ latitude, longitude }) {
         <div id="map"></div>
         <script>
           window.onload = function() {
-            console.log('Kakao Map API Loaded');
             if (typeof kakao !== 'undefined' && kakao.maps) {
-              console.log('Kakao Maps is available');
               const mapContainer = document.getElementById('map');
               const mapOption = {
                 center: new kakao.maps.LatLng(${latitude}, ${longitude}),
@@ -33,7 +37,6 @@ export default function KakaoMap({ latitude, longitude }) {
               };
               const map = new kakao.maps.Map(mapContainer, mapOption);
 
-              // 마커 추가 (선택 사항)
               const markerPosition = new kakao.maps.LatLng(${latitude}, ${longitude});
               const marker = new kakao.maps.Marker({
                 position: markerPosition
@@ -49,21 +52,16 @@ export default function KakaoMap({ latitude, longitude }) {
   `;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { width, height }]}>
       <WebView
         originWhitelist={["*"]}
         source={{ html: htmlContent }}
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}
-        onLoad={() => console.log("WebView loaded successfully")}
-        onError={(e) => console.error("WebView error: ", e.nativeEvent)}
-        injectedJavaScript={`(function() {
-          window.console.log = function(message) {
-            window.ReactNativeWebView.postMessage(message);
-          }
-        })();`}
-        onMessage={(event) => console.log(event.nativeEvent.data)}
+        onMessage={(event) =>
+          console.log("From WebView:", event.nativeEvent.data)
+        }
       />
     </View>
   );
@@ -71,11 +69,11 @@ export default function KakaoMap({ latitude, longitude }) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 450,
-    width: "100%",
     marginTop: 20,
     borderWidth: 1,
     borderColor: "#ddd",
+    borderRadius: 8,
+    overflow: "hidden",
   },
   webview: {
     flex: 1,
