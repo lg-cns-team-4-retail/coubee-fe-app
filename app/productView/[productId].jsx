@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { SafeAreaView } from "react-native";
 import {
   YStack,
@@ -23,20 +23,28 @@ import Animated, {
 import { useWindowDimensions } from "react-native";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { addItem } from "../../redux/slices/cartSlice";
+import { addItem, replaceCart } from "../../redux/slices/cartSlice";
 import { useAuthContext } from "../contexts/AuthContext";
 import { openModal } from "../../redux/slices/modalSlice";
 import { useGetProductDetailQuery } from "../../redux/api/apiSlice";
+import { postViewCountProduct } from "../services/api";
+import { useToastController } from "@tamagui/toast";
 
 const CARD_INITIAL_Y_POSITION = 250;
 
 export default function ProductDetailPage() {
+  const toast = useToastController();
   const router = useRouter();
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
 
   const { isAuthenticated } = useAuthContext();
   const { productId } = useLocalSearchParams();
+  const { cartStoreId, cartItemCount } = useSelector((state) => ({
+    cartStoreId: state.cart.storeId,
+    cartItemCount: state.cart.items.length,
+  }));
+
   const {
     data: item,
     isLoading,
@@ -45,6 +53,13 @@ export default function ProductDetailPage() {
     isSuccess,
     error,
   } = useGetProductDetailQuery(productId, { skip: !productId });
+
+  //view count용
+  useEffect(() => {
+    if (productId) {
+      postViewCountProduct(productId);
+    }
+  }, [productId]);
 
   if (isLoading || isFetching) {
     <YStack flex={1} justifyContent="center" alignItems="center">
@@ -93,18 +108,35 @@ export default function ProductDetailPage() {
   }));
 
   const handleAddToCart = () => {
-    const request = {
+    const newItem = {
       productId: item?.productId,
       productName: item?.productName,
       description: item?.description,
       productImg: item?.productImg,
       originPrice: item?.originPrice,
       salePrice: item?.salePrice,
-      totalOriginPrice: item?.originPrice * quantity,
-      totalSalePrice: item?.salePrice * quantity,
       storeId: item?.storeId,
       quantity,
     };
+
+    if (cartItemCount > 0 && cartStoreId !== newItem.storeId) {
+      dispatch(
+        openModal({
+          type: "warning",
+          title: "장바구니에는 한 가게의 상품만 담을 수 있어요",
+          message: "선택하신 상품을 담으면 이전에 담은 상품은 모두 사라져요.",
+          confirmText: "새로 담기",
+          cancelText: "취소",
+          onConfirm: () => {
+            dispatch(replaceCart(newItem));
+            router.back();
+          },
+          onCancel: () => {},
+        })
+      );
+      return;
+    }
+
     if (!isAuthenticated) {
       dispatch(
         openModal({
@@ -116,7 +148,10 @@ export default function ProductDetailPage() {
         })
       );
     } else {
-      dispatch(addItem(request));
+      dispatch(addItem(newItem));
+      toast.show("상품 추가 완료", {
+        message: `${newItem.productName}를 담았습니다`,
+      });
       router.back();
     }
   };
@@ -220,7 +255,7 @@ export default function ProductDetailPage() {
                     bg="$primary"
                     color="white"
                     fontWeight={700}
-                    onPress={() => handleAddToCart()}
+                    onPress={handleAddToCart}
                   >
                     {totalPrice.toLocaleString() + "원 담기"}
                   </Button>

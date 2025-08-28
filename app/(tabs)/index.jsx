@@ -1,5 +1,6 @@
 import { Alert } from "react-native";
-import { XStack, YStack, Button, Text, Card } from "tamagui";
+import { useState } from "react";
+import { XStack, YStack, Button, Text, Card, Input } from "tamagui";
 import { ToastControl } from "../../components/CurrentToast";
 import { getExpoPushToken } from "../services/notifications";
 import { useAuthContext } from "../contexts/AuthContext";
@@ -11,6 +12,7 @@ import NewOrderListItem from "../../components/NewOrderListItem";
 
 export default function TabOneScreen() {
   const { logout, userId, isAuthenticated } = useAuthContext();
+  const [testingStoreId, setTestingStoreId] = useState("");
   const { location, loading, error, getCurrentLocation } = useLocation();
 
   const handleCopyPushToken = async () => {
@@ -78,7 +80,7 @@ export default function TabOneScreen() {
     <YStack flex={1} gap="$8" px="$10" pt="$5" bg="$background">
       <ToastControl />
 
-      <Card padding="$4" width="90%" backgroundColor="$background">
+      {/* <Card padding="$4" width="90%" backgroundColor="$background">
         <YStack gap="$2">
           <Text fontSize="$5" fontWeight="bold">
             위치 정보
@@ -99,7 +101,7 @@ export default function TabOneScreen() {
             위치 새로고침
           </Button>
         </YStack>
-      </Card>
+      </Card> */}
 
       {/* <NewOrderListItem order={testOrder2} /> */}
 
@@ -130,12 +132,23 @@ export default function TabOneScreen() {
             >
               {"가게보기" + storeId3}
             </Button>
+
             <Button
               onPress={() => router.push(`/orderDetail/${testOrderId}`)}
               theme="blue"
               size="$4"
             >
               주문내역
+            </Button>
+          </XStack>
+          <XStack>
+            <Input onChangeText={setTestingStoreId} value={testingStoreId} />
+            <Button
+              onPress={() => router.push(`/store/${testingStoreId}`)}
+              theme="blue"
+              size="$4"
+            >
+              가게 갑시다 {testingStoreId}
             </Button>
           </XStack>
         </YStack>
@@ -150,6 +163,13 @@ export default function TabOneScreen() {
             size="$4"
           >
             가게보기
+          </Button>
+          <Button
+            onPress={() => router.push(`/checkout`)}
+            theme="blue"
+            size="$4"
+          >
+            바슷ㅅ켓
           </Button>
           <Button
             onPress={() => router.push(`/store/${storeId2}`)}

@@ -6,11 +6,20 @@ import { ChevronLeft, Search } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import SearchResultsSheet from "./storeSearch/SearchResultsSheet";
 import { useTheme } from "tamagui";
+import StoreSearchTab from "./storeSearch/StoreSearchTab";
 
 export const SearchComponent = () => {
   const router = useRouter();
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState("store");
+
+  const [inputValue, setInputValue] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const handleSearch = () => {
+    setSearchKeyword(inputValue.trim());
+  };
+
   const searchResults = [
     {
       storeId: 1037,
@@ -305,8 +314,12 @@ export const SearchComponent = () => {
               borderColor="$borderColor"
               borderWidth={1}
               focusStyle={{ borderColor: "$primary" }}
-              icon={<Search />}
+              value={inputValue}
+              onChangeText={setInputValue}
+              onSubmitEditing={handleSearch}
+              returnKeyType="search"
             />
+            <Button icon={<Search />} onPress={handleSearch} circular />
           </XStack>
 
           {/* 상점/상품 검색 버튼 그룹 */}
@@ -351,8 +364,7 @@ export const SearchComponent = () => {
         <YStack flex={1}>
           {activeTab === "store" && (
             <>
-              <MapComponentContainer />
-              <SearchResultsSheet searchResults={searchResults} />
+              <StoreSearchTab searchKeyword={searchKeyword} />
             </>
           )}
 

@@ -1,11 +1,14 @@
 import { useState, useRef } from "react";
 import { Alert, StyleSheet, useWindowDimensions } from "react-native";
 import { Text, Button, Input, YStack } from "tamagui";
+import { useDispatch } from "react-redux";
 import { router } from "expo-router";
 import { Welcome } from "components/icons";
 import { registerUser } from "../services/api";
+import { openModal } from "../../redux/slices/modalSlice";
 
 const RegisterScreen = () => {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     username: "",
     nickName: "",
@@ -36,8 +39,17 @@ const RegisterScreen = () => {
       const response = await registerUser(formData);
 
       if (response.success) {
-        Alert.alert("성공", "회원가입이 완료되었습니다.");
-        router.push("/(auth)/login");
+        dispatch(
+          openModal({
+            title: "회원가입 성공",
+            message: "쿠비에 오신걸 환영해요",
+            type: "success",
+            onConfirm: () => {
+              router.push("/(auth)/login");
+            },
+            confirmText: "로그인 하러 가기",
+          })
+        );
       } else {
         Alert.alert("오류", response.message);
       }
@@ -57,7 +69,7 @@ const RegisterScreen = () => {
       gap="$4"
       px="$10"
       pt="$2"
-      bg="$background"
+      bg="$cardBg"
     >
       <Text style={styles.loginText} color="$color10">
         필요한 정보만 채우면
@@ -69,6 +81,11 @@ const RegisterScreen = () => {
       <Input
         width="100%"
         placeholder="ID"
+        bg="$background"
+        color="$color"
+        placeholderTextColor="$color10"
+        borderColor="$borderColor"
+        fow="bold"
         value={formData.username}
         onChangeText={(text) => handleChange("username", text)}
         autoCapitalize="none"
@@ -80,6 +97,11 @@ const RegisterScreen = () => {
         ref={nicknameInputRef}
         width="100%"
         placeholder="닉네임"
+        bg="$background"
+        color="$color"
+        placeholderTextColor="$color10"
+        borderColor="$borderColor"
+        fow="bold"
         value={formData.nickName}
         onChangeText={(text) => handleChange("nickName", text)}
         autoCapitalize="none"
@@ -91,6 +113,11 @@ const RegisterScreen = () => {
         ref={passwordInputRef}
         width="100%"
         placeholder="PW"
+        bg="$background"
+        color="$color"
+        placeholderTextColor="$color10"
+        borderColor="$borderColor"
+        fow="bold"
         value={formData.password}
         onChangeText={(text) => handleChange("password", text)}
         secureTextEntry
@@ -102,6 +129,7 @@ const RegisterScreen = () => {
         theme="active"
         width="100%"
         color="#fff"
+        fow="bold"
         backgroundColor="$primary"
         onPress={handleRegister}
         disabled={isLoading}
@@ -110,7 +138,7 @@ const RegisterScreen = () => {
       </Button>
 
       <Button
-        fontWeight={700}
+        fow="bold"
         onPress={() => router.push("/(auth)/login")}
         chromeless
         size="$2"

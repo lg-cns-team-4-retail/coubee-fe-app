@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect } from "react";
 import { router, useSegments } from "expo-router";
 import { useAuth, type AuthState } from "../hooks/useAuth";
+import { useDispatch } from "react-redux";
+import { openModal } from "../../redux/slices/modalSlice";
 
 interface AuthContextType extends AuthState {
   login: (
@@ -16,23 +18,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
+  const dispatch = useDispatch();
   const segments = useSegments();
-  // 페이지별 권한 설정
-  const publicRoutes = [
-    "login", // 로그인 페이지
-    "register", // 회원가입 페이지 (필요시)
-    "forgot-password", // 비밀번호 찾기 (필요시)
-    "index", // 초기 페이지
-    "(tabs)", // 탭 페이지들은 공개 (내부에서 개별 체크)
-    "(auth)",
-  ];
+  const publicRoutes = ["index", "(tabs)", "(auth)"];
 
-  const protectedRoutes = [
-    "profile", // 프로필 페이지
-    "settings", // 설정 페이지
-    "dashboard", // 대시보드
-    "modal", // 모달 페이지
-  ];
+  const protectedRoutes = ["orderDetail", "checkout"];
 
   // 현재 경로가 보호된 경로인지 확인
   const isProtectedRoute = (segments: string[]) => {
@@ -42,46 +32,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return protectedRoutes.includes(firstSegment);
   };
 
-  // 현재 경로가 공개 경로인지 확인
   const isPublicRoute = (segments: string[]) => {
-    if (!segments.length) return true; // 루트는 공개
+    if (!segments.length) return true;
 
     const firstSegment = segments[0];
     return publicRoutes.includes(firstSegment);
   };
 
-  //(auth)/login
-
-  // 인증 상태 변화시 자동 리다이렉트
   useEffect(() => {
-    if (!auth.isLoading) {
-      const currentPath = segments.join("/");
+    if (auth.isLoading) {
+      return;
+    }
 
-      if (auth.isAuthenticated) {
-        if (
-          isPublicRoute(segments) &&
-          segments[0] === "(auth)" &&
-          segments[1] === "login"
-        ) {
-          // 로그인 페이지에 있으면 메인으로 이동
-          router.replace("/(tabs)");
-        }
-        // 보호된 경로에 있으면 그대로 유지
-      } else {
-        // 로그아웃됨
-        if (isProtectedRoute(segments)) {
-          // 보호된 경로에 있으면 로그인으로 이동
-          router.replace("/login");
-        }
-        // 공개 경로에 있으면 그대로 유지
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (auth.isAuthenticated) {
+      if (inAuthGroup) {
+        router.replace("/(tabs)");
       }
-
-      /* console.log("Auth check:", {
-        isAuthenticated: auth.isAuthenticated,
-        currentPath,
-        isProtected: isProtectedRoute(segments),
-        isPublic: isPublicRoute(segments),
-      }); */
+    } else {
+      if (isProtectedRoute(segments)) {
+        dispatch(
+          openModal({
+            type: "warning",
+            title: "로그인이 필요합니다",
+            message: "이 페이지에 접근하려면 먼저 로그인해주세요.",
+            confirmText: "로그인하기",
+            onConfirm: () => {
+              router.replace("/login");
+            },
+            onCancel: () => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/(tabs)");
+              }
+            },
+            cancelText: "다음에 할게요",
+          })
+        );
+      }
     }
   }, [auth.isAuthenticated, auth.isLoading, segments]);
 

@@ -143,18 +143,36 @@ function RootLayoutNav() {
               }}
             />
             <Stack.Screen
-              name="checkout"
+              name="orderDetail/[orderId]"
               options={{
-                title: "주문하기",
+                title: "주문 상세보기",
+                headerStyle: {
+                  backgroundColor: theme.primary?.val,
+                },
+                headerTintColor: "#fff",
+                headerBackTitle: "뒤로",
                 headerShown: true,
                 headerShadowVisible: false,
               }}
             />
             <Stack.Screen
-              name="payment"
+              name="checkout/index"
+              options={{
+                title: "주문하기",
+                headerStyle: {
+                  backgroundColor: theme.primary?.val,
+                },
+                headerTintColor: "#fff",
+                headerBackTitle: "뒤로",
+                headerShown: true,
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen
+              name="payment/index"
               options={{
                 title: "결제하기",
-                headerShown: true,
+                headerShown: false,
                 headerShadowVisible: false,
               }}
             />
@@ -162,18 +180,6 @@ function RootLayoutNav() {
               name="(auth)/register"
               options={{
                 title: "회원가입",
-                headerStyle: {
-                  backgroundColor: theme.primary?.val,
-                },
-                headerTintColor: "#fff",
-                headerBackTitle: "뒤로",
-                headerShadowVisible: false,
-              }}
-            />
-            <Stack.Screen
-              name="orderDetail/[orderId]"
-              options={{
-                title: "주문상세보기",
                 headerStyle: {
                   backgroundColor: theme.primary?.val,
                 },

@@ -7,6 +7,7 @@ import { Spinner, YStack } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
 import { useDispatch } from "react-redux";
 import { clearCart } from "../../redux/slices/cartSlice";
+import { useToastController } from "@tamagui/toast";
 
 // PortOne 결제수단 문자열로 변환
 const getPortOnePayMethod = (method) => {
@@ -19,10 +20,12 @@ const getPortOnePayMethod = (method) => {
 };
 
 export default function PaymentScreen() {
+  const toast = useToastController();
+
   const dispatch = useDispatch();
   // checkout 페이지에서 navigate 하며 전달한 파라미터를 받습니다.
   const { paymentInfo, paymentConfig } = useLocalSearchParams();
-
+  console.log(paymentInfo, "pay info detail");
   // 전달된 파라미터가 없거나, JSON 파싱에 실패하면 이전 화면으로 돌려보냅니다.
   if (!paymentInfo || !paymentConfig) {
     Alert.alert("오류", "결제 정보가 올바르지 않습니다.", [
@@ -44,29 +47,26 @@ export default function PaymentScreen() {
 
   // 결제 완료 처리
   const handlePaymentComplete = (response) => {
-    console.log("payment success", response);
-
-    Alert.alert(
-      "결제 응답 확인", // Alert 제목
-      JSON.stringify(response, null, 2), // response 객체를 읽기 쉬운 JSON 문자열로 변환
-      [{ text: "확인" }]
-    );
+    console.log(response.paymentId, "check from the code ");
     if (response.code != null) {
-      Alert.alert("결제 실패", response.message || "결제가 실패했습니다.");
-      router.back(); // 결제 실패 시 주문확인 페이지로 복귀
+      toast.show("결제 실패", {
+        message: response.message || "결제 실패하셨습니다",
+      });
+      router.replace("/checkout");
     } else {
-      console.log(response, "payment detail check");
-      Alert.alert("결제 성공", "결제가 완료되었습니다!!!!!!");
       dispatch(clearCart()); // 결제 성공 시 장바구니 비우기
-      /* // TODO: QR 코드 생성 및 결과 페이지로 이동하는 로직 추가
-      router.replace("/(tabs)"); // 우선 홈으로 이동 */
+      toast.show("결제 성공", {
+        message: "픽업 받으실 때 까지 쿠비가 최선을 다할게요! ",
+      });
+      router.replace(`/orderDetail/${response.paymentId}`);
     }
   };
 
   // 결제 오류 처리
   const handlePaymentError = (error) => {
-    console.log("payment error", error);
-    Alert.alert("결제 오류", error.message || "결제 중 오류가 발생했습니다.");
+    toast.show("결제 실패", {
+      message: error.message,
+    });
     router.back();
   };
 
@@ -88,6 +88,7 @@ export default function PaymentScreen() {
           totalAmount: parsedPaymentInfo.amount,
           currency: "KRW",
           payMethod: getPortOnePayMethod(parsedPaymentInfo.paymentMethod),
+          appScheme: "coubee",
           customer: {
             // TODO: 실제 고객 정보로 변경 필요
             fullName: "테스트 고객",

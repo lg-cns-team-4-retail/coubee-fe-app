@@ -37,7 +37,7 @@ export default function TabLayout() {
           title: "홈",
           tabBarIcon: ({ color }) => <Home color={color as any} />,
           headerRight: () => (
-            <Link href="/checkout" asChild>
+            <Link href="checkout" asChild>
               <Button mr="$4" size="$2.5">
                 장바구니임
               </Button>

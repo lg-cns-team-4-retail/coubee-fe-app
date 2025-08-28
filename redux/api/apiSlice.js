@@ -29,7 +29,7 @@ export const apiSlice = createApi({
   baseQuery: axiosBaseQuery({
     baseUrl: "",
   }),
-  tagTypes: ["Store", "Products", "Product", "Orders"],
+  tagTypes: ["Store", "Products", "Product", "Orders", "Search"],
 
   endpoints: (builder) => ({
     getStoreDetail: builder.query({
@@ -127,6 +127,49 @@ export const apiSlice = createApi({
         { type: "Orders", id: orderId },
       ],
     }),
+    //
+    searchStores: builder.query({
+      query: ({ keyword, lat, lng, page = 0, size = 10 }) => ({
+        url: `/store/near`,
+        method: "GET",
+        params: { keyword, lat, lng, page, size },
+      }),
+
+      // 응답 데이터 가공: 페이지네이션을 대비하여 응답 형식을 통일합니다.
+      // 현재는 배열만 오므로, 이를 { content: [...] } 형태로 감싸줍니다.
+      // 추후 API에서 last 프로퍼티를 주면 자동으로 처리됩니다.
+      transformResponse: (response) => {
+        if (Array.isArray(response.data)) {
+          return {
+            content: response.data,
+            last: true,
+          };
+        }
+        return response.data;
+      },
+
+      providesTags: (result) => [{ type: "Search", id: "LIST" }],
+
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, ...rest } = queryArgs;
+        return rest;
+      },
+
+      merge: (currentCache, newItems) => {
+        const existingStoreIds = new Set(
+          currentCache.content.map((store) => store.storeId)
+        );
+        const uniqueNewItems = newItems.content.filter(
+          (store) => !existingStoreIds.has(store.storeId)
+        );
+        currentCache.content.push(...uniqueNewItems);
+        currentCache.last = newItems.last;
+      },
+
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.page !== previousArg?.page;
+      },
+    }),
   }),
 });
 
@@ -136,4 +179,5 @@ export const {
   useGetProductDetailQuery,
   useGetOrdersQuery,
   useGetOrderDetailQuery,
+  useSearchStoresQuery,
 } = apiSlice;

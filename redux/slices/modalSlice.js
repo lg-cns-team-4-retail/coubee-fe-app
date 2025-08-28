@@ -4,7 +4,11 @@ const initialState = {
   isOpen: false,
   title: "",
   message: "",
+  type: "default", // 'success', 'error', 'warning'
   onConfirm: null,
+  onCancel: null,
+  confirmText: "확인",
+  cancelText: "취소",
 };
 
 const modalSlice = createSlice({
@@ -12,16 +16,19 @@ const modalSlice = createSlice({
   initialState,
   reducers: {
     openModal: (state, action) => {
+      const { payload } = action;
       state.isOpen = true;
-      state.title = action.payload.title;
-      state.message = action.payload.message;
-      state.onConfirm = action.payload.onConfirm;
+      state.title = payload.title;
+      state.message = payload.message;
+      state.onConfirm = payload.onConfirm;
+      state.type = payload.type || initialState.type;
+      state.onCancel = payload.onCancel || initialState.onCancel;
+      state.confirmText = payload.confirmText || initialState.confirmText;
+      state.cancelText = payload.cancelText || initialState.cancelText;
     },
     closeModal: (state) => {
       state.isOpen = false;
-      state.title = "";
-      state.message = "";
-      state.onConfirm = null;
+      Object.assign(state, { ...initialState, isOpen: false });
     },
   },
 });

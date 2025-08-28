@@ -9,6 +9,7 @@ import { CheckoutItem } from "../../components/CheckoutItem";
 import ProductCheckoutBar from "../store/ProductCheckoutBar";
 import { paymentAPI } from "../services/api";
 import { useAuthContext } from "../contexts/AuthContext";
+import CustomHeader from "../../components/CustomHeader";
 
 // 결제 수단 옵션
 const PAYMENT_METHODS = [
@@ -19,7 +20,8 @@ const PAYMENT_METHODS = [
 
 export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false);
-  // 1. 선택된 결제 수단을 저장하기 위한 상태 추가
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+
   const [selectedMethod, setSelectedMethod] = useState("CARD");
 
   const cartState = useSelector((state) => state.cart);
@@ -71,7 +73,7 @@ export default function CheckoutPage() {
       await paymentAPI.preparePayment(createdOrder.orderId, prepareData);
 
       router.push({
-        pathname: "/checkout/PaymentScreen",
+        pathname: "/payment",
         params: {
           paymentInfo: JSON.stringify({
             ...createdOrder,
@@ -90,68 +92,34 @@ export default function CheckoutPage() {
     }
   };
 
+  if (!isAuthenticated) {
+    return <YStack flex={1} backgroundColor="$background" />;
+  }
+
   return (
     <YStack bg="$background" flex={1}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView
-          contentContainerStyle={{ alignItems: "center", paddingBottom: 150 }}
-        >
-          {/* 3. 결제 수단 선택 UI 추가 */}
-          <YStack
-            w="90%"
-            gap="$3"
-            py="$4"
-            borderBottomWidth={1}
-            borderColor="$borderColor"
-          >
-            <Text fontSize="$5" fontWeight="bold">
-              결제 수단
-            </Text>
-            <XStack gap="$3" jc="space-between">
-              {PAYMENT_METHODS.map((method) => (
-                <Button
-                  key={method.id}
-                  flex={1}
-                  onPress={() => setSelectedMethod(method.id)}
-                  backgroundColor={
-                    selectedMethod === method.id ? "$primary" : "transparent"
-                  }
-                  borderColor={
-                    selectedMethod !== method.id ? "$borderColor" : undefined
-                  }
-                  borderWidth={selectedMethod !== method.id ? 1 : 0}
-                  animation="bouncy"
-                >
-                  <Text
-                    color={selectedMethod === method.id ? "white" : "$color"}
-                  >
-                    {method.label}
-                  </Text>
-                </Button>
-              ))}
-            </XStack>
-          </YStack>
-
-          <YStack alignItems="center" gap="$3" w="100%" pt="$4">
-            {items && items.length > 0 ? (
-              items.map((item) => (
-                <CheckoutItem
-                  key={item.productId}
-                  productId={item.productId}
-                  productName={item.productName}
-                  description={item.description}
-                  productImg={item.productImg}
-                  salePrice={item.salePrice}
-                  originPrice={item.originPrice}
-                  quantity={item.quantity}
-                />
-              ))
-            ) : (
-              <Text mt="$10">장바구니가 비어있습니다.</Text>
-            )}
-          </YStack>
-        </ScrollView>
-      </SafeAreaView>
+      <ScrollView
+        contentContainerStyle={{ alignItems: "center", paddingBottom: 150 }}
+      >
+        <YStack alignItems="center" gap="$3" w="100%" pt="$4">
+          {items && items.length > 0 ? (
+            items.map((item) => (
+              <CheckoutItem
+                key={item.productId}
+                productId={item.productId}
+                productName={item.productName}
+                description={item.description}
+                productImg={item.productImg}
+                salePrice={item.salePrice}
+                originPrice={item.originPrice}
+                quantity={item.quantity}
+              />
+            ))
+          ) : (
+            <Text mt="$10">장바구니가 비어있습니다.</Text>
+          )}
+        </YStack>
+      </ScrollView>
 
       <ProductCheckoutBar currentStoreId={storeId} onPress={startPaymentFlow} />
 

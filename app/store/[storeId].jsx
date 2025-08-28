@@ -196,7 +196,7 @@ export default function StorePage() {
         </YStack>
       </>
     ),
-    [searchQuery, storeId, handleSearchSubmit, storeDetail]
+    [searchQuery, storeId, handleSearchSubmit, storeDetail, products]
   );
 
   return (

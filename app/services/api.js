@@ -32,7 +32,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   async (config) => {
     const token = await AuthService.getToken();
-    console.log("token using", token);
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -65,6 +65,7 @@ async function refreshAccessToken() {
 
   try {
     const refreshToken = await AuthService.getRefreshToken();
+    console.log(refreshToken, "watch refresh token");
     if (!refreshToken) throw new Error("No refresh token available");
 
     console.log("[선제적 갱신] 리프레시 토큰으로 새 Access Token 요청");
@@ -299,7 +300,6 @@ export const paymentAPI = {
    */
   preparePayment: async (orderId, prepareData) => {
     try {
-      // API 경로 수정: 원본 코드의 '/api' 접두사 제외
       const response = await axiosInstance.post(
         `/order/payment/orders/${orderId}/prepare`,
         prepareData
@@ -317,4 +317,30 @@ export const paymentAPI = {
   },
 };
 
+export async function postViewCountProduct(productId) {
+  try {
+    // 1. 먼저 사용자의 토큰을 확인하여 로그인 상태를 파악합니다.
+    const token = await AuthService.getToken();
+    let response;
+
+    if (token) {
+      // 2. 토큰이 있다면, 인터셉터가 적용된 axiosInstance를 사용합니다.
+      //    이 경우, 서버는 어떤 유저가 조회했는지 알 수 있습니다.
+      console.log("[조회수 API] 인증된 사용자로 요청합니다.");
+      response = await axiosInstance.post(`/product/view/${productId}`);
+    } else {
+      // 3. 토큰이 없다면, 인터셉터가 없는 순수 axios를 사용합니다.
+      //    토큰 없이 API를 호출하여 비로그인 사용자의 조회수를 기록합니다.
+      console.log("[조회수 API] 비로그인 사용자로 요청합니다.");
+      response = await axios.post(`${API_BASE_URL}/product/view/${productId}`);
+    }
+
+    return { success: true, data: response.data.message };
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message || "조회수를 기록하는 데 실패했습니다.";
+    console.error("조회수 API 오류:", errorMessage);
+    return { success: false, message: errorMessage };
+  }
+}
 export default axiosInstance;

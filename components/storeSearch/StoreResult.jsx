@@ -20,7 +20,7 @@ export const StoreResult = ({ store, onPress }) => {
       <YStack position="relative">
         <Image
           source={{
-            uri: backgroundImg || "https://via.placeholder.com/400x150",
+            uri: store.backImg || "https://via.placeholder.com/400x150",
           }}
           height={120}
           width="100%"
@@ -29,7 +29,7 @@ export const StoreResult = ({ store, onPress }) => {
         />
         <Image
           source={{
-            uri: profileImg || "https://via.placeholder.com/100",
+            uri: store.profileImg || "https://via.placeholder.com/100",
           }}
           width={80}
           height={80}

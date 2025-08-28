@@ -29,6 +29,7 @@ export class AuthService {
 
   // Refresh Token 저장
   static async setRefreshToken(token: string): Promise<void> {
+    console.log(token, " saving token for refresh service");
     try {
       await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, token);
     } catch (error) {
@@ -182,16 +183,14 @@ export class AuthService {
   ): Promise<void> {
     try {
       await this.setToken(token);
-      // ❗ 만료 시간 저장 로직 추가
+      // ❗ 만료 시간 저장 로직 추가r
       await this.setAccessTokenExpiration(expiresIn);
-
       if (refreshToken) {
         await this.setRefreshToken(refreshToken);
       }
       if (userId) {
         await this.setUserId(userId);
       }
-      console.log("Login successful, tokens and expiration time saved");
     } catch (error) {
       console.error("Error during login:", error);
       throw error;

@@ -1,24 +1,18 @@
-import React from "react";
+import React, { useRef } from "react";
 import { View, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 import { useRouter } from "expo-router";
-
 import { config } from "../../app/config/env";
 
 const KAKAO_MAP_JS_KEY = config.kakaoJSKey;
 
-/**
- * 검색 결과를 지도에 표시하는 컴포넌트입니다.
- * @param {object} center - 지도의 중심점 { latitude, longitude }
- * @param {array} markers - 지도에 표시할 마커 데이터 배열 [{ storeId, latitude, longitude, title }, ...]
- */
 export default function SearchResultsMap({ center, markers = [] }) {
-  const router = useRouter(); // 2. router 인스턴스를 생성합니다.
+  const router = useRouter();
+  const webviewRef = useRef(null);
 
   // 마커 데이터를 WebView의 JavaScript에서 사용할 수 있도록 JSON 문자열로 변환합니다.
   const markersJson = JSON.stringify(markers);
 
-  // WebView에 로드할 HTML 및 JavaScript 코드입니다.
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -41,19 +35,16 @@ export default function SearchResultsMap({ center, markers = [] }) {
             const mapOption = {
               // 요구사항 2: 현재 유저의 위치를 지도의 중심점으로 설정합니다.
               center: new kakao.maps.LatLng(${center.latitude}, ${center.longitude}),
-              level: 4 // 여러 마커를 보여주기 위해 레벨을 조금 조정할 수 있습니다.
+              level: 3 // 여러 마커를 보여주기 위해 레벨을 조금 조정할 수 있습니다.
             };
             const map = new kakao.maps.Map(mapContainer, mapOption);
 
-            // 요구사항 1: 검색 결과에 따른 여러 개의 마커를 생성합니다.
             markersData.forEach(markerInfo => {
               const markerPosition = new kakao.maps.LatLng(markerInfo.latitude, markerInfo.longitude);
-              
               const marker = new kakao.maps.Marker({
                 position: markerPosition,
                 clickable: true // 마커를 클릭할 수 있도록 설정합니다.
               });
-
               marker.setMap(map);
 
               // 요구사항 3: 각 마커에 클릭 이벤트를 추가합니다.
@@ -80,7 +71,6 @@ export default function SearchResultsMap({ center, markers = [] }) {
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}
-        // WebView 내에서 React Native로 메시지를 보낼 때 이 함수가 실행됩니다.
         onMessage={(event) => {
           try {
             const data = JSON.parse(event.nativeEvent.data);

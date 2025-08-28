@@ -41,8 +41,8 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-        ignoredActionPaths: ["payload.onConfirm"],
-        ignoredPaths: ["modal.onConfirm"],
+        ignoredActionPaths: ["payload.onConfirm", "payload.onCancel"],
+        ignoredPaths: ["modal.onConfirm", "modal.onCancel"],
       },
     }).concat(apiSlice.middleware),
 });

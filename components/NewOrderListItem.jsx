@@ -20,6 +20,8 @@ const getStatusProps = (status) => {
       return { text: "결제 취소(점주)", themeColor: "red" };
     case "CANCELLED_USER":
       return { text: "결제 취소", themeColor: "red" };
+    case "RECEIVED":
+      return { text: "픽업 완료", themeColor: "$primary" };
     default:
       return { text: status, themeColor: "$colorSecondary" };
   }
