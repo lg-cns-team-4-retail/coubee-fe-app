@@ -2,30 +2,38 @@ import { tokens } from "./tokens";
 
 export const light_theme = {
   background: tokens.color.lightBg,
-  color: tokens.color.lightText,
   cardBg: tokens.color.lightCardBg,
-  primary: tokens.color.main,
-  secondary: tokens.color.lightSecondary,
-  interactive: tokens.color.lightInteractive,
+  color: tokens.color.lightText,
+  colorSecondary: tokens.color.lightTextSecondary,
   backgroundPress: tokens.color.lightBackgroundPress,
-  borderColor: "#e5e5e5",
-  success: tokens.color.green10,
-  error: tokens.color.red10,
-  infoText: tokens.color.lightInteractive,
-  descriptionText: "#808080",
+  borderColor: tokens.color.lightBorder,
+
+  // 테마 색상
+  primary: tokens.color.main,
+  interactive: tokens.color.lightInfo,
+
+  // 상태 색상
+  success: tokens.color.lightSuccess,
+  error: tokens.color.lightError,
+  warning: tokens.color.lightWarning,
+  info: tokens.color.lightInfo,
 };
 
 export const dark_theme = {
   background: tokens.color.darkBg,
-  color: tokens.color.darkText,
   cardBg: tokens.color.darkCardBg,
-  primary: tokens.color.main,
-  secondary: tokens.color.secondary,
-  interactive: tokens.color.interactive,
+  color: tokens.color.darkText,
+  colorSecondary: tokens.color.darkTextSecondary,
   backgroundPress: tokens.color.darkBackgroundPress,
-  borderColor: "#333333",
-  success: tokens.color.green10,
-  error: tokens.color.red10,
-  infoText: tokens.color.interactive,
-  descriptionText: "#808080",
+  borderColor: tokens.color.darkBorder,
+
+  // 테마 색상
+  primary: tokens.color.main,
+  interactive: tokens.color.darkInfo,
+
+  // 상태 색상
+  success: tokens.color.darkSuccess,
+  error: tokens.color.darkError,
+  warning: tokens.color.darkWarning,
+  info: tokens.color.darkInfo,
 };

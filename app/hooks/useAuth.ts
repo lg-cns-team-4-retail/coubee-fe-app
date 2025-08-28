@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { AuthService } from "../services/auth";
+import { useDispatch } from "react-redux"; // 👈 1. useDispatch import
+import { apiSlice } from "../../redux/api/apiSlice"; // 👈 2. apiSlice import
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -8,6 +10,7 @@ export interface AuthState {
 }
 
 export function useAuth() {
+  const dispatch = useDispatch();
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     isLoading: true,
@@ -107,7 +110,7 @@ export function useAuth() {
 
       // 2. 로컬의 모든 인증 데이터 삭제
       await AuthService.clearAll();
-      
+      dispatch(apiSlice.util.resetApiState());
       // 3. 상태 업데이트
       setAuthState({
         isAuthenticated: false,

@@ -3,8 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   items: [],
   storeId: null,
-  originPrice: 0,
-  salePrice: 0,
+  totalOriginPrice: 0,
+  totalSalePrice: 0,
   totalQuantity: 0,
 };
 
@@ -12,67 +12,86 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    /**
-     * 장바구니에 상품을 추가합니다. 이미 있는 상품이면 수량을 더합니다.
-     * @param payload {{ productId: number, quantity: number }}
-     */
     addItem: (state, action) => {
-      const item = {
-        productId: action.payload.productId,
-        productName: action.payload.productName,
-        description: action.payload.description,
-        productImg: action.payload.productImg,
-        quantity: action.payload.quantity,
-      };
+      // ... (기존 addItem 로직은 그대로 유지) ...
+      const newItem = action.payload;
+      const existingItem = state.items.find(
+        (item) => item.productId === newItem.productId
+      );
 
-      const productExists =
-        state.items.length > 0
-          ? state.items.find(
-              (item) => item.productId === action.payload.productId
-            )
-          : null;
-
-      if (productExists) {
-        productExists.quantity += action.payload.quantity;
+      if (existingItem) {
+        existingItem.quantity += newItem.quantity;
       } else {
-        state.items.push(item);
+        state.items.push({ ...newItem });
       }
 
-      state.storeId = action.payload.storeId;
-      state.originPrice += action.payload.originPrice;
-      state.salePrice += action.payload.salePrice;
-      state.totalQuantity += action.payload.quantity;
+      // 합계 재계산 로직
+      const recalculateTotals = (s) => {
+        s.totalQuantity = s.items.reduce((sum, item) => sum + item.quantity, 0);
+        s.totalOriginPrice = s.items.reduce(
+          (sum, item) => sum + item.originPrice * item.quantity,
+          0
+        );
+        s.totalSalePrice = s.items.reduce(
+          (sum, item) => sum + item.salePrice * item.quantity,
+          0
+        );
+        if (s.items.length === 0) {
+          s.storeId = null;
+        }
+      };
+
+      state.storeId = newItem.storeId;
+      recalculateTotals(state);
     },
-    /**
-     * 장바구니에서 상품을 완전히 제거합니다.
-     * @param payload {{ productId: number }}
-     */
+
     removeItem: (state, action) => {
       const { productId } = action.payload;
-      delete state.items[productId];
+      state.items = state.items.filter((item) => item.productId !== productId);
+
+      // 합계 재계산
+      const recalculateTotals = (s) => {
+        s.totalQuantity = s.items.reduce((sum, item) => sum + item.quantity, 0);
+        s.totalOriginPrice = s.items.reduce(
+          (sum, item) => sum + item.originPrice * item.quantity,
+          0
+        );
+        s.totalSalePrice = s.items.reduce(
+          (sum, item) => sum + item.salePrice * item.quantity,
+          0
+        );
+        if (s.items.length === 0) {
+          s.storeId = null;
+        }
+      };
+      recalculateTotals(state);
     },
-    /**
-     * 특정 상품의 수량을 1 증가시킵니다.
-     * @param payload {{ productId: number }}
-     */
+
     increaseQuantity: (state, action) => {
       const { productId } = action.payload;
-      if (state.items[productId]) {
-        state.items[productId]++;
+      const item = state.items.find((item) => item.productId === productId);
+      if (item) {
+        item.quantity++;
+        state.totalQuantity++;
+        state.totalOriginPrice += item.originPrice;
+        state.totalSalePrice += item.salePrice;
       }
     },
 
     decreaseQuantity: (state, action) => {
       const { productId } = action.payload;
-      if (state.items[productId]) {
-        state.items[productId]--;
-        if (state.items[productId] <= 0) {
-          delete state.items[productId];
-        }
+      const item = state.items.find((item) => item.productId === productId);
+      if (item && item.quantity > 1) {
+        item.quantity--;
+        state.totalQuantity--;
+        state.totalOriginPrice -= item.originPrice;
+        state.totalSalePrice -= item.salePrice;
       }
     },
+
     clearCart: (state) => {
-      state.items = {};
+      // initialState를 반환하여 완전히 초기화
+      return initialState;
     },
   },
 });
@@ -88,9 +107,5 @@ export const {
 export default cartSlice.reducer;
 
 export const selectCartItems = (state) => state.cart.items;
-export const selectTotalQuantity = (state) => {
-  return Object.values(state.cart.items).reduce(
-    (total, quantity) => total + quantity,
-    0
-  );
-};
+// selector 로직 수정
+export const selectTotalQuantity = (state) => state.cart.totalQuantity;
