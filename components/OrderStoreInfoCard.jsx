@@ -4,12 +4,14 @@ import { ChevronDown, ChevronUp, Phone } from "@tamagui/lucide-icons";
 import PhoneLink from "./PhoneLink";
 
 const OrderStoreInfoCard = ({ store, product, isExpanded, onExpandChange }) => {
+  console.log(product.map((item) => item.product));
   const OrderProductItem = ({ product }) => (
     <>
       <XStack p="$3" ai="center" gap="$3">
         <Image
           source={{
-            uri: product.productImg || "https://via.placeholder.com/100",
+            uri:
+              product.product.productImg || "https://via.placeholder.com/100",
           }}
           width={60}
           height={60}
@@ -20,7 +22,7 @@ const OrderStoreInfoCard = ({ store, product, isExpanded, onExpandChange }) => {
           <Text color="$gray10">수량: {product.quantity}개</Text>
         </YStack>
         <Text fontWeight="bold">
-          {(product.salePrice * product.quantity).toLocaleString()}원
+          {(product.product.salePrice * product.quantity).toLocaleString()}원
         </Text>
       </XStack>
       <YStack borderBottomWidth={2} borderColor="$borderColor" />
@@ -69,7 +71,8 @@ const OrderStoreInfoCard = ({ store, product, isExpanded, onExpandChange }) => {
               <Image
                 source={{
                   uri:
-                    product[0].productImg || "https://via.placeholder.com/100",
+                    product[0].product.productImg ||
+                    "https://via.placeholder.com/100",
                 }}
                 width={60}
                 height={60}

@@ -73,10 +73,10 @@ const OrderHistoryScreen = () => {
     isError, // 요청 실패 여부
     error, // 에러 정보
   } = useGetOrderDetailQuery(orderId, {
-    pollingInterval: 100000,
+    pollingInterval: 3000000,
   });
 
-  /* if (isLoading || isFetching) {
+  if (isLoading || isFetching) {
     return (
       <>
         <YStack flex={1} jc="center" ai="center">
@@ -84,18 +84,20 @@ const OrderHistoryScreen = () => {
         </YStack>
       </>
     );
-  } */
+  }
   return (
-    <ScrollView ref={scrollViewRef}>
-      <OrderDetailCard
-        order={order}
-        statusHistory={statusHistory}
-        isExpanded={isCardExpanded}
-        onExpandChange={setIsCardExpanded}
-        isLoading={isLoading}
-        isFetching={isFetching}
-      />
-    </ScrollView>
+    <YStack f={1} bg="$background">
+      <ScrollView ref={scrollViewRef}>
+        <OrderDetailCard
+          order={order}
+          statusHistory={statusHistory}
+          isExpanded={isCardExpanded}
+          onExpandChange={setIsCardExpanded}
+          isLoading={isLoading}
+          isFetching={isFetching}
+        />
+      </ScrollView>
+    </YStack>
   );
 };
 

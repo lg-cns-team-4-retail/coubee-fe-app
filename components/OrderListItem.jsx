@@ -41,7 +41,7 @@ export default function OrderListItem({ order }) {
       marginHorizontal="$4"
       marginBottom="$4"
       padding="$4"
-      onPress={() => router.push(`/order/detail/${order.orderId}`)}
+      onPress={() => router.push(`/orderDetail/${order.orderId}`)}
       animation="bouncy"
       hoverStyle={{ scale: 0.975 }}
       pressStyle={{ scale: 0.95 }}

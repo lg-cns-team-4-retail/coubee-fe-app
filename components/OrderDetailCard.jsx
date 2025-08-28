@@ -18,7 +18,7 @@ const OrderDetailCard = ({
     <YStack gap="$1" p="$3" m="$3" borderRadius="$6">
       {/* 주문 상태 */}
       <OrderStatusTracker
-        currentStatus={order.status}
+        currentStatus={order?.status}
         statusHistory={statusHistory}
         isLoading={isLoading}
         isFetching={isFetching}
@@ -35,8 +35,8 @@ const OrderDetailCard = ({
 
       {/* 상점 정보 */}
       <OrderStoreInfoCard
-        store={order.store}
-        product={order.items}
+        store={order?.store}
+        product={order?.items}
         isExpanded={isExpanded}
         onExpandChange={onExpandChange}
       />
