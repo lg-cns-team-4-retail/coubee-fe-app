@@ -19,7 +19,7 @@ export function CurrentToast() {
   return (
     <Toast
       key={currentToast.id}
-      duration={1500}
+      duration={1800}
       viewportName={currentToast.viewportName}
       enterStyle={{ opacity: 0, scale: 0.5, y: -25 }}
       exitStyle={{ opacity: 0, scale: 1, y: -20 }}
@@ -27,15 +27,17 @@ export function CurrentToast() {
       theme="accent"
       rounded="$6"
       animation="bouncy"
-      bg="$primary"
+      bg="$cardBg"
+      borderColor="$primary"
+      borderWidth={2}
     >
       <YStack alignItems="center" p="$2" gap="$2">
-        <Icon color="white" />
-        <Toast.Title fontWeight="bold" color="white">
+        <Icon color="$color" />
+        <Toast.Title fontWeight="bold" color="$color">
           {currentToast.title}
         </Toast.Title>
         {!!currentToast.message && (
-          <Toast.Description color="white" fow={500}>
+          <Toast.Description color="$color" fow={700}>
             {currentToast.message}
           </Toast.Description>
         )}

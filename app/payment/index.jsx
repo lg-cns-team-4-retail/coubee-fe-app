@@ -67,12 +67,12 @@ export default function PaymentScreen() {
     toast.show("결제 실패", {
       message: error.message,
     });
-    router.back();
+    router.replace("/checkout");
   };
 
   if (!channelKey) {
     Alert.alert("오류", "유효하지 않은 결제 채널입니다.", [
-      { text: "확인", onPress: () => router.back() },
+      { text: "확인", onPress: () => router.replace("/checkout") },
     ]);
     return null;
   }

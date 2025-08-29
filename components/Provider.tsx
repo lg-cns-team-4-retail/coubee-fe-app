@@ -28,7 +28,7 @@ export default function TProvider({
       >
         {children}
         <CurrentToast />
-        <ToastViewport b="$8" left={0} right={0} />
+        <ToastViewport b="$12" left={0} right={0} />
       </ToastProvider>
     </TamaguiProvider>
   );

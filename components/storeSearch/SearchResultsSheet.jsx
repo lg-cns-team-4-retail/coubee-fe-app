@@ -1,24 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 // 👇 Sheet.ScrollView를 사용하기 위해 ScrollView와 Text를 Sheet와 함께 불러옵니다.
 import { Sheet } from "@tamagui/sheet";
 import { router } from "expo-router";
-import { YStack, Text } from "tamagui";
-import StoreResult from "./StoreResult"; // 전하의 StoreResult 컴포넌트
+import { YStack, Text, Spinner } from "tamagui";
+import StoreResult from "./StoreResult";
+import { FlatList } from "react-native";
 
-export default function SearchResultsSheet({ searchResults = [] }) {
+export default function SearchResultsSheet({
+  searchResults = [],
+  onLoadMore,
+  isFetching,
+}) {
   const [open, setOpen] = useState(true);
-  // snapPoints는 전하의 뜻대로 유지합니다.
   const snapPoints = [85, 10];
+
+  const renderStoreItem = useCallback(
+    ({ item: store }) => (
+      <StoreResult
+        onPress={() => {
+          router.push(`/store/${store.storeId}`);
+        }}
+        key={store.storeId}
+        store={store}
+      />
+    ),
+    []
+  );
 
   return (
     <Sheet
       open={open}
       onOpenChange={setOpen}
       snapPoints={snapPoints}
-      defaultPosition={1} // 시작 위치는 최하단(인덱스 1)
+      defaultPosition={1}
       modal={false}
       dismissOnOverlayPress={false}
-      // 복잡한 상호작용을 유발했던 position 상태 및 관련 속성들을 모두 제거하였습니다.
     >
       <Sheet.Handle backgroundColor="grey" />
 
@@ -33,27 +49,21 @@ export default function SearchResultsSheet({ searchResults = [] }) {
           </Text>
         </YStack>
 
-        {/* 👇 일반 ScrollView 대신 Sheet.ScrollView를 사용합니다. */}
-        <Sheet.ScrollView
-          flex={1}
+        <FlatList
+          data={searchResults}
+          renderItem={renderStoreItem}
+          keyExtractor={(item) => item.storeId.toString()}
           contentContainerStyle={{
-            paddingHorizontal: "$4",
-            gap: "$1",
-            paddingBottom: "$4",
+            paddingHorizontal: 16, // tamagui 토큰 대신 숫자 값 사용
+            paddingBottom: 16,
           }}
-          showsVerticalScrollIndicator={false}
-        >
-          {searchResults.map((store) => (
-            <StoreResult
-              onPress={() => {
-                /*  console.log("clcicked store"); */
-                router.push(`/store/${store.storeId}`);
-              }}
-              key={store.storeId}
-              store={store}
-            />
-          ))}
-        </Sheet.ScrollView>
+          // FlatList는 이 props들을 완벽하게 지원합니다.
+          onEndReached={onLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetching ? <Spinner marginVertical="$4" /> : null
+          }
+        />
       </Sheet.Frame>
     </Sheet>
   );

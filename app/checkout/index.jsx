@@ -72,7 +72,7 @@ export default function CheckoutPage() {
       };
       await paymentAPI.preparePayment(createdOrder.orderId, prepareData);
 
-      router.push({
+      router.replace({
         pathname: "/payment",
         params: {
           paymentInfo: JSON.stringify({

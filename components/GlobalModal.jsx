@@ -50,7 +50,6 @@ const GlobalModal = () => {
         <Dialog.Overlay
           key="overlay"
           animation="quick"
-          o={0.5}
           enterStyle={{ o: 0 }}
           exitStyle={{ o: 0 }}
         />
@@ -60,11 +59,10 @@ const GlobalModal = () => {
           animation="bouncy"
           enterStyle={{ y: -20, opacity: 0, scale: 0.9 }}
           exitStyle={{ y: 10, opacity: 0, scale: 0.95 }}
-          w="90%"
+          w="70%"
           br="$6"
         >
           <YStack gap="$4" ai="center" py="$2">
-            {/* 1. 아이콘 추가 */}
             <Icon size={48} color={color} />
 
             <Dialog.Title fontSize="$6" fontWeight="bold" textAlign="center">

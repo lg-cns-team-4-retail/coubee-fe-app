@@ -11,32 +11,27 @@ import { useSearchStoresQuery } from "../../redux/api/apiSlice";
  * 상점 검색 탭의 UI와 데이터 로직을 담당하는 컴포넌트
  * @param {string} searchKeyword - 상위 컴포넌트에서 전달받는 검색 키워드
  */
-const StoreSearchTab = ({ searchKeyword }) => {
-  // 페이지네이션을 위한 state
+
+const StoreSearchTab = ({ searchKeyword, userLocation }) => {
   const [page, setPage] = useState(0);
 
-  // RTK Query 훅을 사용하여 API 호출
-  const {
-    data: searchData,
-    isLoading,
-    isFetching,
-    isError,
-    // refetch 함수는 당겨서 새로고침 등에 활용할 수 있습니다.
-    refetch,
-  } = useSearchStoresQuery({
-    // searchKeyword가 비어있으면 빈 문자열로 API 요청
-    keyword: searchKeyword || "",
-    lat: 37.5595,
-    lng: 127.0053,
-    page: page,
-    size: 20,
-  });
+  const { data, isLoading, isFetching, isError } = useSearchStoresQuery(
+    { keyword: searchKeyword, page, ...userLocation, size: 5 },
+    {
+      skip: !userLocation,
+    }
+  );
 
-  // 검색 결과 데이터
-  const searchResults = searchData?.content || [];
+  console.log(data);
+  const loadMore = () => {
+    if (!data?.last && !isFetching) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
 
-  // 최초 로딩 시 스피너를 표시합니다.
-  if (isLoading) {
+  const searchResults = data?.content || [];
+
+  if (isLoading && page === 0) {
     return (
       <YStack flex={1} jc="center" ai="center">
         <Spinner size="large" />
@@ -52,18 +47,23 @@ const StoreSearchTab = ({ searchKeyword }) => {
   }
 
   // 검색 결과가 없을 때
-  if (searchResults.length === 0) {
-    const message = searchKeyword
-      ? `'${searchKeyword}'에 대한 검색 결과가 없습니다.`
-      : "주변에 등록된 상점이 없습니다.";
-    return <ListEmptyComponent message={message} />;
+  if (data?.content.length === 0) {
+    const message = `주변에 "${searchKeyword}"로 시작되는 상점이 존재하지 않아요`;
+    return (
+      <>
+        <ListEmptyComponent message={message} />
+      </>
+    );
   }
 
-  // 정상적으로 데이터가 있을 때
   return (
     <>
       <MapComponentContainer searchResults={searchResults} />
-      <SearchResultsSheet searchResults={searchResults} />
+      <SearchResultsSheet
+        searchResults={searchResults}
+        onLoadMore={loadMore}
+        isFetching={isFetching}
+      />
     </>
   );
 };

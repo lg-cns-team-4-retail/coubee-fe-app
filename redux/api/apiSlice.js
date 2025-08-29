@@ -100,7 +100,15 @@ export const apiSlice = createApi({
       serializeQueryArgs: ({ endpointName }) => {
         return endpointName;
       },
-      merge: (currentCache, newItems) => {
+      merge: (currentCache, newItems, { arg }) => {
+        // ❗ [핵심 수정] 첫 페이지를 불러오는 경우, 기존 데이터를 모두 버리고 새 데이터로 교체합니다.
+        // 이는 'pull-to-refresh' (당겨서 새로고침)과 같은 동작을 구현할 때 유용합니다.
+        if (arg.page === 0) {
+          // RTK Query 에서는 새로운 상태를 반환하면 캐시를 덮어씁니다.
+          return newItems;
+        }
+
+        // 다음 페이지를 불러오는 경우, 기존 방식대로 데이터를 추가합니다.
         const existingOrderIds = new Set(
           currentCache.content.map((order) => order.orderId)
         );
@@ -109,7 +117,6 @@ export const apiSlice = createApi({
         );
 
         currentCache.content.push(...uniqueNewItems);
-
         currentCache.last = newItems.last;
       },
       forceRefetch({ currentArg, previousArg }) {
@@ -170,6 +177,45 @@ export const apiSlice = createApi({
         return currentArg?.page !== previousArg?.page;
       },
     }),
+    searchProducts: builder.query({
+      query: ({ keyword, lat, lng, page = 0, size = 10 }) => ({
+        url: `/product/search/es`,
+        method: "GET",
+        params: { keyword, latitude: lat, longitude: lng, page, size },
+      }),
+
+      transformResponse: (response) => {
+        if (Array.isArray(response.data)) {
+          return {
+            content: response.data,
+            last: true,
+          };
+        }
+        return response.data;
+      },
+
+      providesTags: (result) => [{ type: "Search", id: "LIST" }],
+
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, ...rest } = queryArgs;
+        return rest;
+      },
+
+      merge: (currentCache, newItems) => {
+        const existingProductIds = new Set(
+          currentCache.content.map((product) => product.productId)
+        );
+        const uniqueNewItems = newItems.content.filter(
+          (product) => !existingProductIds.has(product.productId)
+        );
+        currentCache.content.push(...uniqueNewItems);
+        currentCache.last = newItems.last;
+      },
+
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.page !== previousArg?.page;
+      },
+    }),
   }),
 });
 
@@ -180,4 +226,5 @@ export const {
   useGetOrdersQuery,
   useGetOrderDetailQuery,
   useSearchStoresQuery,
+  useSearchProductsQuery,
 } = apiSlice;
