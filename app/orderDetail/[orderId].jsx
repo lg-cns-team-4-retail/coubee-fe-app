@@ -1,20 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { ScrollView, YStack, Spinner, Button } from "tamagui";
+import { ScrollView, YStack, Spinner, Button, Text } from "tamagui";
 import { RefreshControl } from "react-native";
 
 import OrderDetailCard from "../../components/OrderDetailCard";
-import CoubeeRefreshAnimation from "../../components/CoubeeRefreshAnimation";
 import { useGetOrderDetailQuery } from "../../redux/api/apiSlice";
 import { useLocalSearchParams } from "expo-router";
 
 const OrderHistoryScreen = () => {
-  const [statusHistory, setStatusHistory] = useState({
-    PAID: "2024-07-29T23:00:00",
-    PREPARING: "2024-07-29T23:15:00",
-    PREPARED: null,
-    RECEIVED: null,
-    CANCELLED: null,
-  });
   const { orderId } = useLocalSearchParams();
 
   const scrollViewRef = useRef(null);
@@ -34,7 +26,6 @@ const OrderHistoryScreen = () => {
     isLoading,
     isFetching,
     isError,
-    error,
     refetch,
   } = useGetOrderDetailQuery(orderId, {
     pollingInterval: 150000,
@@ -61,7 +52,7 @@ const OrderHistoryScreen = () => {
 
   if (isError || !order) {
     return (
-      <YStack flex={1} jc="center" ai="center">
+      <YStack flex={1} jc="center" ai="center" gap="$3">
         <Text fontSize="$5">주문 내역을 불러오는 데 실패했습니다.</Text>
         <Button
           bg="$primary"
@@ -84,14 +75,14 @@ const OrderHistoryScreen = () => {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={onRefresh}
-            tintColor="#8E6559" // 스피너 색상 (iOS)
-            colors={["#8E6559"]} // 스피너 색상 (Android)
+            tintColor="#8E6559"
+            colors={["#8E6559"]}
           />
         }
       >
         <OrderDetailCard
           order={order}
-          statusHistory={statusHistory}
+          statusHistory={order.statusHistory}
           isExpanded={isCardExpanded}
           onExpandChange={setIsCardExpanded}
           isLoading={isLoading}

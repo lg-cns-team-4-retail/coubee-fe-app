@@ -37,9 +37,7 @@ export const apiSlice = createApi({
         url: `/store/interest/${storeId}`,
         method: "POST",
       }),
-      //  기존 invalidatesTags 대신 onQueryStarted를 사용합니다.
       async onQueryStarted(storeId, { dispatch, queryFulfilled, getState }) {
-        // 현재 활성화된 searchStores 쿼리의 인자(arguments)를 찾습니다.
         const state = getState();
         const activeSearchQuery = Object.values(state.api.queries).find(
           (query) =>
@@ -59,8 +57,6 @@ export const apiSlice = createApi({
             "searchStores", // 업데이트할 엔드포인트
             originalArgs, // 해당 엔드포인트의 인자
             (draft) => {
-              // 캐시를 어떻게 업데이트할지에 대한 로직
-              // 캐시된 데이터에서 현재 상점을 찾습니다.
               const store = draft.content.find((s) => s.storeId == storeId);
               if (store) {
                 // '좋아요' 상태를 반전시킵니다.
@@ -71,16 +67,25 @@ export const apiSlice = createApi({
         );
 
         try {
-          // 뮤테이션이 성공적으로 완료되기를 기다립니다.
           await queryFulfilled;
         } catch {
-          // 실패 시, Optimistic Update를 되돌립니다.
           patchResult.undo();
         }
       },
-      // 목록 캐시는 직접 업데이트하므로, 상세 정보 캐시만 무효화합니다.
       invalidatesTags: (result, error, storeId) => [
         { type: "Store", id: storeId },
+      ],
+    }),
+
+    cancelOrder: builder.mutation({
+      query: ({ orderId, reason }) => ({
+        url: `/order/orders/${orderId}/cancel`,
+        method: "POST",
+        data: { cancelReason: reason },
+      }),
+      invalidatesTags: (result, error, { orderId }) => [
+        { type: "Orders", id: orderId },
+        { type: "Orders", id: "LIST" },
       ],
     }),
 
@@ -313,4 +318,5 @@ export const {
   useSearchProductsQuery,
   useToggleInterestMutation,
   useGetProductsInStoreQuery,
+  useCancelOrderMutation,
 } = apiSlice;

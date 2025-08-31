@@ -1,7 +1,7 @@
 // components/NewOrderListItem.js
 
 import React from "react";
-import { YStack, XStack, Text, Button, Paragraph } from "tamagui";
+import { YStack, XStack, Text, Button } from "tamagui";
 import { router } from "expo-router";
 import { useDispatch } from "react-redux";
 import { openQRCodeModal } from "../redux/slices/uiSlice";
@@ -9,7 +9,6 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko"; // 한국어 로케일 설정
 dayjs.locale("ko"); // dayjs 한국어 설정 적용
 
-// 주문 상태에 따른 텍스트와 테마를 반환하는 로직은 유지합니다.
 const getStatusProps = (status) => {
   switch (status) {
     case "PAID":
@@ -31,17 +30,34 @@ const getStatusProps = (status) => {
   }
 };
 
+// 가격 표시를 위한 헬퍼 컴포넌트
+const PriceRow = ({ label, amount, isTotal = false, color = "$color" }) => (
+  <XStack justifyContent="space-between" alignItems="center">
+    <Text
+      fontSize={isTotal ? "$4" : "$3"}
+      color={isTotal ? "$color" : "gray"}
+      fontWeight={isTotal ? "bold" : "normal"}
+    >
+      {label}
+    </Text>
+    <Text
+      fontSize={isTotal ? "$4" : "$3"}
+      color={color}
+      fontWeight={isTotal ? "bold" : "normal"}
+    >
+      {amount.toLocaleString()}원
+    </Text>
+  </XStack>
+);
+
 export default function NewOrderListItem({ order }) {
   const dispatch = useDispatch();
   if (!order) return null;
 
   const { text: statusText, themeColor } = getStatusProps(order.status);
-
-  // '픽업하기' 버튼은 특정 상태에서만 보이도록 설정할 수 있습니다.
   const canPickup = ["PREPARED"].includes(order.status);
 
   const handleShowQRCode = () => {
-    console.log("hi");
     dispatch(openQRCodeModal(order.orderId));
   };
 
@@ -66,11 +82,11 @@ export default function NewOrderListItem({ order }) {
           borderWidth={1}
           borderColor={themeColor}
           borderRadius="$5"
-          paddingHorizontal="$1.5"
-          paddingVertical="$1.5"
+          paddingHorizontal="$2"
+          paddingVertical="$1"
           alignSelf="flex-start"
         >
-          <Text fontSize="$3" fontWeight="bold" color={themeColor}>
+          <Text fontSize="$3.5" fontWeight="bold" color={themeColor}>
             {statusText}
           </Text>
         </YStack>
@@ -81,47 +97,37 @@ export default function NewOrderListItem({ order }) {
         <Text fontSize="$5" fontWeight="bold">
           {order.store.storeName}
         </Text>
-        {/* 모든 아이템을 목록으로 표시 */}
-        {order.items.map((item) => (
-          <Text key={item.productId} fontSize="$4" color="gray" my="$2">
-            {item.productName} {item.quantity}개
-          </Text>
-        ))}
+        <Text fontSize="$4" color="$gray11" numberOfLines={1}>
+          {order.items[0].productName}
+          {order.items.length > 1 && ` 외 ${order.items.length - 1}건`}
+        </Text>
       </YStack>
 
       {/* 구분선 */}
       <YStack borderBottomWidth={1} borderColor="$borderColor" />
 
-      {/* 하단: 결제 금액 */}
-      <XStack justifyContent="space-between" alignItems="center">
-        <Text fontSize="$4" color="$gray11">
-          결제금액
-        </Text>
-        <XStack gap="$2.5" alignItems="center">
-          {order.discountRate > 0 && (
-            <YStack
-              backgroundColor="#C0D7FF"
-              paddingHorizontal="$2.5"
-              paddingVertical="$1.5"
-              borderRadius="$4"
-            >
-              <Text fontSize="$2.5" color="#232DB8" fontWeight="bold">
-                {order.discountRate}% 할인
-              </Text>
-            </YStack>
-          )}
-          <Text fontSize="$4" fontWeight="bold">
-            {order.totalAmount.toLocaleString()}원
-          </Text>
-        </XStack>
-      </XStack>
+      {/* 하단: 결제 금액 (수정된 부분) */}
+      <YStack gap="$2">
+        <PriceRow label="상품 금액" amount={order.originalAmount} />
+        {order.discountAmount > 0 && (
+          <PriceRow
+            label="할인 금액"
+            amount={-order.discountAmount}
+            color="red"
+          />
+        )}
+        <PriceRow label="최종 금액" amount={order.totalAmount} isTotal={true} />
+      </YStack>
 
       {/* 최하단: 버튼 */}
       <XStack gap="$3" marginTop="$2">
         <Button
           variant="outlined"
           flex={1}
-          onPress={() => router.push(`/orderDetail/${order.orderId}`)}
+          onPress={(e) => {
+            e.stopPropagation();
+            router.push(`/orderDetail/${order.orderId}`);
+          }}
           borderWidth={1}
           fontWeight="bold"
           borderColor="$color"
@@ -134,7 +140,10 @@ export default function NewOrderListItem({ order }) {
             bg="$primary"
             color="white"
             fontWeight="bold"
-            onPress={handleShowQRCode}
+            onPress={(e) => {
+              e.stopPropagation();
+              handleShowQRCode();
+            }}
           >
             픽업 코드
           </Button>

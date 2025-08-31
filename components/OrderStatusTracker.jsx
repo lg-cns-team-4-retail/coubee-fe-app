@@ -72,33 +72,53 @@ const OrderStatusSkeleton = () => (
   </XStack>
 );
 
+const convertHistoryToObject = (historyArray = []) => {
+  return historyArray.reduce((acc, item) => {
+    acc[item.status] = item.updatedAt;
+    return acc;
+  }, {});
+};
 const OrderStatusTracker = ({
   currentStatus,
-  statusHistory = {},
+  statusHistory: historyArray = [], // Prop 이름을 historyArray로 명확히 함
   isLoading,
   isFetching,
 }) => {
-  if (currentStatus === "CANCELLED") {
-    const { label, Icon } = STATUS_DETAILS.CANCELLED;
-    const formattedTime = formatTimestamp(statusHistory.CANCELLED);
+  const statusHistory = convertHistoryToObject(historyArray);
+
+  if (
+    currentStatus === "CANCELLED" ||
+    currentStatus === "CANCELLED_ADMIN" ||
+    currentStatus === "CANCELLED_USER"
+  ) {
+    const formattedTime = formatTimestamp(
+      statusHistory.CANCELLED ||
+        statusHistory.CANCELLED_ADMIN ||
+        statusHistory.CANCELLED_USER
+    );
 
     return (
-      <YStack ai="center" gap="$2" p="$4" bg="$red2" br="$4">
-        <Icon size={32} color="$red10" />
-        <Text fontSize="$5" fontWeight="bold" color="$red10">
-          {label}
-        </Text>
-        {formattedTime && (
-          <YStack ai="center">
-            <Text fontSize="$2" color="$red10">
-              {formattedTime.date}
+      <XStack
+        bg="$cardBg"
+        p="$4"
+        br="$4"
+        gap="$4"
+        ai="center"
+        borderWidth={1}
+        borderColor="$borderColor"
+      >
+        <Ban size={32} color="$error" />
+        <YStack f={1}>
+          <Text fontSize="$5" fontWeight="bold" color="$error">
+            주문이 취소되었습니다.
+          </Text>
+          {formattedTime && (
+            <Text fontSize="$3" color="$gray" mt="$1">
+              {formattedTime.date} {formattedTime.time}
             </Text>
-            <Text fontSize="$2" color="$red10">
-              {formattedTime.time}
-            </Text>
-          </YStack>
-        )}
-      </YStack>
+          )}
+        </YStack>
+      </XStack>
     );
   }
 
@@ -110,7 +130,6 @@ const OrderStatusTracker = ({
 
   return (
     <YStack pos="relative">
-      {/* ✨ 2. 데이터 갱신(isFetching) 시 부드러운 효과를 위해 AnimatePresence를 사용합니다. */}
       <AnimatePresence>
         {isFetching && (
           <YStack
@@ -121,7 +140,7 @@ const OrderStatusTracker = ({
             b={0}
             zi={1}
             br={8}
-            bg="rgba(0,0,0,0.1)" // 반투명 오버레이
+            bg="rgba(0,0,0,0.1)"
             jc="center"
             ai="center"
             animation="lazy"
@@ -132,8 +151,6 @@ const OrderStatusTracker = ({
           </YStack>
         )}
       </AnimatePresence>
-
-      {/* 기존 상태 추적 UI */}
       <XStack br={8} bg="$cardBg" jc="space-between" ai="flex-start" p="$2">
         {STATUS_ORDER.map((status, index) => {
           const { label, Icon } = STATUS_DETAILS[status];
