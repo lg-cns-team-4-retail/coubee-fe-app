@@ -103,7 +103,7 @@ function RootLayoutNav() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <AuthProvider>
           <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-          <Stack>
+          <Stack screenOptions={{ animation: "default" }}>
             <Stack.Screen
               name="(tabs)"
               options={{
@@ -141,6 +141,7 @@ function RootLayoutNav() {
               options={{
                 headerShown: false,
                 headerShadowVisible: false,
+                animation: "slide_from_bottom",
               }}
             />
             <Stack.Screen

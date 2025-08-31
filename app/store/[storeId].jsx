@@ -36,6 +36,9 @@ import ProductItem from "../../components/ProductItem";
 import backgroundSrc from "../../assets/images/background.jpg";
 import ProductCheckoutBar from "./ProductCheckoutBar";
 import HorizontalSection from "./HorizontalSection";
+import { useAuthContext } from "../contexts/AuthContext";
+import { openModal } from "../../redux/slices/modalSlice";
+
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
 const ANIMATION_END_Y = HEADER_IMAGE_HEIGHT * 0.8;
@@ -58,6 +61,7 @@ export default function StorePage() {
   const scrollY = useSharedValue(0);
   const theme = useTheme();
   const dispatch = useDispatch();
+  const { isAuthenticated } = useAuthContext();
 
   const { storeId, keyword: initialKeyword } = useLocalSearchParams();
 
@@ -173,21 +177,37 @@ export default function StorePage() {
   );
 
   const handleLikePress = useCallback(async () => {
-    const isCurrentlyLiked = storeDetail?.interest;
-
-    try {
-      await toggleInterest(storeId).unwrap();
-
-      toast.show(
-        isCurrentlyLiked
-          ? "관심 가게에서 삭제했어요."
-          : "관심 가게로 등록했어요."
+    if (!isAuthenticated) {
+      dispatch(
+        openModal({
+          type: "warning",
+          title: "로그인이 필요해요",
+          message: "관심 매장 등록은 로그인 이후에 가능하세요",
+          confirmText: "로그인 하러 가기",
+          cancelText: "취소",
+          onConfirm: () => {
+            router.replace("/login");
+          },
+          onCancel: () => {},
+        })
       );
-    } catch (error) {
-      console.error("관심 가게 변경 실패:", error);
-      toast.show("요청에 실패했습니다.");
+    } else {
+      const isCurrentlyLiked = storeDetail?.interest;
+
+      try {
+        await toggleInterest(storeId).unwrap();
+
+        toast.show(
+          isCurrentlyLiked
+            ? "관심 가게에서 삭제했어요."
+            : "관심 가게로 등록했어요."
+        );
+      } catch (error) {
+        console.error("관심 가게 변경 실패:", error);
+        toast.show("요청에 실패했습니다.");
+      }
     }
-  }, [storeId, toggleInterest, storeDetail, toast]);
+  }, [isAuthenticated, dispatch, storeId, toggleInterest, storeDetail, toast]);
 
   const renderListHeader = useMemo(
     () => (

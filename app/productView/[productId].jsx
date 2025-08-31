@@ -40,11 +40,12 @@ export default function ProductDetailPage() {
 
   const { isAuthenticated } = useAuthContext();
   const { productId } = useLocalSearchParams();
-  const { cartStoreId, cartItemCount } = useSelector((state) => ({
+  /*   const { cartStoreId, cartItemCount } = useSelector((state) => ({
     cartStoreId: state.cart.storeId,
     cartItemCount: state.cart.items.length,
-  }));
-
+  })); */
+  const cartStoreId = useSelector((state) => state.cart.storeId);
+  const cartItemCount = useSelector((state) => state.cart.items.length);
   const {
     data: item,
     isLoading,
