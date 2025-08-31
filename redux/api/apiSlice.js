@@ -32,6 +32,58 @@ export const apiSlice = createApi({
   tagTypes: ["Store", "Products", "Product", "Orders"],
 
   endpoints: (builder) => ({
+    toggleInterest: builder.mutation({
+      query: (storeId) => ({
+        url: `/store/interest/${storeId}`,
+        method: "POST",
+      }),
+      //  기존 invalidatesTags 대신 onQueryStarted를 사용합니다.
+      async onQueryStarted(storeId, { dispatch, queryFulfilled, getState }) {
+        // 현재 활성화된 searchStores 쿼리의 인자(arguments)를 찾습니다.
+        const state = getState();
+        const activeSearchQuery = Object.values(state.api.queries).find(
+          (query) =>
+            query.endpointName === "searchStores" &&
+            query.status === "fulfilled"
+        );
+
+        if (!activeSearchQuery) {
+          return;
+        }
+
+        const { originalArgs } = activeSearchQuery;
+
+        // searchStores 캐시를 직접 업데이트합니다.
+        const patchResult = dispatch(
+          apiSlice.util.updateQueryData(
+            "searchStores", // 업데이트할 엔드포인트
+            originalArgs, // 해당 엔드포인트의 인자
+            (draft) => {
+              // 캐시를 어떻게 업데이트할지에 대한 로직
+              // 캐시된 데이터에서 현재 상점을 찾습니다.
+              const store = draft.content.find((s) => s.storeId == storeId);
+              if (store) {
+                // '좋아요' 상태를 반전시킵니다.
+                store.interest = !store.interest;
+              }
+            }
+          )
+        );
+
+        try {
+          // 뮤테이션이 성공적으로 완료되기를 기다립니다.
+          await queryFulfilled;
+        } catch {
+          // 실패 시, Optimistic Update를 되돌립니다.
+          patchResult.undo();
+        }
+      },
+      // 목록 캐시는 직접 업데이트하므로, 상세 정보 캐시만 무효화합니다.
+      invalidatesTags: (result, error, storeId) => [
+        { type: "Store", id: storeId },
+      ],
+    }),
+
     getStoreDetail: builder.query({
       query: (storeId) => ({
         url: `/store/detail/${storeId}`,
@@ -100,7 +152,10 @@ export const apiSlice = createApi({
       serializeQueryArgs: ({ endpointName }) => {
         return endpointName;
       },
-      merge: (currentCache, newItems) => {
+      merge: (currentCache, newItems, { arg }) => {
+        if (arg.page === 0) {
+          return newItems;
+        }
         const existingOrderIds = new Set(
           currentCache.content.map((order) => order.orderId)
         );
@@ -127,6 +182,100 @@ export const apiSlice = createApi({
         { type: "Orders", id: orderId },
       ],
     }),
+    //
+    searchStores: builder.query({
+      query: ({ keyword, lat, lng, page = 0, size = 10 }) => ({
+        url: `/store/near`,
+        method: "GET",
+        params: { keyword, lat, lng, page, size },
+      }),
+      transformResponse: (response) => {
+        if (Array.isArray(response.data)) {
+          return {
+            content: response.data,
+            last: true,
+          };
+        }
+        return response.data;
+      },
+
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.content.map(({ storeId }) => ({
+                type: "Store",
+                id: storeId,
+              })),
+              { type: "Search", id: "LIST" },
+            ]
+          : [{ type: "Search", id: "LIST" }],
+
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, ...rest } = queryArgs;
+        return rest;
+      },
+
+      merge: (currentCache, newItems, { arg }) => {
+        if (arg.page === 0) {
+          return newItems;
+        }
+
+        const existingStoreIds = new Set(
+          currentCache.content.map((store) => store.storeId)
+        );
+        const uniqueNewItems = newItems.content.filter(
+          (store) => !existingStoreIds.has(store.storeId)
+        );
+        currentCache.content.push(...uniqueNewItems);
+        currentCache.last = newItems.last;
+      },
+
+      forceRefetch({ currentArg, previousArg }) {
+        return (
+          currentArg?.page !== previousArg?.page ||
+          currentArg?.keyword !== previousArg?.keyword
+        );
+      },
+    }),
+    searchProducts: builder.query({
+      query: ({ keyword, lat, lng, page = 0, size = 10 }) => ({
+        url: `/product/search/es`,
+        method: "GET",
+        params: { keyword, latitude: lat, longitude: lng, page, size },
+      }),
+
+      transformResponse: (response) => {
+        if (Array.isArray(response.data)) {
+          return {
+            content: response.data,
+            last: true,
+          };
+        }
+        return response.data;
+      },
+
+      providesTags: (result) => [{ type: "Search", id: "LIST" }],
+
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, ...rest } = queryArgs;
+        return rest;
+      },
+
+      merge: (currentCache, newItems) => {
+        const existingProductIds = new Set(
+          currentCache.content.map((product) => product.productId)
+        );
+        const uniqueNewItems = newItems.content.filter(
+          (product) => !existingProductIds.has(product.productId)
+        );
+        currentCache.content.push(...uniqueNewItems);
+        currentCache.last = newItems.last;
+      },
+
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.page !== previousArg?.page;
+      },
+    }),
   }),
 });
 
@@ -136,4 +285,7 @@ export const {
   useGetProductDetailQuery,
   useGetOrdersQuery,
   useGetOrderDetailQuery,
+  useSearchStoresQuery,
+  useSearchProductsQuery,
+  useToggleInterestMutation,
 } = apiSlice;
