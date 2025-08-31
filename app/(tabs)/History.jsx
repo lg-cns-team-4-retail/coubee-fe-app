@@ -11,6 +11,7 @@ import ListEmptyComponent from "../../components/ListEmptyComponent";
 import { useAuthContext } from "../contexts/AuthContext";
 import { openModal } from "../../redux/slices/modalSlice";
 import { useDispatch } from "react-redux";
+import OrderHistoryHeader from "../../components/OrderHistoryHeader";
 
 export default function OrderHistoryScreen() {
   const [page, setPage] = useState(0);
@@ -106,6 +107,7 @@ export default function OrderHistoryScreen() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
+      <OrderHistoryHeader userName={"환진"} />
       <FlatList
         data={filteredOrders}
         renderItem={renderItem}

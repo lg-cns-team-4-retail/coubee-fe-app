@@ -24,6 +24,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "../redux/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import GlobalModal from "../components/GlobalModal";
+import QRCodeModal from "../components/OrderHistory/QRCodeModal";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -204,6 +205,7 @@ function RootLayoutNav() {
           </Stack>
 
           <GlobalModal />
+          <QRCodeModal />
         </AuthProvider>
       </ThemeProvider>
     </GestureHandlerRootView>

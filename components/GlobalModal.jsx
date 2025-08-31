@@ -61,6 +61,8 @@ const GlobalModal = () => {
           exitStyle={{ y: 10, opacity: 0, scale: 0.95 }}
           w="70%"
           br="$6"
+          elevation={0}
+          shadowOpacity={0}
         >
           <YStack gap="$4" ai="center" py="$2">
             <Icon size={48} color={color} />

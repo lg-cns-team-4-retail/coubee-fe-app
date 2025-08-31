@@ -3,6 +3,8 @@
 import React from "react";
 import { YStack, XStack, Text, Button, Paragraph } from "tamagui";
 import { router } from "expo-router";
+import { useDispatch } from "react-redux";
+import { openQRCodeModal } from "../redux/slices/uiSlice";
 import dayjs from "dayjs";
 import "dayjs/locale/ko"; // 한국어 로케일 설정
 dayjs.locale("ko"); // dayjs 한국어 설정 적용
@@ -30,12 +32,18 @@ const getStatusProps = (status) => {
 };
 
 export default function NewOrderListItem({ order }) {
+  const dispatch = useDispatch();
   if (!order) return null;
 
   const { text: statusText, themeColor } = getStatusProps(order.status);
 
   // '픽업하기' 버튼은 특정 상태에서만 보이도록 설정할 수 있습니다.
   const canPickup = ["PREPARED"].includes(order.status);
+
+  const handleShowQRCode = () => {
+    console.log("hi");
+    dispatch(openQRCodeModal(order.orderId));
+  };
 
   return (
     <YStack
@@ -45,6 +53,9 @@ export default function NewOrderListItem({ order }) {
       marginHorizontal="$4"
       marginBottom="$4"
       gap="$4"
+      pressStyle={{ scale: 0.985, opacity: 0.9 }}
+      animation="bouncy"
+      onPress={() => router.push(`/orderDetail/${order.orderId}`)}
     >
       {/* 상단: 날짜와 주문 상태 */}
       <XStack justifyContent="space-between" alignItems="center">
@@ -123,9 +134,9 @@ export default function NewOrderListItem({ order }) {
             bg="$primary"
             color="white"
             fontWeight="bold"
-            onPress={() => console.log("Pickup for order:", order.orderId)} // 픽업 로직 연결
+            onPress={handleShowQRCode}
           >
-            픽업 하기
+            픽업 코드
           </Button>
         )}
       </XStack>
