@@ -25,7 +25,7 @@ const ProductSearchTab = ({ searchKeyword, userLocation }) => {
       <ProductItem
         item={item}
         onPress={() => {
-          router.push(`/store/${item.storeId}`);
+          router.push(`/store/${item.storeId}?keyword=${searchKeyword}`);
         }}
       />
     ),

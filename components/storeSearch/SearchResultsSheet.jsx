@@ -6,34 +6,44 @@ import { YStack, Text, Spinner, View } from "tamagui";
 import StoreResult from "./StoreResult";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { useTheme } from "tamagui";
-const CustomHandle = () => (
-  <View
-    bg="$background"
-    style={{
-      paddingVertical: 12,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      alignItems: "center",
-    }}
-  >
+import StoreSkeleton from "./StoreSkeleton";
+
+const CustomHandle = () => {
+  const theme = useTheme();
+  return (
     <View
-      bg="$color"
       style={{
-        width: 40,
-        height: 5,
-        borderRadius: 4,
+        backgroundColor: theme.background?.val,
+        paddingVertical: 12,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: theme.borderColor?.val,
       }}
-    />
-  </View>
-);
+    >
+      <View
+        style={{
+          width: 40,
+          height: 5,
+          borderRadius: 4,
+          backgroundColor: theme.color?.val,
+        }}
+      />
+    </View>
+  );
+};
 
 export default function SearchResultsSheet({
   searchResults = [],
   onLoadMore,
   isFetching,
+  isLoading,
+  totalResults,
 }) {
   const snapPoints = useMemo(() => ["10%", "85%"], []);
   const theme = useTheme();
+  const headerText = `검색 결과 (${totalResults || 0})`;
   const renderStoreItem = ({ item: store }) => (
     <StoreResult
       onPress={() => router.push(`/store/${store.storeId}`)}
@@ -47,33 +57,48 @@ export default function SearchResultsSheet({
       index={1}
       snapPoints={snapPoints}
       handleComponent={CustomHandle}
+      backgroundStyle={{ backgroundColor: theme.background?.val }}
     >
-      <YStack
-        paddingHorizontal="$4"
-        paddingTop="$2"
-        paddingBottom="$2"
-        backgroundColor="$background"
-      >
-        <Text p="$3" fontSize="$4" color="$color" fontWeight="bold">
-          검색 결과
-        </Text>
-      </YStack>
+      {isLoading ? (
+        <YStack px="$4" gap="$2">
+          <Text fontSize="$4" color="$color" fontWeight="bold" p="$3">
+            검색중입니다
+          </Text>
+          <StoreSkeleton />
+          <StoreSkeleton />
+          <StoreSkeleton />
+        </YStack>
+      ) : (
+        <>
+          <YStack
+            paddingHorizontal="$4"
+            paddingTop="$2"
+            paddingBottom="$2"
+            backgroundColor="$background"
+            borderTopWidth={1}
+            borderTopColor="$borderColor"
+          >
+            <Text p="$3" fontSize="$4" color="$color" fontWeight="bold">
+              {headerText}
+            </Text>
+          </YStack>
 
-      <BottomSheetFlatList
-        data={searchResults}
-        renderItem={renderStoreItem}
-        keyExtractor={(item) => item.storeId.toString()}
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingBottom: 16,
-          backgroundColor: theme.background?.val,
-        }}
-        onEndReached={onLoadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetching ? <Spinner marginVertical="$4" /> : null
-        }
-      />
+          <BottomSheetFlatList
+            data={searchResults}
+            renderItem={renderStoreItem}
+            keyExtractor={(item) => item.storeId.toString()}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 16,
+            }}
+            onEndReached={onLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              isFetching ? <Spinner marginVertical="$4" /> : null
+            }
+          />
+        </>
+      )}
     </BottomSheet>
   );
 }

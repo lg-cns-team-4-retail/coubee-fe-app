@@ -3,36 +3,62 @@ import { YStack, XStack, Text, Image, Button, Paragraph } from "tamagui";
 import { MapPin, Heart } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
 import { useToggleInterestMutation } from "../../redux/api/apiSlice";
+import { useAuthContext } from "../../app/contexts/AuthContext";
+import { useDispatch } from "react-redux";
+import { openModal } from "../../redux/slices/modalSlice";
+import { router } from "expo-router";
 export const StoreResult = ({ store, onPress }) => {
   const toast = useToastController();
+  const dispatch = useDispatch();
   const [toggleInterest, { isLoading: isToggling }] =
     useToggleInterestMutation();
+  const { isAuthenticated } = useAuthContext();
 
   const handleLikePress = React.useCallback(
     async (e) => {
-      e.stopPropagation(); // 카드 전체가 눌리는 것을 방지
-
-      const isCurrentlyLiked = store.interest;
-
-      try {
-        // API 요청 후 성공 또는 실패를 기다립니다.
-        await toggleInterest(store.storeId).unwrap();
-
-        // 성공 시, 현재 상태에 따라 적절한 메시지를 보여줍니다.
-        toast.show(
-          isCurrentlyLiked
-            ? "관심 가게에서 삭제했어요."
-            : "관심 가게로 등록했어요."
+      e.stopPropagation();
+      console.log(isAuthenticated);
+      if (!isAuthenticated) {
+        dispatch(
+          openModal({
+            type: "warning",
+            title: "로그인이 필요해요",
+            message: "관심 매장 등록은 로그인 이후에 가능하세요",
+            confirmText: "로그인 하러 가기",
+            cancelText: "취소",
+            onConfirm: () => {
+              router.replace("/login");
+            },
+            onCancel: () => {},
+          })
         );
-      } catch (error) {
-        // 실패 시, 에러 메시지를 보여줍니다.
-        console.error("관심 가게 변경 실패:", error);
-        toast.show("요청에 실패했습니다.", {
-          message: "잠시 후 다시 시도해주세요.",
-        });
+      } else {
+        const isCurrentlyLiked = store.interest;
+
+        try {
+          await toggleInterest(store.storeId).unwrap();
+
+          toast.show(
+            isCurrentlyLiked
+              ? "관심 가게에서 삭제했어요."
+              : "관심 가게로 등록했어요."
+          );
+        } catch (error) {
+          console.error("관심 가게 변경 실패:", error);
+          toast.show("요청에 실패했습니다.", {
+            message: "잠시 후 다시 시도해주세요.",
+          });
+        }
       }
     },
-    [store.storeId, store.interest, toggleInterest, toast]
+    [
+      isAuthenticated,
+      dispatch,
+      store.storeId,
+      store.interest,
+      toggleInterest,
+      toast,
+    ]
   );
 
   return (

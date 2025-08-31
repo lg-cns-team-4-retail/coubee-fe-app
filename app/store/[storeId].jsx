@@ -29,6 +29,7 @@ import {
   useGetProductsQuery,
   useGetStoreDetailQuery,
   useToggleInterestMutation,
+  useGetProductsInStoreQuery,
 } from "../../redux/api/apiSlice";
 import { selectProducts } from "../../redux/slices/uiSlice";
 import ProductItem from "../../components/ProductItem";
@@ -57,14 +58,18 @@ export default function StorePage() {
   const scrollY = useSharedValue(0);
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { storeId } = useLocalSearchParams();
+
+  const { storeId, keyword: initialKeyword } = useLocalSearchParams();
+
+  // 1. 상태 관리 세분화
+  const [searchQuery, setSearchQuery] = useState(initialKeyword || ""); // Input의 현재 값
+  const [activeKeyword, setActiveKeyword] = useState(initialKeyword); // 실제 검색에 사용될 키워드
 
   const [toggleInterest, { isLoading: isToggling }] =
     useToggleInterestMutation();
 
   const [page, setPage] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
-
+  const [hPage, setHPage] = useState(0);
   const { data: storeDetail } = useGetStoreDetailQuery(storeId, {
     skip: !storeId,
   });
@@ -75,6 +80,12 @@ export default function StorePage() {
     isLoading,
     isFetching,
   } = useGetProductsQuery({ storeId, page, size: 20 }, { skip: !storeId });
+
+  const { data: keywordSearchResult, isFetching: isKeywordFetching } =
+    useGetProductsInStoreQuery(
+      { storeId, keyword: activeKeyword, page: hPage, size: 5 }, // 페이지당 5개씩 로드
+      { skip: !activeKeyword }
+    );
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -91,12 +102,24 @@ export default function StorePage() {
     }
   };
   const handleSearchSubmit = useCallback(() => {
-    if (!searchQuery.trim()) return;
-    console.log("입력된 검색어:", searchQuery);
+    const newKeyword = searchQuery.trim();
+    if (!newKeyword) return;
+
+    setHPage(0); // 페이지를 0으로 리셋
+    setActiveKeyword(newKeyword);
   }, [searchQuery]);
 
+  const handleHorizontalLoadMore = () => {
+    if (
+      keywordSearchResult &&
+      !keywordSearchResult.last &&
+      !isKeywordFetching
+    ) {
+      setHPage((prevPage) => prevPage + 1);
+    }
+  };
+
   const handleCheckOut = () => {
-    console.log("hi");
     router.push("/checkout");
   };
 
@@ -231,7 +254,13 @@ export default function StorePage() {
             />
           </XStack>
 
-          <HorizontalSection />
+          <HorizontalSection
+            title={`'${activeKeyword}'(으)로 검색한 상품`}
+            products={keywordSearchResult?.content}
+            isLoading={isKeywordFetching && hPage === 0}
+            isFetchingMore={isKeywordFetching && hPage > 0}
+            onLoadMore={handleHorizontalLoadMore}
+          />
 
           <YStack py="$4" gap="$4">
             <Text fontSize="$4" fontWeight="bold">
@@ -249,6 +278,10 @@ export default function StorePage() {
       products,
       handleLikePress,
       isToggling,
+      activeKeyword,
+      hPage,
+      keywordSearchResult,
+      isKeywordFetching,
     ]
   );
 

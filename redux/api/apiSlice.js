@@ -131,6 +131,31 @@ export const apiSlice = createApi({
         return currentArg !== previousArg;
       },
     }),
+    //키워드로 상점내 검색 api
+    getProductsInStore: builder.query({
+      query: ({ storeId, keyword, page = 0, size = 10 }) => ({
+        url: `/product/list`,
+        method: "GET",
+        params: { storeId, keyword, page, size },
+      }),
+      transformResponse: (response) => response.data,
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, ...rest } = queryArgs;
+        // page를 제외한 인자(storeId, keyword)가 같으면 같은 쿼리로 취급합니다.
+        return rest;
+      },
+      merge: (currentCache, newItems) => {
+        // 새로운 페이지의 데이터를 기존 content 배열에 추가합니다.
+        if (newItems.content) {
+          currentCache.content.push(...newItems.content);
+        }
+        // 마지막 페이지 여부를 업데이트합니다.
+        currentCache.last = newItems.last;
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.page !== previousArg?.page;
+      },
+    }),
     //
     getOrders: builder.query({
       query: ({ page, size }) => ({
@@ -287,4 +312,5 @@ export const {
   useSearchStoresQuery,
   useSearchProductsQuery,
   useToggleInterestMutation,
+  useGetProductsInStoreQuery,
 } = apiSlice;

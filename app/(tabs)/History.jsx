@@ -6,6 +6,7 @@ import { YStack, Spinner, Text } from "tamagui";
 import { router, useFocusEffect } from "expo-router";
 import { useGetOrdersQuery } from "../../redux/api/apiSlice";
 import OrderListItem from "../../components/OrderListItem";
+import NewOrderListItem from "../../components/NewOrderListItem";
 import ListEmptyComponent from "../../components/ListEmptyComponent";
 import { useAuthContext } from "../contexts/AuthContext";
 import { openModal } from "../../redux/slices/modalSlice";
@@ -76,7 +77,7 @@ export default function OrderHistoryScreen() {
     return <YStack flex={1} backgroundColor="$background" />;
   }
 
-  const renderItem = ({ item }) => <OrderListItem order={item} />;
+  const renderItem = ({ item }) => <NewOrderListItem order={item} />;
 
   if (isLoading && page === 0) {
     return (

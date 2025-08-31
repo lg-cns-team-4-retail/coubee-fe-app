@@ -16,6 +16,8 @@ const getStatusProps = (status) => {
       return { text: "상품준비중", themeColor: "$info" };
     case "PENDING":
       return { text: "결제대기", themeColor: "$warning" };
+    case "PREPARED":
+      return { text: "픽업 준비 완료", themeColor: "teal" };
     case "CANCELLED_ADMIN":
       return { text: "결제 취소(점주)", themeColor: "red" };
     case "CANCELLED_USER":
@@ -28,13 +30,12 @@ const getStatusProps = (status) => {
 };
 
 export default function NewOrderListItem({ order }) {
-  console.log(order);
   if (!order) return null;
 
   const { text: statusText, themeColor } = getStatusProps(order.status);
 
   // '픽업하기' 버튼은 특정 상태에서만 보이도록 설정할 수 있습니다.
-  const canPickup = ["PAID", "PREPARING", "PREPARED"].includes(order.status);
+  const canPickup = ["PREPARED"].includes(order.status);
 
   return (
     <YStack
@@ -109,7 +110,7 @@ export default function NewOrderListItem({ order }) {
         <Button
           variant="outlined"
           flex={1}
-          onPress={() => router.push(`/order/detail/${order.orderId}`)}
+          onPress={() => router.push(`/orderDetail/${order.orderId}`)}
           borderWidth={1}
           fontWeight="bold"
           borderColor="$color"
