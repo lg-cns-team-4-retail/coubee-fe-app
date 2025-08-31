@@ -6,8 +6,8 @@
 
 이 앱은 두 가지 주요 목적을 가집니다:
 1.  **완전한 결제 기능 테스트**: 고객이 앱을 통해 상품을 주문하고, PortOne을 통해 다양한 수단으로 결제한 후, QR 코드로 주문을 수령하는 전체 과정을 테스트합니다.
-2.  **백엔드 API 테스트**: `coubee-be-order`의 모든 API 엔드포인트를 테스트할 수 있는 종합적인 도구를 제공합니다.
-2.  **TestPayment.html**: PortOne V2 결제 테스트를 위한 HTML 파일입니다. HTML 테스트를 원하시면 이 파일을 Live Server로 실행하여 테스트할 수 있습니다.
+2.  **백엔드 API 테스트**: `user-service` 및 `order-service`의 주요 API 엔드포인트를 테스트할 수 있는 종합적인 도구를 제공합니다.
+
 ### ✅ 주요 기능
 
 #### 결제 기능
@@ -18,7 +18,7 @@
 - **보안 토큰 관리**: Expo SecureStore를 통한 안전한 토큰 저장
 
 #### API 테스트 기능
-- **카테고리별 분류**: 인증, 주문, 결제, QR코드
+- **서비스별 API 분류**: 인증, 주문, 결제, QR코드, 통계
 - **실시간 검색**: API 이름, 설명, 카테고리로 검색 가능
 - **매개변수 자동 입력**: 각 API에 필요한 매개변수를 직관적인 폼으로 입력
 - **응답 뷰어**: JSON 응답을 가독성 좋게 포맷팅하여 표시
@@ -39,7 +39,7 @@
 - Yarn v1 (Classic)
 - Expo CLI (`npm install -g @expo/cli`)
 - Android Studio (Android 개발용)
-- 백엔드 API 서버 실행 (`http://localhost:8080` 또는 `https://coubee-api.murkui.com`)
+- 백엔드 API 서버 실행 (`user-service`, `order-service` 등)
 
 ### 1. 의존성 설치
 프로젝트 루트 디렉토리에서 다음 명령어를 실행하여 필요한 모든 의존성을 설치합니다.
@@ -78,16 +78,16 @@ yarn install
 ## 📱 사용 방법
 
 ### 1. 결제 테스트
-1.  **로그인**: 테스트 계정(`test_user`/`1234`)으로 로그인합니다.
+1.  **로그인**: 테스트 계정으로 로그인합니다.
 2.  **주문 정보 입력**: 메인 화면에서 매장 ID, 수령인 이름, 상품 정보를 입력합니다.
 3.  **결제 시작**: "결제 시작" 버튼을 클릭하고 PortOne 결제창에서 결제를 진행합니다.
 4.  **QR 코드 확인**: 결제가 완료되면 수령용 QR 코드가 자동으로 표시됩니다.
 
 ### 2. API 엔드포인트 테스트
 1.  메인 화면에서 "🧪 API 테스트" 버튼을 클릭합니다.
-2.  원하는 카테고리의 API를 선택하거나 검색합니다.
+2.  테스트하려는 서비스 및 API를 선택하거나 검색합니다.
 3.  필요한 매개변수를 자동으로 생성된 폼에 입력합니다.
-4.  API를 호출하고 форматированный 응답을 확인합니다.
+4.  API를 호출하고 포맷팅된 응답을 확인합니다.
 
 ## 🏗️ 프로젝트 구조
 
@@ -110,57 +110,59 @@ src/
 
 ## 🔧 지원하는 API 엔드포인트 목록
 
-### 📦 주문 관리 (Order Management)
+### 🔐 인증 (User Service)
 
-| Feature | HTTP Method | Endpoint | Required Permissions | Request / Parameters |
-|---------|-------------|----------|---------------------|---------------------|
-| Create Order | POST | `/api/order/orders` | JWT (User) | Headers: `X-Auth-UserId`<br>Body: `OrderCreateRequest` |
-| Get Order Details | GET | `/api/order/orders/{orderId}` | Public | Path: `orderId` |
-| Get Order Status | GET | `/api/order/orders/status/{orderId}` | Public | Path: `orderId` |
-| Get My Orders | GET | `/api/order/users/me/orders` | JWT (User) | Headers: `X-Auth-UserId`<br>Query: `page`, `size` |
-| Cancel Order | POST | `/api/order/orders/{orderId}/cancel` | JWT (User/Admin) | Headers: `X-Auth-UserId`, `X-Auth-Role`<br>Path: `orderId`<br>Body: `OrderCancelRequest` |
-| Receive Order | POST | `/api/order/orders/{orderId}/receive` | Public | Path: `orderId` |
-| Update Order Status | PATCH | `/api/order/orders/{orderId}` | JWT (Admin) | Headers: `X-Auth-UserId`, `X-Auth-Role`<br>Path: `orderId`<br>Body: `OrderStatusUpdateRequest` |
+| 기능 | HTTP Method | 엔드포인트 | 필요 권한 | 요청 / 파라미터 |
+|---------|-------------|----------|-----------|---------------------|
+| 회원가입 | POST | `/api/user/auth/signup` | Public | Body: `RegisterRequest` |
+| 로그인 | POST | `/api/user/auth/login` | Public | Body: `LoginRequest` |
+| 토큰 재발급 | POST | `/api/user/auth/refresh` | Public | Body: `refreshToken` |
+| 로그아웃 | POST | `/api/user/auth/logout` | JWT (User) | None |
 
-### 💳 결제 관련 (Payment)
+### 📦 주문 관리 (Order Service)
 
-| Feature | HTTP Method | Endpoint | Required Permissions | Request / Parameters |
-|---------|-------------|----------|---------------------|---------------------|
-| Get Payment Config | GET | `/api/order/payment/config` | JWT (User) | None |
-| Prepare Payment | POST | `/api/order/payment/orders/{orderId}/prepare` | Public | Path: `orderId`<br>Body: `PaymentReadyRequest` |
-| Get Payment Status | GET | `/api/order/payment/{paymentId}/status` | Public | Path: `paymentId` |
-| Test Payment Event | POST | `/api/order/payment/test/payment-completed` | Public | Query: `userId`, `storeId` |
+| 기능 | HTTP Method | 엔드포인트 | 필요 권한 | 요청 / 파라미터 |
+|---------|-------------|----------|-----------|---------------------|
+| 주문 생성 | POST | `/api/order/orders` | JWT (User) | Headers: `X-Auth-UserId`<br>Body: `OrderCreateRequest` |
+| 주문 상세 조회 | GET | `/api/order/orders/{orderId}` | Public | Path: `orderId` |
+| 주문 상태 조회 | GET | `/api/order/orders/status/{orderId}` | Public | Path: `orderId` |
+| **내 주문 목록 조회** | GET | `/api/order/users/me/orders` | JWT (User) | Headers: `X-Auth-UserId`<br>Query: `page`, `size` |
+| **내 주문 요약 조회** | GET | `/api/order/users/me/summary` | JWT (User) | Headers: `X-Auth-UserId` |
+| 주문 취소 | POST | `/api/order/orders/{orderId}/cancel` | JWT (User/Admin) | Headers: `X-Auth-UserId`, `X-Auth-Role`<br>Path: `orderId`<br>Body: `OrderCancelRequest` |
+| 주문 수령 | POST | `/api/order/orders/{orderId}/receive` | JWT (User) | Headers: `X-Auth-UserId`<br>Path: `orderId` |
+| 주문 상태 변경 | PATCH | `/api/order/orders/{orderId}` | JWT (Admin) | Headers: `X-Auth-UserId`, `X-Auth-Role`<br>Path: `orderId`<br>Body: `OrderStatusUpdateRequest` |
 
-### 📱 QR 코드 (QR Code)
+### 💳 결제 (Order Service)
 
-| Feature | HTTP Method | Endpoint | Required Permissions | Request / Parameters |
-|---------|-------------|----------|---------------------|---------------------|
-| Generate Order QR | GET | `/api/order/qr/orders/{orderId}` | Public | Path: `orderId`<br>Query: `size` (default: 200) |
-| Generate Payment QR | GET | `/api/order/qr/payment/{merchantUid}` | Public | Path: `merchantUid`<br>Query: `size` (default: 200) |
+| 기능 | HTTP Method | 엔드포인트 | 필요 권한 | 요청 / 파라미터 |
+|---------|-------------|----------|-----------|---------------------|
+| 결제 설정 조회 | GET | `/api/order/payment/config` | Public | None |
+| 결제 준비 | POST | `/api/order/payment/orders/{orderId}/prepare` | Public | Path: `orderId`<br>Body: `PaymentReadyRequest` |
+| 결제 상태 조회 | GET | `/api/order/payment/{paymentId}/status` | Public | Path: `paymentId` |
+| 결제 이벤트 테스트 | POST | `/api/order/payment/test/payment-completed` | Public | Query: `userId`, `storeId` |
 
-### 📊 통계 관리 (Statistics - Admin Only)
+### 📱 QR 코드 (Order Service)
 
-| Feature | HTTP Method | Endpoint | Required Permissions | Request / Parameters |
-|---------|-------------|----------|---------------------|---------------------|
-| Daily Sales Statistics | GET | `/api/order/reports/admin/sales/daily` | JWT (Admin) | Headers: `X-Auth-Role`<br>Query: `date`, `storeId` (optional) |
-| Weekly Sales Statistics | GET | `/api/order/reports/admin/sales/weekly` | JWT (Admin) | Headers: `X-Auth-Role`<br>Query: `weekStartDate`, `storeId` (optional) |
-| Monthly Sales Statistics | GET | `/api/order/reports/admin/sales/monthly` | JWT (Admin) | Headers: `X-Auth-Role`<br>Query: `year`, `month`, `storeId` (optional) |
+| 기능 | HTTP Method | 엔드포인트 | 필요 권한 | 요청 / 파라미터 |
+|---------|-------------|----------|-----------|---------------------|
+| 주문 QR 생성 | GET | `/api/order/qr/orders/{orderId}` | Public | Path: `orderId`<br>Query: `size` (optional) |
+| 결제 QR 생성 | GET | `/api/order/qr/payment/{merchantUid}` | Public | Path: `merchantUid`<br>Query: `size` (optional) |
 
-### 🔐 인증 관련 (Authentication)
+### 📊 통계 (Order Service - Admin Only)
 
-| Feature | HTTP Method | Endpoint | Required Permissions | Request / Parameters |
-|---------|-------------|----------|---------------------|---------------------|
-| User Login | POST | `/api/user/auth/login` | Public | Body: `LoginRequest` |
-| User Registration | POST | `/api/user/auth/signup` | Public | Body: `RegisterRequest` |
-| Token Refresh | POST | `/api/user/auth/refresh` | Public | Body: `refreshToken` |
-| User Logout | POST | `/api/user/auth/logout` | JWT (User) | None |
+| 기능 | HTTP Method | 엔드포인트 | 필요 권한 | 요청 / 파라미터 |
+|---------|-------------|----------|-----------|---------------------|
+| 일일 통계 | GET | `/api/order/reports/admin/sales/daily` | JWT (Admin) | Headers: `X-Auth-UserId`<br>Query: `date`, `storeId` |
+| 주간 통계 | GET | `/api/order/reports/admin/sales/weekly` | JWT (Admin) | Headers: `X-Auth-UserId`<br>Query: `weekStartDate`, `storeId` |
+| 월간 통계 | GET | `/api/order/reports/admin/sales/monthly` | JWT (Admin) | Headers: `X-Auth-UserId`<br>Query: `year`, `month`, `storeId` |
+| 상품별 판매 요약 | GET | `/api/order/reports/admin/product-sales-summary` | JWT (Admin) | Headers: `X-Auth-UserId`<br>Query: `storeId`, `startDate`, `endDate`|
 
 ## 🔐 백엔드 API 상세 레퍼런스
 
 프론트엔드 개발자가 백엔드 API를 올바르게 사용할 수 있도록 상세 정보를 제공합니다.
 
 ### 🔑 인증
-모든 API 요청은 JWT 토큰 인증이 필요합니다. (`Authorization: Bearer {JWT_TOKEN}`)
+API Gateway에서 JWT 토큰을 검증한 후, 백엔드 서비스에는 `X-Auth-UserId`와 `X-Auth-Role` 헤더를 추가하여 전달합니다. 이 앱은 로그인 시 받은 토큰을 사용하여 모든 후속 요청 헤더를 자동으로 관리합니다.
 
 ### 📝 주요 API 사용 예시
 
@@ -178,25 +180,34 @@ src/
     ]
   }
   ```
-  > **주의**: `totalAmount`는 더 이상 필요하지 않습니다. 백엔드에서 자동으로 계산됩니다.
-
-- **응답 (201 Created)**:
+- **응답 (201 Created)** (`OrderCreateResponse`):
   ```json
   {
-    "success": true,
-    "data": {
-      "orderId": "order_b7833686f25b48e0862612345678abcd",
-      "paymentId": "order_b7833686f25b48e0862612345678abcd",
-      "amount": 200,
-      "orderName": "테스트 상품 1 외 1건",
-      "buyerName": "홍길동"
-    }
+    "orderId": "order_b7833686f25b48e0862612345678abcd",
+    "paymentId": "order_b7833686f25b48e0862612345678abcd",
+    "amount": 200,
+    "orderName": "테스트 상품 1 외 1건",
+    "buyerName": "홍길동"
   }
   ```
 
-#### 2. 주문 상태 업데이트 (Admin Only)
+#### 2. 내 주문 요약 조회 (For My Page)
+**GET** `/api/order/users/me/summary`
+- **인증**: 필수 (`X-Auth-UserId` 헤더 필요)
+- **요청**: 파라미터나 바디 없음
+- **응답** (`UserOrderSummaryDto`):
+  ```json
+  {
+    "totalOrderCount": 15,
+    "totalOriginalAmount": 150000,
+    "totalDiscountAmount": 25000,
+    "finalPurchaseAmount": 125000
+  }
+  ```
+
+#### 3. 주문 상태 업데이트 (Admin Only)
 **PATCH** `/api/order/orders/{orderId}`
-- **인증**: 관리자 권한 필수 (`X-Auth-Role: ROLE_ADMIN` 또는 `ROLE_SUPER_ADMIN`)
+- **인증**: 관리자 권한 필수 (`X-Auth-UserId`, `X-Auth-Role: ROLE_ADMIN`)
 - **요청 본문** (`OrderStatusUpdateRequest`):
   ```json
   {
@@ -205,31 +216,16 @@ src/
   }
   ```
 
-#### 3. 통계 조회 (Admin Only)
-**GET** `/api/order/reports/admin/sales/daily?date=2023-06-01&storeId=1`
-- **인증**: 관리자 권한 필수 (`X-Auth-Role: ROLE_ADMIN`)
-- **응답**: 일일 매출 통계, 주문 수, 평균 주문 금액, 피크 시간 등
-
-#### 4. 결제 준비
-**POST** `/api/order/payment/orders/{orderId}/prepare`
-- **요청 본문** (`PaymentReadyRequest`):
-  ```json
-  {
-    "storeId": 1,
-    "items": [
-      { "itemId": 11, "quantity": 2 }
-    ]
-  }
-  ```
+#### 4. 일일 통계 조회 (Admin Only)
+**GET** `/api/order/reports/admin/sales/daily?date=2025-08-27&storeId=1`
+- **인증**: 관리자 권한 필수 (`X-Auth-UserId`)
+- **응답**: 일일 매출 통계, 주문 수, 평균 주문 금액, 피크 시간 등 상세 정보
 
 ### 🔄 토큰 자동 새로고침 (Automatic Token Refresh)
 
-이 앱은 15초마다 만료되는 짧은 액세스 토큰을 자동으로 새로고침합니다:
-
-- **액세스 토큰**: 15초 후 만료
-- **리프레시 토큰**: 더 긴 유효 기간
-- **자동 처리**: 401 오류 시 자동으로 토큰 새로고침 시도
-- **대기열 관리**: 동시 요청들을 큐에서 관리하여 중복 새로고침 방지
+이 앱은 15초마다 만료되는 짧은 액세스 토큰을 자동으로 새로고침하는 로직을 포함합니다:
+- **자동 처리**: API 요청 시 401 Unauthorized 에러가 발생하면, 저장된 리프레시 토큰을 사용하여 새로운 액세스 토큰을 자동으로 재발급받습니다.
+- **대기열 관리**: 토큰 재발급이 진행되는 동안 실패했던 API 요청을 포함한 모든 동시 요청들은 대기 상태에 있다가, 새로운 토큰이 발급되면 순차적으로 재실행됩니다.
 
 ## 💡 프론트엔드 개발 팁
 
@@ -240,7 +236,7 @@ src/
 `try...catch` 블록을 사용하여 API 호출을 감싸고, `error.response.status`에 따라 분기 처리합니다. (예: 401 시 로그인 화면 이동, 400 시 사용자에게 오류 메시지 표시)
 
 ### 📊 페이지네이션 처리
-주문 목록과 같이 많은 데이터를 불러올 때는 `page`와 `size` 파라미터를 사용하여 API를 호출하고, 응답의 `pageInfo`를 확인하여 '더 보기' 기능을 구현합니다.
+`GET /api/order/users/me/orders`와 같이 많은 데이터를 불러올 때는 `page`와 `size` 파라미터를 사용하고, 응답의 `totalPages`, `totalElements` 등을 확인하여 '더 보기' 또는 무한 스크롤 기능을 구현합니다.
 
 ## 🐛 문제 해결 및 디버깅
 - **토큰 만료**: 앱은 자동으로 토큰 만료를 감지하고 로그인 화면으로 이동시킵니다.

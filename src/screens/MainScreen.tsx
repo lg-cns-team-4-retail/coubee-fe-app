@@ -39,7 +39,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ onLogout }) => {
   const [productId, setProductId] = useState('1');
   const [quantity, setQuantity] = useState('2');
   const [itemPrice, setItemPrice] = useState('500');
-  const storeId = '1'; // 매장 ID는 고정값으로 설정
+  const [storeId, setStoreId] = useState('1'); // 매장 ID는 고정값으로 설정
   
   // 상태 관리
   const [isLoading, setIsLoading] = useState(false);
@@ -164,12 +164,12 @@ const MainScreen: React.FC<MainScreenProps> = ({ onLogout }) => {
 
     const prepareData = {
       storeId: parseInt(storeId),
-      items: [{
-        productId: parseInt(productId),
-        name: itemName,
-        quantity: parseInt(quantity),
-        price: parseInt(itemPrice)
-      }]
+      items: orderToUse.items.map(item => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      }))
     };
 
     try {
@@ -290,6 +290,16 @@ const MainScreen: React.FC<MainScreenProps> = ({ onLogout }) => {
               style={styles.input}
               value={recipientName}
               onChangeText={setRecipientName}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>상점 ID</Text>
+            <TextInput
+              style={styles.input}
+              value={storeId}
+              onChangeText={setStoreId}
+              keyboardType="numeric"
             />
           </View>
 

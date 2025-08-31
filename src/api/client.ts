@@ -21,9 +21,14 @@ const processQueue = (error: any, token: string | null = null) => {
     if (error) {
       reject(error);
     } else {
-      if (token && config.headers) {
+      if (token) {
+        // 헤더가 없으면 초기화
+        if (!config.headers) {
+          config.headers = {};
+        }
         config.headers.Authorization = `Bearer ${token}`;
       }
+      // 큐에 있는 요청들을 재시도
       resolve(apiClient(config));
     }
   });
@@ -121,9 +126,10 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // 401 에러이고 아직 재시도하지 않은 요청인 경우
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // 이미 토큰 새로고침이 진행 중인 경우, 대기열에 추가
       if (isRefreshing) {
-        // 이미 토큰 새로고침이 진행 중인 경우, 대기열에 추가
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject, config: originalRequest });
         });
@@ -139,28 +145,43 @@ apiClient.interceptors.response.use(
           // 리프레시 토큰이 없으면 로그아웃 처리
           await tokenManager.removeTokens();
           processQueue(new Error('No refresh token available'), null);
-          return Promise.reject(error);
+          return Promise.reject(new Error('No refresh token available'));
         }
 
-        // 토큰 새로고침 요청
+        // 토큰 새로고침 요청 - 별도의 axios 인스턴스 사용하여 무한 루프 방지
         const refreshResponse = await axios.post(`${BASE_URL}/api/user/auth/refresh`, {
-          refreshToken: refreshToken
+          token: refreshToken  // 백엔드는 'token' 필드를 기대함
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
 
-        const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data.data.accessRefreshToken.access.token
-          ? {
-              accessToken: refreshResponse.data.data.accessRefreshToken.access.token,
-              refreshToken: refreshResponse.data.data.accessRefreshToken.refresh.token
-            }
-          : refreshResponse.data.data;
+        // 응답 구조 분석 및 토큰 추출
+        let accessToken: string;
+        const currentRefreshToken = refreshToken; // 기존 리프레시 토큰 유지
 
-        // 새 토큰들 저장
-        await tokenManager.saveTokens(accessToken, newRefreshToken);
+        // 백엔드 refresh 엔드포인트는 새로운 access token만 반환
+        if (refreshResponse.data?.data?.access?.token) {
+          accessToken = refreshResponse.data.data.access.token;
+        } else {
+          throw new Error('Invalid refresh response structure - missing access token');
+        }
+
+        if (!accessToken) {
+          throw new Error('Missing access token in refresh response');
+        }
+
+        // 새 액세스 토큰과 기존 리프레시 토큰 저장
+        await tokenManager.saveTokens(accessToken, currentRefreshToken);
 
         // axios 기본 헤더 업데이트
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
         // 원래 요청에 새 토큰 적용
+        if (!originalRequest.headers) {
+          originalRequest.headers = {};
+        }
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
         // 대기 중인 요청들 처리
@@ -169,10 +190,24 @@ apiClient.interceptors.response.use(
         // 원래 요청 재시도
         return apiClient(originalRequest);
 
-      } catch (refreshError) {
+      } catch (refreshError: any) {
+        console.error('Token refresh failed:', refreshError);
+        console.error('Refresh error details:', {
+          status: refreshError.response?.status,
+          statusText: refreshError.response?.statusText,
+          data: refreshError.response?.data,
+          message: refreshError.message
+        });
+
         // 토큰 새로고침 실패 시 모든 토큰 삭제
         await tokenManager.removeTokens();
+
+        // axios 기본 헤더에서도 제거
+        delete apiClient.defaults.headers.common['Authorization'];
+
+        // 대기 중인 모든 요청들을 거부
         processQueue(refreshError, null);
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
