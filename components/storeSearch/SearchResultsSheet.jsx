@@ -1,18 +1,46 @@
-import React, { useState, useCallback } from "react";
-// 👇 Sheet.ScrollView를 사용하기 위해 ScrollView와 Text를 Sheet와 함께 불러옵니다.
-import { Sheet } from "@tamagui/sheet";
+// components/storeSearch/NewSearchResultsSheet.jsx
+
+import React, { useMemo } from "react";
 import { router } from "expo-router";
-import { YStack, Text, Spinner } from "tamagui";
+import { YStack, Text, Spinner, View } from "tamagui";
 import StoreResult from "./StoreResult";
-import { FlatList } from "react-native";
+import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { useTheme } from "tamagui";
+const CustomHandle = () => (
+  <View
+    bg="$background"
+    style={{
+      paddingVertical: 12,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      alignItems: "center",
+    }}
+  >
+    <View
+      bg="$color"
+      style={{
+        width: 40,
+        height: 5,
+        borderRadius: 4,
+      }}
+    />
+  </View>
+);
 
 export default function SearchResultsSheet({
   searchResults = [],
   onLoadMore,
   isFetching,
 }) {
-  const [open, setOpen] = useState(true);
-  const snapPoints = [85, 10];
+  const snapPoints = useMemo(() => ["10%", "85%"], []);
+  const theme = useTheme();
+  const renderStoreItem = ({ item: store }) => (
+    <StoreResult
+      onPress={() => router.push(`/store/${store.storeId}`)}
+      key={store.storeId}
+      store={store}
+    />
+  );
 
   const renderStoreItem = useCallback(
     ({ item: store }) => (
@@ -28,43 +56,37 @@ export default function SearchResultsSheet({
   );
 
   return (
-    <Sheet
-      open={open}
-      onOpenChange={setOpen}
+    <BottomSheet
+      index={1}
       snapPoints={snapPoints}
-      defaultPosition={1}
-      modal={false}
-      dismissOnOverlayPress={false}
+      handleComponent={CustomHandle}
     >
-      <Sheet.Handle backgroundColor="grey" />
-
-      <Sheet.Frame
-        flex={1}
+      <YStack
+        paddingHorizontal="$4"
+        paddingTop="$2"
+        paddingBottom="$2"
         backgroundColor="$background"
-        borderTopColor="black"
       >
-        <YStack paddingHorizontal="$4" paddingTop="$4" paddingBottom="$2">
-          <Text fontSize="$4" color="$color" fontWeight="bold">
-            검색 결과
-          </Text>
-        </YStack>
+        <Text p="$3" fontSize="$4" color="$color" fontWeight="bold">
+          검색 결과
+        </Text>
+      </YStack>
 
-        <FlatList
-          data={searchResults}
-          renderItem={renderStoreItem}
-          keyExtractor={(item) => item.storeId.toString()}
-          contentContainerStyle={{
-            paddingHorizontal: 16, // tamagui 토큰 대신 숫자 값 사용
-            paddingBottom: 16,
-          }}
-          // FlatList는 이 props들을 완벽하게 지원합니다.
-          onEndReached={onLoadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            isFetching ? <Spinner marginVertical="$4" /> : null
-          }
-        />
-      </Sheet.Frame>
-    </Sheet>
+      <BottomSheetFlatList
+        data={searchResults}
+        renderItem={renderStoreItem}
+        keyExtractor={(item) => item.storeId.toString()}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: 16,
+          backgroundColor: theme.background?.val,
+        }}
+        onEndReached={onLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isFetching ? <Spinner marginVertical="$4" /> : null
+        }
+      />
+    </BottomSheet>
   );
 }

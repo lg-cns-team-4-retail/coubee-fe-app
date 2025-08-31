@@ -6,6 +6,7 @@ import ProductItem from "../ProductItem";
 import { useDispatch } from "react-redux";
 import { useRouter } from "expo-router";
 import { useSearchProductsQuery } from "../../redux/api/apiSlice";
+import ListEmptyComponent from "../ListEmptyComponent";
 
 const ProductSearchTab = ({ searchKeyword, userLocation }) => {
   const router = useRouter();

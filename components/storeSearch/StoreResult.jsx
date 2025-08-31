@@ -1,10 +1,40 @@
 import React, { useState } from "react";
 import { YStack, XStack, Text, Image, Button, Paragraph } from "tamagui";
-import { MapPin } from "@tamagui/lucide-icons";
-import backgroundImg from "../../assets/images/background.jpg";
-import profileImg from "../../assets/images/peach.png";
-// 새로운 디자인의 상점 리스트 아이템 컴포넌트
+import { MapPin, Heart } from "@tamagui/lucide-icons";
+import { useToastController } from "@tamagui/toast";
+import { useToggleInterestMutation } from "../../redux/api/apiSlice";
 export const StoreResult = ({ store, onPress }) => {
+  const toast = useToastController();
+  const [toggleInterest, { isLoading: isToggling }] =
+    useToggleInterestMutation();
+
+  const handleLikePress = React.useCallback(
+    async (e) => {
+      e.stopPropagation(); // 카드 전체가 눌리는 것을 방지
+
+      const isCurrentlyLiked = store.interest;
+
+      try {
+        // API 요청 후 성공 또는 실패를 기다립니다.
+        await toggleInterest(store.storeId).unwrap();
+
+        // 성공 시, 현재 상태에 따라 적절한 메시지를 보여줍니다.
+        toast.show(
+          isCurrentlyLiked
+            ? "관심 가게에서 삭제했어요."
+            : "관심 가게로 등록했어요."
+        );
+      } catch (error) {
+        // 실패 시, 에러 메시지를 보여줍니다.
+        console.error("관심 가게 변경 실패:", error);
+        toast.show("요청에 실패했습니다.", {
+          message: "잠시 후 다시 시도해주세요.",
+        });
+      }
+    },
+    [store.storeId, store.interest, toggleInterest, toast]
+  );
+
   return (
     <YStack
       borderRadius="$6"
@@ -27,6 +57,26 @@ export const StoreResult = ({ store, onPress }) => {
           borderTopLeftRadius="$6"
           borderTopRightRadius="$6"
         />
+
+        <Button
+          position="absolute"
+          top="$3"
+          right="$3"
+          size="$3"
+          circular
+          backgroundColor="rgba(0, 0, 0, 0.4)"
+          pressStyle={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
+          onPress={handleLikePress}
+          disabled={isToggling}
+          icon={
+            <Heart
+              size={20}
+              color={store.interest ? "red" : "white"}
+              fill={store.interest ? "red" : "transparent"}
+            />
+          }
+        />
+
         <Image
           source={{
             uri: store.profileImg || "https://via.placeholder.com/100",

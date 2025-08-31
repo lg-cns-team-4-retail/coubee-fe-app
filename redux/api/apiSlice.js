@@ -32,6 +32,58 @@ export const apiSlice = createApi({
   tagTypes: ["Store", "Products", "Product", "Orders", "Search"],
 
   endpoints: (builder) => ({
+    toggleInterest: builder.mutation({
+      query: (storeId) => ({
+        url: `/store/interest/${storeId}`,
+        method: "POST",
+      }),
+      //  기존 invalidatesTags 대신 onQueryStarted를 사용합니다.
+      async onQueryStarted(storeId, { dispatch, queryFulfilled, getState }) {
+        // 현재 활성화된 searchStores 쿼리의 인자(arguments)를 찾습니다.
+        const state = getState();
+        const activeSearchQuery = Object.values(state.api.queries).find(
+          (query) =>
+            query.endpointName === "searchStores" &&
+            query.status === "fulfilled"
+        );
+
+        if (!activeSearchQuery) {
+          return;
+        }
+
+        const { originalArgs } = activeSearchQuery;
+
+        // searchStores 캐시를 직접 업데이트합니다.
+        const patchResult = dispatch(
+          apiSlice.util.updateQueryData(
+            "searchStores", // 업데이트할 엔드포인트
+            originalArgs, // 해당 엔드포인트의 인자
+            (draft) => {
+              // 캐시를 어떻게 업데이트할지에 대한 로직
+              // 캐시된 데이터에서 현재 상점을 찾습니다.
+              const store = draft.content.find((s) => s.storeId == storeId);
+              if (store) {
+                // '좋아요' 상태를 반전시킵니다.
+                store.interest = !store.interest;
+              }
+            }
+          )
+        );
+
+        try {
+          // 뮤테이션이 성공적으로 완료되기를 기다립니다.
+          await queryFulfilled;
+        } catch {
+          // 실패 시, Optimistic Update를 되돌립니다.
+          patchResult.undo();
+        }
+      },
+      // 목록 캐시는 직접 업데이트하므로, 상세 정보 캐시만 무효화합니다.
+      invalidatesTags: (result, error, storeId) => [
+        { type: "Store", id: storeId },
+      ],
+    }),
+
     getStoreDetail: builder.query({
       query: (storeId) => ({
         url: `/store/detail/${storeId}`,
@@ -101,14 +153,9 @@ export const apiSlice = createApi({
         return endpointName;
       },
       merge: (currentCache, newItems, { arg }) => {
-        // ❗ [핵심 수정] 첫 페이지를 불러오는 경우, 기존 데이터를 모두 버리고 새 데이터로 교체합니다.
-        // 이는 'pull-to-refresh' (당겨서 새로고침)과 같은 동작을 구현할 때 유용합니다.
         if (arg.page === 0) {
-          // RTK Query 에서는 새로운 상태를 반환하면 캐시를 덮어씁니다.
           return newItems;
         }
-
-        // 다음 페이지를 불러오는 경우, 기존 방식대로 데이터를 추가합니다.
         const existingOrderIds = new Set(
           currentCache.content.map((order) => order.orderId)
         );
@@ -141,10 +188,6 @@ export const apiSlice = createApi({
         method: "GET",
         params: { keyword, lat, lng, page, size },
       }),
-
-      // 응답 데이터 가공: 페이지네이션을 대비하여 응답 형식을 통일합니다.
-      // 현재는 배열만 오므로, 이를 { content: [...] } 형태로 감싸줍니다.
-      // 추후 API에서 last 프로퍼티를 주면 자동으로 처리됩니다.
       transformResponse: (response) => {
         if (Array.isArray(response.data)) {
           return {
@@ -155,14 +198,27 @@ export const apiSlice = createApi({
         return response.data;
       },
 
-      providesTags: (result) => [{ type: "Search", id: "LIST" }],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.content.map(({ storeId }) => ({
+                type: "Store",
+                id: storeId,
+              })),
+              { type: "Search", id: "LIST" },
+            ]
+          : [{ type: "Search", id: "LIST" }],
 
       serializeQueryArgs: ({ queryArgs }) => {
         const { page, ...rest } = queryArgs;
         return rest;
       },
 
-      merge: (currentCache, newItems) => {
+      merge: (currentCache, newItems, { arg }) => {
+        if (arg.page === 0) {
+          return newItems;
+        }
+
         const existingStoreIds = new Set(
           currentCache.content.map((store) => store.storeId)
         );
@@ -174,7 +230,10 @@ export const apiSlice = createApi({
       },
 
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg?.page !== previousArg?.page;
+        return (
+          currentArg?.page !== previousArg?.page ||
+          currentArg?.keyword !== previousArg?.keyword
+        );
       },
     }),
     searchProducts: builder.query({
@@ -227,4 +286,5 @@ export const {
   useGetOrderDetailQuery,
   useSearchStoresQuery,
   useSearchProductsQuery,
+  useToggleInterestMutation,
 } = apiSlice;

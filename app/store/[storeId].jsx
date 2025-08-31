@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { View, StyleSheet, SafeAreaView, StatusBar, Image } from "react-native";
 import Animated, {
   useSharedValue,
@@ -8,7 +8,12 @@ import Animated, {
   interpolateColor,
 } from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
-import { ChevronLeft, Search, ShoppingCart } from "@tamagui/lucide-icons";
+import {
+  ChevronLeft,
+  Search,
+  ShoppingCart,
+  Heart,
+} from "@tamagui/lucide-icons";
 import {
   useTheme,
   Button,
@@ -19,10 +24,11 @@ import {
   Spinner,
 } from "tamagui";
 import { useDispatch } from "react-redux";
-
+import { useToastController } from "@tamagui/toast";
 import {
   useGetProductsQuery,
   useGetStoreDetailQuery,
+  useToggleInterestMutation,
 } from "../../redux/api/apiSlice";
 import { selectProducts } from "../../redux/slices/uiSlice";
 import ProductItem from "../../components/ProductItem";
@@ -47,10 +53,14 @@ const CrossfadingIcon = React.memo(
 );
 
 export default function StorePage() {
+  const toast = useToastController();
   const scrollY = useSharedValue(0);
   const theme = useTheme();
   const dispatch = useDispatch();
   const { storeId } = useLocalSearchParams();
+
+  const [toggleInterest, { isLoading: isToggling }] =
+    useToggleInterestMutation();
 
   const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -139,6 +149,23 @@ export default function StorePage() {
     [isLoading, dispatch]
   );
 
+  const handleLikePress = useCallback(async () => {
+    const isCurrentlyLiked = storeDetail?.interest;
+
+    try {
+      await toggleInterest(storeId).unwrap();
+
+      toast.show(
+        isCurrentlyLiked
+          ? "관심 가게에서 삭제했어요."
+          : "관심 가게로 등록했어요."
+      );
+    } catch (error) {
+      console.error("관심 가게 변경 실패:", error);
+      toast.show("요청에 실패했습니다.");
+    }
+  }, [storeId, toggleInterest, storeDetail, toast]);
+
   const renderListHeader = useMemo(
     () => (
       <>
@@ -146,24 +173,42 @@ export default function StorePage() {
         <YStack bg="$background" style={styles.content} px="$4">
           <XStack
             flex={1}
-            px="$2"
+            px="$3"
+            py="$2"
             justifyContent="space-between"
             alignItems="center"
           >
             <Text style={styles.storeTitle}>{storeDetail?.storeName}</Text>
-            <Button
-              color="#fff"
-              fontWeight="500"
-              backgroundColor="$primary"
-              borderRadius={22}
-              fontSize={13}
-              height="$3"
-              paddingHorizontal="$3"
-              my="$2"
-              onPress={() => router.push(`/storeInformation/${storeId}`)}
-            >
-              가게 정보
-            </Button>
+
+            <XStack ai="center" gap="$2">
+              <Button
+                circular
+                chromeless
+                onPress={handleLikePress}
+                disabled={isToggling}
+                icon={
+                  <Heart
+                    size={24}
+                    fill={storeDetail?.interest ? "red" : "transparent"}
+                    color={storeDetail?.interest ? "red" : "gray"}
+                  />
+                }
+              />
+
+              <Button
+                color="#fff"
+                fontWeight="500"
+                backgroundColor="$primary"
+                borderRadius={22}
+                fontSize={13}
+                height="$3"
+                paddingHorizontal="$3"
+                my="$2"
+                onPress={() => router.push(`/storeInformation/${storeId}`)}
+              >
+                가게 정보
+              </Button>
+            </XStack>
           </XStack>
           <XStack
             borderWidth={2}
@@ -196,7 +241,15 @@ export default function StorePage() {
         </YStack>
       </>
     ),
-    [searchQuery, storeId, handleSearchSubmit, storeDetail, products]
+    [
+      searchQuery,
+      storeId,
+      handleSearchSubmit,
+      storeDetail,
+      products,
+      handleLikePress,
+      isToggling,
+    ]
   );
 
   return (
@@ -217,6 +270,21 @@ export default function StorePage() {
               {storeDetail?.storeName}
             </Animated.Text>
             <View style={{ width: 28 }} />
+            <Animated.View style={[{ width: 28 }, blackIconAnimatedStyle]}>
+              <Button
+                unstyled
+                chromeless
+                scaleIcon={1.2}
+                onPress={handleLikePress}
+                disabled={isToggling}
+                icon={
+                  <Heart
+                    fill={storeDetail?.interest ? "white" : "transparent"}
+                    color={"white"}
+                  />
+                }
+              />
+            </Animated.View>
           </View>
         </SafeAreaView>
       </Animated.View>

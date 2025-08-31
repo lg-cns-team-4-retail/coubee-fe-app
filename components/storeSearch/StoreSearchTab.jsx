@@ -1,7 +1,7 @@
 // components/storeSearch/StoreSearchTab.jsx
 
 import React, { useEffect, useState } from "react";
-import { YStack, Spinner } from "tamagui";
+import { YStack, Spinner, View } from "tamagui";
 import MapComponentContainer from "./MapComponentContainer";
 import SearchResultsSheet from "./SearchResultsSheet";
 import ListEmptyComponent from "../ListEmptyComponent";
@@ -22,7 +22,6 @@ const StoreSearchTab = ({ searchKeyword, userLocation }) => {
     }
   );
 
-  console.log(data);
   const loadMore = () => {
     if (!data?.last && !isFetching) {
       setPage((prevPage) => prevPage + 1);
@@ -48,7 +47,13 @@ const StoreSearchTab = ({ searchKeyword, userLocation }) => {
 
   // 검색 결과가 없을 때
   if (data?.content.length === 0) {
-    const message = `주변에 "${searchKeyword}"로 시작되는 상점이 존재하지 않아요`;
+    let message = "";
+    if (searchKeyword.trim().length === 0) {
+      message = `주변에 쿠비 매장이 존재하지 않아요`;
+    } else {
+      message = `주변에 "${searchKeyword}"로 시작되는 상점이 존재하지 않아요`;
+    }
+
     return (
       <>
         <ListEmptyComponent message={message} />
@@ -57,14 +62,14 @@ const StoreSearchTab = ({ searchKeyword, userLocation }) => {
   }
 
   return (
-    <>
+    <View flex={1}>
       <MapComponentContainer searchResults={searchResults} />
       <SearchResultsSheet
         searchResults={searchResults}
         onLoadMore={loadMore}
         isFetching={isFetching}
       />
-    </>
+    </View>
   );
 };
 

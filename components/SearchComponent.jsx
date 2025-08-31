@@ -26,9 +26,13 @@ export const SearchComponent = () => {
 
   useEffect(() => {
     if (location) {
-      setUserLocation({
+      /* setUserLocation({
         lat: location.latitude,
         lng: location.longitude,
+      }); */
+      setUserLocation({
+        lat: 37.559661293097975,
+        lng: 127.0053580437816,
       });
     }
   }, [location]);
@@ -40,24 +44,6 @@ export const SearchComponent = () => {
     setSearchKeyword(inputValue.trim());
   };
 
-  /*   const {
-    data: storesData,
-    isLoading: isStoresLoading,
-    isError: isStoresError,
-  } = useSearchStoresQuery(
-    { keyword: searchKeyword, ...userLocation },
-    {
-      skip: activeTab !== "store" || !userLocation,
-    }
-  );
-
-  const { data: productsData, isLoading: isProductsLoading } =
-    useSearchProductsQuery(
-      { keyword: searchKeyword, ...userLocation },
-      {
-        skip: activeTab !== "product" || !searchKeyword || !userLocation,
-      }
-    ); */
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background?.val }}>
       <YStack flex={1} backgroundColor="$background">
