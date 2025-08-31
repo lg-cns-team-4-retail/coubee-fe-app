@@ -42,19 +42,6 @@ export default function SearchResultsSheet({
     />
   );
 
-  const renderStoreItem = useCallback(
-    ({ item: store }) => (
-      <StoreResult
-        onPress={() => {
-          router.push(`/store/${store.storeId}`);
-        }}
-        key={store.storeId}
-        store={store}
-      />
-    ),
-    []
-  );
-
   return (
     <BottomSheet
       index={1}
