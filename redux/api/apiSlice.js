@@ -179,6 +179,7 @@ export const apiSlice = createApi({
               { type: "Orders", id: "LIST" },
             ]
           : [{ type: "Orders", id: "LIST" }],
+      refetchOnFocus: true,
       serializeQueryArgs: ({ endpointName }) => {
         return endpointName;
       },
@@ -210,7 +211,14 @@ export const apiSlice = createApi({
       providesTags: (result, error, orderId) => [
         { type: "Orders", id: orderId },
       ],
+      // 1. 상세 페이지에 들어올 때마다 항상 최신 정보를 가져옵니다.
+      refetchOnMountOrArgChange: true,
+      // 2. 다른 앱을 보다가 다시 돌아왔을 때도 최신 정보를 가져옵니다.
+      refetchOnFocus: true,
+      // 3. 화면을 보고 있는 동안 15초마다 자동으로 정보를 업데이트합니다.
+      pollingInterval: 15000,
     }),
+
     //
     searchStores: builder.query({
       query: ({ keyword, lat, lng, page = 0, size = 10 }) => ({
