@@ -8,10 +8,14 @@ import { router } from "expo-router";
 import { useLocation } from "../hooks/useLocation";
 import { persistor } from "../../redux/store";
 import QRCode from "react-native-qrcode-svg";
+import { useDispatch } from "react-redux";
+
+import { apiSlice } from "../../redux/api/apiSlice";
 import NewOrderListItem from "../../components/NewOrderListItem";
 
 export default function TabOneScreen() {
   const { logout, userId, isAuthenticated } = useAuthContext();
+  const dispatch = useDispatch();
   const [testingStoreId, setTestingStoreId] = useState("");
   const { location, loading, error, getCurrentLocation } = useLocation();
 
@@ -41,6 +45,7 @@ export default function TabOneScreen() {
   const handleLogout = async () => {
     try {
       await logout();
+      dispatch(apiSlice.util.resetApiState());
       Alert.alert("성공", "로그아웃되었습니다.");
     } catch (error) {
       Alert.alert("오류", "로그아웃에 실패했습니다.");

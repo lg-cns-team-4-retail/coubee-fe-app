@@ -2,7 +2,7 @@ import React from "react";
 import { YStack, XStack, Text, Input, Button, Paragraph } from "tamagui";
 import { Search, ChevronDown } from "@tamagui/lucide-icons";
 
-const OrderHistoryHeader = ({ userName }) => {
+const OrderHistoryHeader = ({ userName, searchQuery, onSearchChange }) => {
   return (
     <YStack space="$4" p="$4" backgroundColor="$cardBg">
       {/* 제목 */}
@@ -30,31 +30,15 @@ const OrderHistoryHeader = ({ userName }) => {
           borderWidth={0}
           backgroundColor="transparent"
           placeholder="주문 내역을 검색해보세요"
-          placeholderTextColor="$gray10"
+          placeholderTextColor="gray"
           focusStyle={{
             borderWidth: 0,
           }}
+          value={searchQuery}
+          onChangeText={onSearchChange}
         />
-        <Search color="$gray10" />
+        <Search color="gray" />
       </XStack>
-
-      {/* 필터 버튼 */}
-      {/* <XStack space="$3">
-        <Button
-          iconAfter={<ChevronDown size={16} />}
-          borderRadius="$10"
-          size="$3"
-        >
-          조회 기간
-        </Button>
-        <Button
-          iconAfter={<ChevronDown size={16} />}
-          borderRadius="$10"
-          size="$3"
-        >
-          주문 상태
-        </Button>
-      </XStack> */}
     </YStack>
   );
 };

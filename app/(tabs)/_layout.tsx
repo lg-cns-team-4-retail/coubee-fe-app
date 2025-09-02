@@ -19,16 +19,16 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme.primary!.val,
+        tabBarActiveTintColor: theme.color!.val,
         tabBarStyle: {
           backgroundColor: theme.background!.val,
-          borderTopColor: theme.borderColor!.val,
+          borderTopColor: theme.background!.val,
         },
         headerStyle: {
           backgroundColor: theme.background!.val,
-          borderBottomColor: theme.borderColor!.val,
+          borderBottomColor: theme.background!.val,
         },
-        headerTintColor: theme.primary!.val,
+        headerTintColor: theme.color!.val,
       }}
     >
       <Tabs.Screen

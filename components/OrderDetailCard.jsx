@@ -103,17 +103,17 @@ const OrderDetailCard = ({
         <Text fontSize="$5" fontWeight="bold" mb="$2">
           결제 금액
         </Text>
-        <PriceRow label="상품 금액" amount={order?.originalAmount || 0} />
+        <PriceRow label="총 상품 가격" amount={order?.originalAmount || 0} />
         {(order?.discountAmount || 0) > 0 && (
           <PriceRow
-            label="할인 금액"
+            label="프로모션 핫딜"
             amount={-(order?.discountAmount || 0)}
             color="red"
           />
         )}
         <YStack borderBottomWidth={1} borderColor="$borderColor" my="$2" />
         <PriceRow
-          label="총 결제 금액"
+          label="최종 결제 금액"
           amount={order?.totalAmount || 0}
           isTotal={true}
         />

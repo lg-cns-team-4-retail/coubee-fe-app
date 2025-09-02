@@ -26,7 +26,10 @@ import { useDispatch } from "react-redux";
 import { addItem, replaceCart } from "../../redux/slices/cartSlice";
 import { useAuthContext } from "../contexts/AuthContext";
 import { openModal } from "../../redux/slices/modalSlice";
-import { useGetProductDetailQuery } from "../../redux/api/apiSlice";
+import {
+  useGetProductDetailQuery,
+  useGetStoreDetailQuery,
+} from "../../redux/api/apiSlice";
 import { postViewCountProduct } from "../services/api";
 import { useToastController } from "@tamagui/toast";
 
@@ -40,12 +43,9 @@ export default function ProductDetailPage() {
 
   const { isAuthenticated } = useAuthContext();
   const { productId } = useLocalSearchParams();
-  /*   const { cartStoreId, cartItemCount } = useSelector((state) => ({
-    cartStoreId: state.cart.storeId,
-    cartItemCount: state.cart.items.length,
-  })); */
   const cartStoreId = useSelector((state) => state.cart.storeId);
   const cartItemCount = useSelector((state) => state.cart.items.length);
+
   const {
     data: item,
     isLoading,
@@ -54,6 +54,10 @@ export default function ProductDetailPage() {
     isSuccess,
     error,
   } = useGetProductDetailQuery(productId, { skip: !productId });
+
+  const { data: storeDetail } = useGetStoreDetailQuery(item?.storeId, {
+    skip: !item?.storeId,
+  });
 
   //view count용
   useEffect(() => {
@@ -118,6 +122,7 @@ export default function ProductDetailPage() {
       salePrice: item?.salePrice,
       storeId: item?.storeId,
       quantity,
+      hotdeal: storeDetail?.hotdeal,
     };
 
     if (cartItemCount > 0 && cartStoreId !== newItem.storeId) {
@@ -149,6 +154,7 @@ export default function ProductDetailPage() {
         })
       );
     } else {
+      console.log(newItem);
       dispatch(addItem(newItem));
       toast.show("상품 추가 완료", {
         message: `${newItem.productName}를 담았습니다`,

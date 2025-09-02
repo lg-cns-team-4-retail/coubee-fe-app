@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { YStack, XStack, Text, Button } from "tamagui";
 import { Zap } from "@tamagui/lucide-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,11 +13,40 @@ import { useLocalSearchParams, useRouter } from "expo-router";
  * @param {number} props.discountAmount - 즉시 할인 금액
  * @param {function} props.onPress - '바로 주문하기' 버튼 클릭 시 실행될 함수
  */
+const formatCurrency = (amount) => {
+  if (typeof amount !== "number") return "0원";
+  return amount.toLocaleString(); // '원'은 필요한 곳에서 붙입니다.
+};
+
 const ProductCheckoutBar = ({ currentStoreId, onPress }) => {
   const { bottom } = useSafeAreaInsets();
 
-  const { totalOriginPrice, totalSalePrice, totalQuantity, storeId, items } =
-    useSelector((state) => state.cart);
+  const {
+    items,
+    totalOriginPrice,
+    totalSalePrice,
+    hotdeal,
+    totalQuantity,
+    storeId,
+  } = useSelector((state) => state.cart);
+
+  const paymentDetails = useMemo(() => {
+    const itemDiscountAmount = totalOriginPrice - totalSalePrice;
+
+    let hotdealDiscountAmount = 0;
+    if (hotdeal && hotdeal.hotdealStatus === "ACTIVE") {
+      const calculatedDiscount = totalSalePrice * hotdeal.saleRate;
+      hotdealDiscountAmount = Math.min(calculatedDiscount, hotdeal.maxDiscount);
+    }
+
+    const finalAmount = totalSalePrice - hotdealDiscountAmount;
+    const totalDiscountAmount = itemDiscountAmount + hotdealDiscountAmount;
+
+    return {
+      finalAmount,
+      totalDiscountAmount,
+    };
+  }, [totalOriginPrice, totalSalePrice, hotdeal]);
 
   if (items.length === 0 || Number(storeId) !== Number(currentStoreId)) {
     return null;
@@ -46,7 +75,7 @@ const ProductCheckoutBar = ({ currentStoreId, onPress }) => {
       <YStack>
         <XStack alignItems="flex-end" gap="$2">
           <Text fontSize={22} fontWeight="bold">
-            {totalSalePrice.toLocaleString()}원
+            {formatCurrency(paymentDetails.finalAmount)}원
           </Text>
           {totalOriginPrice !== totalSalePrice && (
             <Text
@@ -54,7 +83,7 @@ const ProductCheckoutBar = ({ currentStoreId, onPress }) => {
               color="$descriptionText"
               textDecorationLine="line-through"
             >
-              {totalOriginPrice.toLocaleString()}원
+              {formatCurrency(totalOriginPrice)}원
             </Text>
           )}
         </XStack>
@@ -63,7 +92,7 @@ const ProductCheckoutBar = ({ currentStoreId, onPress }) => {
             <>
               <CoubeeSvgClick fontSize={6} />
               <Text fontSize={14} color="$primary" fontWeight="700">
-                {(totalOriginPrice - totalSalePrice).toLocaleString()}원 할인!
+                {formatCurrency(paymentDetails.totalDiscountAmount)}원 할인!
               </Text>
             </>
           )}

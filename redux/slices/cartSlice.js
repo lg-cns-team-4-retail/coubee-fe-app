@@ -6,6 +6,7 @@ const initialState = {
   totalOriginPrice: 0,
   totalSalePrice: 0,
   totalQuantity: 0,
+  hotdeal: null,
 };
 
 const recalculateTotals = (state) => {
@@ -23,6 +24,7 @@ const recalculateTotals = (state) => {
   );
   if (state.items.length === 0) {
     state.storeId = null;
+    state.hotdeal = null;
   }
 };
 
@@ -31,18 +33,19 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addItem: (state, action) => {
-      const newItem = action.payload;
+      const { hotdeal, ...newItemData } = action.payload;
       const existingItem = state.items.find(
-        (item) => item.productId === newItem.productId
+        (item) => item.productId === newItemData.productId
       );
 
       if (existingItem) {
-        existingItem.quantity += newItem.quantity;
+        existingItem.quantity += newItemData.quantity;
       } else {
-        state.items.push({ ...newItem });
+        state.items.push({ ...newItemData });
       }
 
-      state.storeId = newItem.storeId;
+      state.storeId = newItemData.storeId;
+      state.hotdeal = hotdeal;
       recalculateTotals(state);
     },
 
@@ -70,10 +73,14 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       return initialState;
     },
+
     replaceCart: (state, action) => {
-      const newItem = action.payload;
-      state.items = [{ ...newItem }];
-      state.storeId = newItem.storeId;
+      // addItem과 동일한 로직을 적용합니다.
+      const { hotdeal, ...newItemData } = action.payload;
+
+      state.items = [{ ...newItemData }];
+      state.storeId = newItemData.storeId;
+      state.hotdeal = hotdeal;
       recalculateTotals(state);
     },
   },

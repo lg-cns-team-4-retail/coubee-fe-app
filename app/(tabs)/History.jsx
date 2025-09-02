@@ -16,6 +16,8 @@ import OrderHistoryHeader from "../../components/OrderHistoryHeader";
 export default function OrderHistoryScreen() {
   const [page, setPage] = useState(0);
   const dispatch = useDispatch();
+  const [searchQuery, setSearchQuery] = useState(""); // 사용자의 즉각적인 입력을 위한 상태
+  const [debouncedKeyword, setDebouncedKeyword] = useState(""); // API 호출을 위한 디바운싱된 상태
 
   const { isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
 
@@ -23,6 +25,7 @@ export default function OrderHistoryScreen() {
     {
       page,
       size: 10,
+      keyword: debouncedKeyword, // 검색어 파라미터 추가
     },
     { skip: !isAuthenticated }
   );
@@ -35,6 +38,22 @@ export default function OrderHistoryScreen() {
       setPage((prevPage) => prevPage + 1);
     }
   };
+
+  useEffect(() => {
+    // 사용자가 타이핑을 멈추고 500ms가 지나면 API 호출용 상태를 업데이트합니다.
+    const handler = setTimeout(() => {
+      setDebouncedKeyword(searchQuery);
+    }, 500);
+
+    // 이전 타이머를 정리하여 불필요한 실행을 방지합니다.
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedKeyword]);
 
   useFocusEffect(
     useCallback(() => {
@@ -107,7 +126,11 @@ export default function OrderHistoryScreen() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <OrderHistoryHeader userName={"환진"} />
+      <OrderHistoryHeader
+        userName={"환진"}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
       <FlatList
         data={filteredOrders}
         renderItem={renderItem}

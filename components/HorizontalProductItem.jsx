@@ -48,7 +48,7 @@ const HorizontalProductItem = ({ item, loading, onPress }) => {
             "상품 설명을 불러오는 중입니다. 잠시만 기다려주세요."}
         </Text>
 
-        <YStack minHeight={50} jc="center">
+        <YStack minHeight={30} jc="center">
           {isSale ? (
             <XStack ai="flex-end" gap="$2" flexWrap="wrap">
               <Text fos="$4" col="red" fow="bold">

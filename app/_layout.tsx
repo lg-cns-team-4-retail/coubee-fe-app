@@ -108,8 +108,13 @@ function RootLayoutNav() {
               name="(tabs)"
               options={{
                 headerShown: false,
+                headerStyle: {
+                  backgroundColor: theme.primary?.val,
+                },
+                headerTintColor: "#fff",
               }}
             />
+
             <Stack.Screen
               name="(auth)/login"
               options={{
@@ -187,6 +192,16 @@ function RootLayoutNav() {
                 },
                 headerTintColor: "#fff",
                 headerBackTitle: "뒤로",
+                headerShadowVisible: false,
+              }}
+            />
+
+            <Stack.Screen
+              name="myList/index"
+              options={{
+                title: "찜한 매장 & 추천",
+                headerShown: false,
+
                 headerShadowVisible: false,
               }}
             />

@@ -143,7 +143,7 @@ export const StoreResult = ({ store, onPress }) => {
 
         {/* 상점 태그 */}
         <XStack flexWrap="wrap" gap="$2" paddingTop="$2">
-          {store.storeTag.slice(0, 3).map((tag) => (
+          {store.storeTag?.slice(0, 3).map((tag) => (
             <Button
               key={tag.categoryId}
               size="$2"

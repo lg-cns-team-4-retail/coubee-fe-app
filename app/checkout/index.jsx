@@ -10,6 +10,7 @@ import ProductCheckoutBar from "../store/ProductCheckoutBar";
 import { paymentAPI } from "../services/api";
 import { useAuthContext } from "../contexts/AuthContext";
 import CustomHeader from "../../components/CustomHeader";
+import { PaymentSummary } from "../../components/PaymentSummary";
 
 // 결제 수단 옵션
 const PAYMENT_METHODS = [
@@ -118,6 +119,8 @@ export default function CheckoutPage() {
           ) : (
             <Text mt="$10">장바구니가 비어있습니다.</Text>
           )}
+
+          <PaymentSummary />
         </YStack>
       </ScrollView>
 

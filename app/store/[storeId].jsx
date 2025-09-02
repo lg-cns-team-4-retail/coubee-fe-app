@@ -38,7 +38,7 @@ import ProductCheckoutBar from "./ProductCheckoutBar";
 import HorizontalSection from "./HorizontalSection";
 import { useAuthContext } from "../contexts/AuthContext";
 import { openModal } from "../../redux/slices/modalSlice";
-
+import HotdealIndicator from "../../components/HotdealIndicator";
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
 const ANIMATION_END_Y = HEADER_IMAGE_HEIGHT * 0.8;
@@ -208,12 +208,19 @@ export default function StorePage() {
       }
     }
   }, [isAuthenticated, dispatch, storeId, toggleInterest, storeDetail, toast]);
-
+  console.log(storeDetail?.backImg, "back img");
   const renderListHeader = useMemo(
     () => (
       <>
-        <Image source={backgroundSrc} style={styles.headerImage} />
+        <Image
+          source={{ uri: storeDetail?.backImg }}
+          style={styles.headerImage}
+          resizeMode="cover"
+        />
         <YStack bg="$background" style={styles.content} px="$4">
+          <XStack py="$4" ai="center">
+            <HotdealIndicator hotdeal={storeDetail?.hotdeal} />
+          </XStack>
           <XStack
             flex={1}
             px="$3"
@@ -253,6 +260,7 @@ export default function StorePage() {
               </Button>
             </XStack>
           </XStack>
+
           <XStack
             borderWidth={2}
             borderColor="$borderColor"
