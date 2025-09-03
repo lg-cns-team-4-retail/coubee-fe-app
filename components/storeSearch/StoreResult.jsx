@@ -17,7 +17,6 @@ export const StoreResult = ({ store, onPress }) => {
   const handleLikePress = React.useCallback(
     async (e) => {
       e.stopPropagation();
-      console.log(isAuthenticated);
       if (!isAuthenticated) {
         dispatch(
           openModal({

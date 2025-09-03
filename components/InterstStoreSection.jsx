@@ -7,9 +7,7 @@ import { router } from "expo-router";
 import ListEmptyComponent from "./ListEmptyComponent";
 
 const InterestStoreSection = ({ userName, stores, isLoading }) => {
-  const handleStoreRedirect = (storeId) => {
-    console.log(`StoreId ${storeId} pressed!`);
-  };
+  const handleStoreRedirect = (storeId) => {};
 
   if (isLoading) {
     return (

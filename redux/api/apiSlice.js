@@ -318,17 +318,6 @@ export const apiSlice = createApi({
         return rest;
       },
 
-      /* merge: (currentCache, newItems) => {
-        const existingProductIds = new Set(
-          currentCache.content.map((product) => product.productId)
-        );
-        const uniqueNewItems = newItems.content.filter(
-          (product) => !existingProductIds.has(product.productId)
-        );
-        currentCache.content.push(...uniqueNewItems);
-        currentCache.last = newItems.last;
-      }, */
-
       merge: (currentCache, newItems) => {
         currentCache.content.push(...newItems.content);
         currentCache.last = newItems.last;
@@ -369,6 +358,52 @@ export const apiSlice = createApi({
       refetchOnMountOrArgChange: true,
       refetchOnFocus: true,
     }),
+    //비로그인용 주변 가장 많이 팔린 물품목록
+    getPopularProduct: builder.query({
+      query: ({ keyword, lat, lng, page = 0, size = 10 }) => ({
+        url: `/order/products/bestsellers-nearby`,
+        method: "GET",
+        params: { latitude: lat, longitude: lng, page, size },
+      }),
+
+      transformResponse: (response) => {
+        if (Array.isArray(response.data)) {
+          return {
+            content: response.data,
+            last: true,
+          };
+        }
+        return response.data;
+      },
+
+      providesTags: (result) => [{ type: "Search", id: "LIST" }],
+
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, ...rest } = queryArgs;
+        return rest;
+      },
+
+      /*       merge: (currentCache, newItems) => {
+        currentCache.content.push(...newItems.content);
+        currentCache.last = newItems.last;
+      },
+
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg;
+      }, */
+    }),
+    //유저 주변에 인기 있는 매장용
+    getPopularInterestStore: builder.query({
+      query: ({ lat, lng }) => ({
+        url: `/store/near/interest`,
+        method: "GET",
+        params: { lat, lng },
+      }),
+      transformResponse: (response) => response.data,
+      providesTags: (result) => [{ type: "Store", id: result }],
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+    }),
   }),
 });
 
@@ -386,4 +421,6 @@ export const {
   useGetTotalDiscountQuery,
   useGetRecommendedProductQuery,
   useGetInterestStoreQuery,
+  useGetPopularProductQuery,
+  useGetPopularInterestStoreQuery,
 } = apiSlice;

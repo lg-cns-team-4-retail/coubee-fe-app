@@ -10,7 +10,6 @@ const formatPrice = (price) => {
 
 const HorizontalProductItem = ({ item, loading, onPress }) => {
   const isSale = item && item.originPrice > item.salePrice;
-
   const discountRate = isSale
     ? Math.round(((item.originPrice - item.salePrice) / item.originPrice) * 100)
     : 0;
@@ -40,6 +39,11 @@ const HorizontalProductItem = ({ item, loading, onPress }) => {
         />
       </YStack>
       <YStack f={1} gap="$1.5" jc="center">
+        {item && item.totalQuantitySold && item.totalQuantitySold > 0 && (
+          <Text fos="$3" fow={700} col="$info" my="$1">
+            {`누적 판매 ${item.totalQuantitySold}개 `}
+          </Text>
+        )}
         <Text fos="$4" fow="bold" numberOfLines={1}>
           {item?.productName || "상품 이름을 불러오는 중"}
         </Text>
@@ -67,9 +71,11 @@ const HorizontalProductItem = ({ item, loading, onPress }) => {
             </Text>
           )}
         </YStack>
-        <Text fos="$3" col="grey" mt="$1">
-          {item?.stock ? `남은 수량: ${item.stock}개` : "품절"}
-        </Text>
+        {item && !item.totalQuantitySold && (
+          <Text fos="$3" col="grey" mt="$1">
+            {item?.stock ? `남은 수량: ${item.stock}개` : "품절"}
+          </Text>
+        )}
       </YStack>
     </XStack>
   );

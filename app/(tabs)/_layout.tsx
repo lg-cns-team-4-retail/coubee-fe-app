@@ -10,16 +10,18 @@ import {
 import CoubeeSvgClick from "../../components/icons/CoubeeSvgClick";
 import CoubeeSvgUnclick from "../../components/icons/CoubeeSvgUnclick";
 import CoubeeSvgUnclickLeft from "../../components/icons/CoubeeSvgUnclickLeft";
+import { useAuthContext } from "app/contexts/AuthContext";
 
 const TAB_ICON_SIZE = 24;
 
 export default function TabLayout() {
   const theme = useTheme();
+  const { isAuthenticated, nickname } = useAuthContext();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme.color!.val,
+        tabBarActiveTintColor: theme.primary!.val,
         tabBarStyle: {
           backgroundColor: theme.background!.val,
           borderTopColor: theme.background!.val,
@@ -36,13 +38,7 @@ export default function TabLayout() {
         options={{
           title: "홈",
           tabBarIcon: ({ color }) => <Home color={color as any} />,
-          headerRight: () => (
-            <Link href="checkout" asChild>
-              <Button mr="$4" size="$2.5">
-                장바구니임
-              </Button>
-            </Link>
-          ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -53,6 +49,8 @@ export default function TabLayout() {
           tabBarStyle: {
             display: "none",
           },
+          presentation: "modal", // iOS에서 아래에서 위로 올라오는 효과
+          animation: "fade", // 모든 플랫폼에서 부드럽게 나타나는 효과
           headerShown: false,
         }}
       />

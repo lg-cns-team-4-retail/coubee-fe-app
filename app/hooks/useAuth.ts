@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { AuthService } from "../services/auth";
 import { useDispatch } from "react-redux"; // 👈 1. useDispatch import
 import { apiSlice } from "../../redux/api/apiSlice"; // 👈 2. apiSlice import
+import { router } from "expo-router";
 
 export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   userId: string | null;
+  nickname: string | null;
 }
 
 export function useAuth() {
@@ -15,19 +17,22 @@ export function useAuth() {
     isAuthenticated: false,
     isLoading: true,
     userId: null,
+    nickname: null,
   });
 
   const checkAuthStatus = async () => {
     try {
-      const [isAuthenticated, userId] = await Promise.all([
+      const [isAuthenticated, userId, nickname] = await Promise.all([
         AuthService.isAuthenticated(),
         AuthService.getUserId(),
+        AuthService.getNickname(),
       ]);
 
       setAuthState({
         isAuthenticated,
         isLoading: false,
         userId,
+        nickname,
       });
     } catch (error) {
       console.error("Error checking auth status:", error);
@@ -35,17 +40,20 @@ export function useAuth() {
         isAuthenticated: false,
         isLoading: false,
         userId: null,
+        nickname: null,
       });
     }
   };
 
   const login = async (
     token: string,
+    expiresIn: number,
     refreshToken?: string,
-    userId?: string
+    userId?: string,
+    nickname?: string
   ) => {
     try {
-      await AuthService.login(token, refreshToken, userId);
+      await AuthService.login(token, expiresIn, refreshToken, userId, nickname);
 
       // 로그인 성공 후 푸시 토큰 등록 및 로컬 저장
       await registerAndStorePushToken(userId);
@@ -101,22 +109,21 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      // 1. 서버에서 푸시 토큰 삭제
       const pushToken = await AuthService.getPushToken();
       if (pushToken) {
         const { deleteTokenFromBackend } = await import("../services/api");
         await deleteTokenFromBackend(pushToken);
       }
 
-      // 2. 로컬의 모든 인증 데이터 삭제
       await AuthService.clearAll();
       dispatch(apiSlice.util.resetApiState());
-      // 3. 상태 업데이트
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
         userId: null,
+        nickname: null,
       });
+      router.push("/(tabs)");
     } catch (error) {
       console.error("Error during logout:", error);
       throw error;

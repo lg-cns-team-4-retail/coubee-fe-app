@@ -119,8 +119,7 @@ export default function CheckoutPage() {
           ) : (
             <Text mt="$10">장바구니가 비어있습니다.</Text>
           )}
-
-          <PaymentSummary />
+          {items.length > 0 && <PaymentSummary />}
         </YStack>
       </ScrollView>
 

@@ -25,7 +25,6 @@ const ProductSearchTab = ({ searchKeyword, userLocation }) => {
       <ProductItem
         item={item}
         onPress={() => {
-          console.log(item.storeId, searchKeyword);
           router.push(`/store/${item.storeId}?keyword=${searchKeyword}`);
         }}
       />
@@ -34,7 +33,6 @@ const ProductSearchTab = ({ searchKeyword, userLocation }) => {
   );
 
   const loadMore = () => {
-    console.log("load more");
     if (!data?.last && !isFetching) {
       setPage((prevPage) => prevPage + 1);
     }

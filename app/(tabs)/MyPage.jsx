@@ -1,4 +1,12 @@
-import { Text, View, YStack, ScrollView, Separator } from "tamagui";
+import {
+  Text,
+  View,
+  YStack,
+  ScrollView,
+  Separator,
+  Button,
+  XStack,
+} from "tamagui";
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { PurchaseSummaryCard } from "../../components/PurchaseSummaryCard";
@@ -12,11 +20,16 @@ import { openModal } from "../../redux/slices/modalSlice";
 import { useAuthContext } from "../contexts/AuthContext";
 import RecommendedProductSection from "../../components/RecommendProductSection";
 import InterestStoreSection from "../../components/InterstStoreSection";
+import { useToastController } from "@tamagui/toast";
 
 export default function TabTwoScreen() {
   const dispatch = useDispatch();
-
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+  const toast = useToastController();
+  const {
+    logout,
+    isAuthenticated,
+    isLoading: isAuthLoading,
+  } = useAuthContext();
 
   useFocusEffect(
     useCallback(() => {
@@ -48,23 +61,37 @@ export default function TabTwoScreen() {
     data: summaryData,
     isLoading,
     refetch: refetchSummary,
-  } = useGetTotalDiscountQuery();
+  } = useGetTotalDiscountQuery(undefined, {
+    skip: !isAuthenticated,
+  });
   const {
     data: stores,
     isLoading: isInterstStoresLoading,
     refetch: refetchStores,
-  } = useGetInterestStoreQuery();
+  } = useGetInterestStoreQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   const {
     data: products,
     isLoading: isRecommendedProductLoading,
     refetch: refetchProducts,
-  } = useGetRecommendedProductQuery();
+  } = useGetRecommendedProductQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.show("로그아웃 성공");
+    } catch (error) {
+      toast.show("로그아웃에 실패했습니다");
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
       if (isAuthenticated) {
-        console.log("마이페이지 탭 포커스됨. 데이터를 새로고침합니다.");
         refetchSummary();
         refetchStores();
         refetchProducts();
@@ -86,9 +113,7 @@ export default function TabTwoScreen() {
 
   return (
     <View flex={1} bg="$background">
-      {/* 👇 기존 YStack을 ScrollView로 교체하여 스크롤 기능을 부여합니다. */}
       <ScrollView flex={1} backgroundColor="$background">
-        {/* 👇 ScrollView 내부에 content를 담을 YStack을 배치하고, gap으로 간격을 줍니다. */}
         <YStack padding="$4" gap="$1">
           <PurchaseSummaryCard data={summaryData} isLoading={isLoading} />
 
@@ -104,6 +129,21 @@ export default function TabTwoScreen() {
             isLoading={isInterstStoresLoading}
           />
         </YStack>
+
+        <XStack ai="center" jc="center">
+          <Button
+            my="$2"
+            width="50%"
+            variant="outlined"
+            bg="$primary"
+            color="white"
+            fontWeight="bold"
+            size="$5"
+            onPress={handleLogout}
+          >
+            로그아웃
+          </Button>
+        </XStack>
       </ScrollView>
     </View>
   );

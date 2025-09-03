@@ -39,12 +39,7 @@ export const SearchComponent = () => {
   const handleSearch = () => {
     const newKeyword = inputValue.trim();
 
-    // 2. 이 변수를 사용해 상태를 업데이트합니다.
     setSearchKeyword(newKeyword);
-
-    // 3. 그리고 라우터 이동에도 동일한 변수를 사용합니다.
-    console.log(newKeyword); // 이제 올바른 값이 출력됩니다.
-    /* router.push(`/store/${1177}?keyword=${newKeyword}`); */
   };
 
   return (

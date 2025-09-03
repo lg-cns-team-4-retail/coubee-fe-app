@@ -91,16 +91,20 @@ export default function StorePage() {
       { skip: !activeKeyword }
     );
 
+  const { openProduct } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (openProduct && typeof openProduct === "string") {
+      router.push(`/productView/${openProduct}`);
+    }
+  }, [openProduct]);
+
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
   const handleLoadMore = () => {
-    if (products) {
-      console.log(`products.last 값: ${products.last}`);
-    }
-
     if (!isFetching && products && !products.last) {
       setPage((prevPage) => prevPage + 1);
     }
@@ -208,7 +212,6 @@ export default function StorePage() {
       }
     }
   }, [isAuthenticated, dispatch, storeId, toggleInterest, storeDetail, toast]);
-  console.log(storeDetail?.backImg, "back img");
   const renderListHeader = useMemo(
     () => (
       <>

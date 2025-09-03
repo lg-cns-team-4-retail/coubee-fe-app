@@ -1,91 +1,120 @@
-import { Alert } from "react-native";
-import { useState } from "react";
-import { XStack, YStack, Button, Text, Card, Input } from "tamagui";
-import { ToastControl } from "../../components/CurrentToast";
-import { getExpoPushToken } from "../services/notifications";
+import { useState, useEffect } from "react";
+import { YStack, ScrollView, Button, XStack, Input } from "tamagui";
 import { useAuthContext } from "../contexts/AuthContext";
-import { router } from "expo-router";
 import { useLocation } from "../hooks/useLocation";
 import { persistor } from "../../redux/store";
-import QRCode from "react-native-qrcode-svg";
 import { useDispatch } from "react-redux";
+import { Search } from "@tamagui/lucide-icons";
+import { router } from "expo-router";
 
 import { apiSlice } from "../../redux/api/apiSlice";
-import NewOrderListItem from "../../components/NewOrderListItem";
+import {
+  useGetPopularProductQuery,
+  useGetPopularInterestStoreQuery,
+  useGetRecommendedProductQuery,
+} from "../../redux/api/apiSlice";
+import PopularProductSection from "../../components/LandingPage/PopularProductSection";
+import PopularStoreSection from "../../components/LandingPage/PopularStoreSection";
 
-export default function TabOneScreen() {
-  const { logout, userId, isAuthenticated } = useAuthContext();
+import AppHeader from "../../components/AppHeader";
+import { useToastController } from "@tamagui/toast";
+import RecommendedProductSection from "../../components/RecommendProductSection";
+
+export default function LandingPage() {
+  const { logout, userId, isAuthenticated, nickname } = useAuthContext();
   const dispatch = useDispatch();
-  const [testingStoreId, setTestingStoreId] = useState("");
-  const { location, loading, error, getCurrentLocation } = useLocation();
+  const toast = useToastController();
+  const { location } = useLocation();
 
-  const handleCopyPushToken = async () => {
-    const { AuthService } = await import("../services/auth");
-    const [expoToken, storedToken] = await Promise.all([
-      getExpoPushToken(),
-      AuthService.getPushToken(),
-    ]);
+  const [userLocation, setUserLocation] = useState(null);
 
-    const tokenToCopy = expoToken || storedToken;
-    if (tokenToCopy) {
-      // 클립보드에 복사하는 기능이 필요하면 expo-clipboard 설치 후 사용
-      Alert.alert(
-        "푸시 토큰",
-        `토큰이 준비되었습니다:\n\n${tokenToCopy}\n\nExpo Push Tool에서 사용하세요!`,
-        [{ text: "확인", style: "default" }]
-      );
-      console.log("=== PUSH TOKEN FOR EXPO TOOL ===");
-      console.log(tokenToCopy);
-      console.log("=== COPY THIS TOKEN ===");
-    } else {
-      Alert.alert("오류", "푸시 토큰을 가져올 수 없습니다.");
+  useEffect(() => {
+    if (location) {
+      setUserLocation({
+        lat: location.latitude,
+        lng: location.longitude,
+      });
+      //집에서 테스트용 박아두기
+      /* setUserLocation({
+        lat: 37.559661293097975,
+        lng: 127.0053580437816,
+      }); */
     }
-  };
+  }, [location]);
+  const [page, setPage] = useState(0);
 
+  //인기 제품 보여주기
+  const { data: popularProduct, isLoading: popularProductLoading } =
+    useGetPopularProductQuery(
+      {
+        page,
+        size: 10,
+        ...userLocation,
+      },
+      {
+        skip: !userLocation,
+      }
+    );
+  //인기 매장
+  const { data: popularInterestStore, isLoading: popularInterestStoreLoading } =
+    useGetPopularInterestStoreQuery(
+      {
+        ...userLocation,
+      },
+      {
+        skip: !userLocation,
+      }
+    );
+  const popularProductList = popularProduct?.content || [];
+  //로그인용 유저 추천 (personalize)
+  const {
+    data: recommendProducts,
+    isLoading: isRecommendProductLoading,
+    refetch: refetchProducts,
+  } = useGetRecommendedProductQuery(undefined, {
+    skip: !isAuthenticated,
+  });
   const handleLogout = async () => {
     try {
       await logout();
       dispatch(apiSlice.util.resetApiState());
-      Alert.alert("성공", "로그아웃되었습니다.");
+      toast.show("로그아웃 성공");
     } catch (error) {
-      Alert.alert("오류", "로그아웃에 실패했습니다.");
+      toast.show("로그아웃에 실패했습니다");
     }
   };
 
   const handlePurge = async () => {
     await persistor.purge();
   };
-  const storeId = 1242;
-  const storeId2 = 1176;
-  const storeId3 = 1276;
-  const testOrderId = "order_36d4941cdd7546bb8a437d324fd72be5";
-  const testOrder2 = {
-    orderId: 12345,
-    status: "PAID",
-    createdAt: "2025-07-24T10:30:00Z",
-    totalAmount: 39800,
-    discountRate: 13, // 할인율 (없으면 0)
-    store: {
-      storeName: "장씨네 과일가게 동국대점",
-    },
-    items: [
-      {
-        productId: 1,
-        productName: "딱딱한 물복숭아",
-        quantity: 9,
-      },
-      {
-        productId: 2,
-        productName: "따뜻한 수박",
-        quantity: 3,
-      },
-    ],
-  };
   return (
-    <YStack flex={1} gap="$8" px="$10" pt="$5" bg="$background">
-      <ToastControl />
+    <YStack flex={1} bg="$background">
+      <AppHeader />
+      <ScrollView>
+        <YStack flex={1} gap="$3" px="$3" pt="$5">
+          {isAuthenticated ? (
+            <RecommendedProductSection
+              products={recommendProducts}
+              isLoading={isRecommendProductLoading}
+            />
+          ) : (
+            <PopularProductSection
+              products={popularProductList}
+              isLoading={popularProductLoading}
+            />
+          )}
+          <PopularStoreSection
+            stores={popularInterestStore}
+            isLoading={popularInterestStoreLoading}
+          />
+        </YStack>
+      </ScrollView>
+    </YStack>
+  );
+}
 
-      {/* <Card padding="$4" width="90%" backgroundColor="$background">
+{
+  /* <Card padding="$4" width="90%" backgroundColor="$background">
         <YStack gap="$2">
           <Text fontSize="$5" fontWeight="bold">
             위치 정보
@@ -106,11 +135,11 @@ export default function TabOneScreen() {
             위치 새로고침
           </Button>
         </YStack>
-      </Card> */}
+      </Card> */
+}
 
-      {/* <NewOrderListItem order={testOrder2} /> */}
-
-      {isAuthenticated ? (
+{
+  /*  {isAuthenticated ? (
         <YStack flexWrap="wrap" gap="$4">
           <Text>환영합니다!</Text>
           <Text>사용자명: {userId}</Text>
@@ -199,12 +228,5 @@ export default function TabOneScreen() {
             주문내역
           </Button>
         </XStack>
-      )}
-
-      <QRCode
-        logoSize={300}
-        value="https://www.notion.so/4-Honeycomb-225fef49d8d5807dac52ee9bd7ff82bc"
-      />
-    </YStack>
-  );
+      )} */
 }

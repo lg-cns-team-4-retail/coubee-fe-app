@@ -37,7 +37,6 @@ const OrderDetailCard = ({
   isLoading,
   isFetching,
 }) => {
-  console.log(order.status);
   const dispatch = useDispatch();
 
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();

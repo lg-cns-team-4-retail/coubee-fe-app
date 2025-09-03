@@ -1,36 +1,31 @@
 import React from "react";
 import { FlatList } from "react-native";
 import { YStack, Text, Paragraph, Spinner, Button, XStack } from "tamagui";
-import HorizontalProductItem from "./HorizontalProductItem";
+import HorizontalProductItem from "../HorizontalProductItem";
 import { ChevronRight } from "@tamagui/lucide-icons";
-import Skeleton from "./Skeleton";
 import { router } from "expo-router";
-import ListEmptyComponent from "./ListEmptyComponent";
-import { useAuthContext } from "../app/contexts/AuthContext";
+import ListEmptyComponent from "../ListEmptyComponent";
+import { useAuthContext } from "../../app/contexts/AuthContext";
+import StoreResult from "../storeSearch/StoreResult";
 
-const RecommendedProductSection = ({ userName, products, isLoading }) => {
-  const { isAuthenticated, nickname } = useAuthContext();
+const PopularStoreSection = ({ userName, stores, isLoading }) => {
+  const { logout, userId, isAuthenticated, nickname } = useAuthContext();
 
-  const handleProductPress = (productId) => {};
+  const handleStorePress = (productId) => {};
 
-  /*   if (isLoading) {
+  if (isLoading) {
     return (
       <YStack h={100} ai="center" jc="center">
         <Spinner />
       </YStack>
     );
   }
- */
+
   const renderItem = ({ item }) => (
     <YStack width="350" mr="$3">
-      <HorizontalProductItem
-        item={item}
-        onPress={() =>
-          router.push({
-            pathname: `/store/${item.storeId}`,
-            params: { openProduct: item.productId, keyword: item.productName },
-          })
-        }
+      <StoreResult
+        store={item}
+        onPress={() => router.push(`/store/${item.storeId}`)}
       />
     </YStack>
   );
@@ -41,25 +36,25 @@ const RecommendedProductSection = ({ userName, products, isLoading }) => {
         {/* 왼쪽: 텍스트 영역 */}
         <YStack>
           <Paragraph size="$8" color="gray" fontWeight="bold">
-            <Text color="$info">{isAuthenticated ? nickname : "사용자"}</Text>
-            님에게
+            지금은 이곳이 인기있어요
           </Paragraph>
           <Paragraph size="$8" fontWeight="bold" color="$color">
-            추천하는 물품이에요
+            <Text color="$info">{isAuthenticated ? nickname : "사용자"}</Text>님
+            근처 있는 매장
           </Paragraph>
         </YStack>
       </XStack>
 
-      {!products || products.length === 0 ? (
-        <ListEmptyComponent message={"쿠비가 아직 추천 물품을 찾지 못했어요"} />
+      {!stores || stores.length === 0 ? (
+        <ListEmptyComponent message={"주변 인기 있는 매장이 존재하지 않아요"} />
       ) : isLoading ? (
         <Spinner />
       ) : (
         <FlatList
           horizontal
-          data={products}
+          data={stores}
           renderItem={renderItem}
-          keyExtractor={(item) => item.productId.toString()}
+          keyExtractor={(item) => item.storeId.toString()}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16 }}
         />
@@ -68,4 +63,4 @@ const RecommendedProductSection = ({ userName, products, isLoading }) => {
   );
 };
 
-export default RecommendedProductSection;
+export default PopularStoreSection;

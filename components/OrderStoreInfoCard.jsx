@@ -4,7 +4,6 @@ import { ChevronDown, ChevronUp, Phone } from "@tamagui/lucide-icons";
 import PhoneLink from "./PhoneLink";
 
 const OrderStoreInfoCard = ({ store, product, isExpanded, onExpandChange }) => {
-  console.log(product.map((item) => item.product));
   const OrderProductItem = ({ product }) => (
     <>
       <XStack p="$3" ai="center" gap="$3">
