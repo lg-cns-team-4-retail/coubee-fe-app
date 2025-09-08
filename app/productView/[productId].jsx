@@ -10,6 +10,7 @@ import {
   Paragraph,
   View,
   Spinner,
+  ScrollView,
 } from "tamagui";
 import { ChevronLeft, Plus, Minus } from "@tamagui/lucide-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -23,10 +24,17 @@ import Animated, {
 import { useWindowDimensions } from "react-native";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { addItem, replaceCart } from "../../redux/slices/cartSlice";
+import {
+  addItem,
+  replaceCart,
+  selectCartItems,
+} from "../../redux/slices/cartSlice";
 import { useAuthContext } from "../contexts/AuthContext";
 import { openModal } from "../../redux/slices/modalSlice";
-import { useGetProductDetailQuery } from "../../redux/api/apiSlice";
+import {
+  useGetProductDetailQuery,
+  useGetStoreDetailQuery,
+} from "../../redux/api/apiSlice";
 import { postViewCountProduct } from "../services/api";
 import { useToastController } from "@tamagui/toast";
 
@@ -40,12 +48,9 @@ export default function ProductDetailPage() {
 
   const { isAuthenticated } = useAuthContext();
   const { productId } = useLocalSearchParams();
-  /*   const { cartStoreId, cartItemCount } = useSelector((state) => ({
-    cartStoreId: state.cart.storeId,
-    cartItemCount: state.cart.items.length,
-  })); */
   const cartStoreId = useSelector((state) => state.cart.storeId);
   const cartItemCount = useSelector((state) => state.cart.items.length);
+  const cartItems = useSelector(selectCartItems);
   const {
     data: item,
     isLoading,
@@ -54,6 +59,10 @@ export default function ProductDetailPage() {
     isSuccess,
     error,
   } = useGetProductDetailQuery(productId, { skip: !productId });
+
+  const { data: storeDetail } = useGetStoreDetailQuery(item?.storeId, {
+    skip: !item?.storeId,
+  });
 
   //view count용
   useEffect(() => {
@@ -117,7 +126,9 @@ export default function ProductDetailPage() {
       originPrice: item?.originPrice,
       salePrice: item?.salePrice,
       storeId: item?.storeId,
+      availableStock: item?.stock,
       quantity,
+      hotdeal: storeDetail?.hotdeal,
     };
 
     if (cartItemCount > 0 && cartStoreId !== newItem.storeId) {
@@ -149,6 +160,16 @@ export default function ProductDetailPage() {
         })
       );
     } else {
+      const itemInCart = cartItems.find(
+        (item) => item.productId === newItem.productId
+      );
+
+      if (itemInCart && itemInCart.quantity >= newItem.availableStock) {
+        toast.show("재고 부족", {
+          message: "장바구니에 담을 수 있는 최대 수량입니다.",
+        });
+        return;
+      }
       dispatch(addItem(newItem));
       toast.show("상품 추가 완료", {
         message: `${newItem.productName}를 담았습니다`,
@@ -240,7 +261,21 @@ export default function ProductDetailPage() {
                       </Text>
                     )}
                   </XStack>
-                  <Separator />
+
+                  <ScrollView f={1}>
+                    <Separator mb="$4" />
+                    <YStack gap="$2">
+                      <Text fos="$4" fow={700}>
+                        상품 정보
+                      </Text>
+                      <Text my="$2" fos="$4" color="gray">
+                        {item?.description}
+                      </Text>
+                      <Text color="$gray10">남은 수량: {item?.stock}개</Text>
+                    </YStack>
+                  </ScrollView>
+
+                  {/* <Separator />
                   <YStack gap="$2">
                     <Text fos="$4" fow={700}>
                       상품 정보
@@ -250,7 +285,7 @@ export default function ProductDetailPage() {
                     </Text>
                     <Text color="$gray10">남은 수량: {item?.stock}개</Text>
                   </YStack>
-                  <YStack f={1} />
+ */}
                   <Button
                     size="$5"
                     bg="$primary"

@@ -68,7 +68,6 @@ async function refreshAccessToken() {
     console.log(refreshToken, "watch refresh token");
     if (!refreshToken) throw new Error("No refresh token available");
 
-    console.log("[선제적 갱신] 리프레시 토큰으로 새 Access Token 요청");
     const response = await axios.post(`${API_BASE_URL}/user/auth/refresh`, {
       token: refreshToken,
     });
@@ -76,12 +75,10 @@ async function refreshAccessToken() {
     const { access } = response.data.data;
     await AuthService.login(access.token, access.expiresIn, refreshToken);
 
-    console.log("[선제적 갱신] 새 Access Token 저장 완료");
     isRefreshing = false;
     onRefreshed(access.token);
     return access.token;
   } catch (error) {
-    console.error("선제적 토큰 갱신 실패. 로그아웃 합니다.", error);
     isRefreshing = false;
     onRefreshed(null);
     await handleTokenExpiredLogout();
@@ -121,6 +118,19 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const { config: originalRequest, response } = error;
+    console.group("--- Axios Interceptor 401 Error ---");
+    console.log("Request URL:", originalRequest.url);
+    console.log("Request Method:", originalRequest.method);
+    console.log("Request Headers:", originalRequest.headers);
+    if (originalRequest.data) {
+      console.log("Request Data:", originalRequest.data);
+    }
+    if (response) {
+      console.log("Response Status:", response.status);
+      console.log("Response Data:", response.data);
+    }
+    console.groupEnd();
+
     if (response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       console.log(
@@ -164,7 +174,8 @@ export async function loginUser(credentials) {
       accessRefreshToken.access.token,
       accessRefreshToken.access.expiresIn,
       accessRefreshToken.refresh.token,
-      String(userInfo.userId)
+      String(userInfo.userId),
+      String(userInfo.nickname)
     );
     return { success: true, data: response.data };
   } catch (error) {
@@ -223,13 +234,13 @@ export async function deleteTokenFromBackend(token) {
     await axiosInstance.post(`/user/notification/token/delete`, {
       notificationToken: token,
     });
-    console.log("Push token deleted successfully");
+    /*     console.log("Push token deleted successfully"); */
     return true;
   } catch (error) {
-    console.error(
+    /* console.error(
       "Error deleting push token:",
       error.response?.data || error.message
-    );
+    ); */
     return false;
   }
 }

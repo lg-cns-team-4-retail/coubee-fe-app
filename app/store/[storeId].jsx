@@ -38,7 +38,7 @@ import ProductCheckoutBar from "./ProductCheckoutBar";
 import HorizontalSection from "./HorizontalSection";
 import { useAuthContext } from "../contexts/AuthContext";
 import { openModal } from "../../redux/slices/modalSlice";
-
+import HotdealIndicator from "../../components/HotdealIndicator";
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
 const ANIMATION_END_Y = HEADER_IMAGE_HEIGHT * 0.8;
@@ -91,16 +91,20 @@ export default function StorePage() {
       { skip: !activeKeyword }
     );
 
+  const { openProduct } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (openProduct && typeof openProduct === "string") {
+      router.push(`/productView/${openProduct}`);
+    }
+  }, [openProduct]);
+
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
   const handleLoadMore = () => {
-    if (products) {
-      console.log(`products.last 값: ${products.last}`);
-    }
-
     if (!isFetching && products && !products.last) {
       setPage((prevPage) => prevPage + 1);
     }
@@ -208,12 +212,18 @@ export default function StorePage() {
       }
     }
   }, [isAuthenticated, dispatch, storeId, toggleInterest, storeDetail, toast]);
-
   const renderListHeader = useMemo(
     () => (
       <>
-        <Image source={backgroundSrc} style={styles.headerImage} />
+        <Image
+          source={{ uri: storeDetail?.backImg }}
+          style={styles.headerImage}
+          resizeMode="cover"
+        />
         <YStack bg="$background" style={styles.content} px="$4">
+          <XStack py="$4" ai="center">
+            <HotdealIndicator hotdeal={storeDetail?.hotdeal} />
+          </XStack>
           <XStack
             flex={1}
             px="$3"
@@ -221,7 +231,9 @@ export default function StorePage() {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Text style={styles.storeTitle}>{storeDetail?.storeName}</Text>
+            <Text flex={1} numberOfLines={2} style={styles.storeTitle}>
+              {storeDetail?.storeName}
+            </Text>
 
             <XStack ai="center" gap="$2">
               <Button
@@ -253,6 +265,7 @@ export default function StorePage() {
               </Button>
             </XStack>
           </XStack>
+
           <XStack
             borderWidth={2}
             borderColor="$borderColor"

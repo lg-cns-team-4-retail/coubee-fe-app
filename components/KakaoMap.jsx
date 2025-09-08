@@ -13,7 +13,6 @@ export default function KakaoMap({
   width = "100%",
   height = 450,
 }) {
-  console.log(latitude, longitude);
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -59,9 +58,6 @@ export default function KakaoMap({
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}
-        onMessage={(event) =>
-          console.log("From WebView:", event.nativeEvent.data)
-        }
       />
     </View>
   );

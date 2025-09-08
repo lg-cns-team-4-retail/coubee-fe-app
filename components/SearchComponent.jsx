@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { YStack, XStack, Input, Button, Text } from "tamagui";
 import MapComponentContainer from "./storeSearch/MapComponentContainer";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Search } from "@tamagui/lucide-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import SearchResultsSheet from "./storeSearch/SearchResultsSheet";
 import { useTheme } from "tamagui";
 import StoreSearchTab from "./storeSearch/StoreSearchTab";
@@ -33,18 +33,23 @@ export const SearchComponent = () => {
     }
   }, [location]);
 
+  useFocusEffect(
+    useCallback(() => {
+      setInputValue("");
+      setSearchKeyword("");
+      setActiveTab("store");
+
+      return () => {};
+    }, [])
+  );
+
   const [inputValue, setInputValue] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const handleSearch = () => {
     const newKeyword = inputValue.trim();
 
-    // 2. 이 변수를 사용해 상태를 업데이트합니다.
     setSearchKeyword(newKeyword);
-
-    // 3. 그리고 라우터 이동에도 동일한 변수를 사용합니다.
-    console.log(newKeyword); // 이제 올바른 값이 출력됩니다.
-    router.push(`/store/${1177}?keyword=${newKeyword}`);
   };
 
   return (
@@ -118,6 +123,7 @@ export const SearchComponent = () => {
           {activeTab === "store" && (
             <>
               <StoreSearchTab
+                key={`store-${searchKeyword}`}
                 searchKeyword={searchKeyword}
                 userLocation={userLocation}
               />
@@ -127,6 +133,7 @@ export const SearchComponent = () => {
           {activeTab === "product" && (
             <>
               <ProductSearchTab
+                key={`product-${searchKeyword}`}
                 searchKeyword={searchKeyword}
                 userLocation={userLocation}
               />

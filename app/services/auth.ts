@@ -5,6 +5,7 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 const USER_ID_KEY = "userId";
 const PUSH_TOKEN_KEY = "pushToken";
 const ACCESS_TOKEN_EXPIRATION_KEY = "accessTokenExpiration";
+const NICKNAME_KEY = "nickname";
 
 export class AuthService {
   // JWT 토큰 저장
@@ -67,6 +68,26 @@ export class AuthService {
     } catch (error) {
       console.error("Error retrieving user ID:", error);
       return null;
+    }
+  }
+
+  // 유저네임 조회
+  static async getNickname(): Promise<string | null> {
+    try {
+      return await SecureStore.getItemAsync(NICKNAME_KEY);
+    } catch (error) {
+      console.error("Error retrieving nickname:", error);
+      return null;
+    }
+  }
+
+  // 유저네임 저장
+  static async setNickname(nickname: string): Promise<void> {
+    try {
+      await SecureStore.setItemAsync(NICKNAME_KEY, nickname);
+    } catch (error) {
+      console.error("Error saving nickname:", error);
+      throw error;
     }
   }
 
@@ -146,7 +167,6 @@ export class AuthService {
     }
   }
 
-  // ❗ 새로운 메서드 추가: 만료 시간 조회
   static async getAccessTokenExpiration(): Promise<number | null> {
     try {
       const expirationTime = await SecureStore.getItemAsync(
@@ -159,7 +179,6 @@ export class AuthService {
     }
   }
 
-  // ❗ 수정된 메서드: clearAll
   static async clearAll(): Promise<void> {
     try {
       await Promise.all([
@@ -168,6 +187,7 @@ export class AuthService {
         SecureStore.deleteItemAsync(USER_ID_KEY),
         SecureStore.deleteItemAsync(PUSH_TOKEN_KEY),
         SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRATION_KEY),
+        SecureStore.deleteItemAsync(NICKNAME_KEY),
       ]);
       console.log("All auth data cleared");
     } catch (error) {
@@ -179,7 +199,8 @@ export class AuthService {
     token: string,
     expiresIn: number, // expiresIn 파라미터 추가
     refreshToken?: string,
-    userId?: string
+    userId?: string,
+    nickname?: string
   ): Promise<void> {
     try {
       await this.setToken(token);
@@ -190,6 +211,9 @@ export class AuthService {
       }
       if (userId) {
         await this.setUserId(userId);
+      }
+      if (nickname) {
+        await this.setNickname(nickname);
       }
     } catch (error) {
       console.error("Error during login:", error);

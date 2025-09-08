@@ -16,6 +16,7 @@ export function CheckoutItem({
   salePrice,
   originPrice,
   quantity,
+  availableStock,
 }) {
   const dispatch = useDispatch();
 
@@ -29,7 +30,9 @@ export function CheckoutItem({
   };
 
   const handleIncrease = () => {
-    dispatch(increaseQuantity({ productId }));
+    if (quantity < availableStock) {
+      dispatch(increaseQuantity({ productId }));
+    }
   };
 
   const isSale = originPrice > salePrice;
@@ -67,7 +70,13 @@ export function CheckoutItem({
           <Text fontSize="$3" fontWeight="bold">
             {quantity}
           </Text>
-          <Button icon={Plus} size="$2" circular onPress={handleIncrease} />
+          <Button
+            icon={Plus}
+            disabled={quantity >= availableStock}
+            size="$2"
+            circular
+            onPress={handleIncrease}
+          />
         </XStack>
       </YStack>
       <YStack f={1} gap="$1.5" jc="center">

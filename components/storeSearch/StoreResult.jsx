@@ -17,7 +17,6 @@ export const StoreResult = ({ store, onPress }) => {
   const handleLikePress = React.useCallback(
     async (e) => {
       e.stopPropagation();
-      console.log(isAuthenticated);
       if (!isAuthenticated) {
         dispatch(
           openModal({
@@ -133,9 +132,13 @@ export const StoreResult = ({ store, onPress }) => {
         {/* 주소 정보 */}
         <XStack alignItems="center" gap="$2">
           <MapPin size={16} color="$gray10" />
-          <Text color="$green10" fontWeight="bold">
-            {Math.round(store.distance)}m
-          </Text>
+
+          {store?.distance > 0 && (
+            <Text color="green" fontWeight="bold">
+              {Math.round(store.distance)}m
+            </Text>
+          )}
+
           <Text color="$gray10" numberOfLines={1}>
             {store.storeAddress}
           </Text>
@@ -143,7 +146,7 @@ export const StoreResult = ({ store, onPress }) => {
 
         {/* 상점 태그 */}
         <XStack flexWrap="wrap" gap="$2" paddingTop="$2">
-          {store.storeTag.slice(0, 3).map((tag) => (
+          {store.storeTag?.slice(0, 3).map((tag) => (
             <Button
               key={tag.categoryId}
               size="$2"

@@ -137,7 +137,6 @@ export default function StoreInformationPage() {
     <YStack bg="$background" style={styles.container}>
       <StatusBar barStyle={"light-content"} />
 
-      {/* 헤더 (기존과 동일) */}
       <Animated.View style={[styles.header, headerAnimatedStyle]}>
         <SafeAreaView>
           <XStack
@@ -156,7 +155,6 @@ export default function StoreInformationPage() {
             <Animated.View
               style={[styles.headerTitleContainer, titleAnimatedStyle]}
             >
-              {/* 헤더 타이틀도 동적으로 변경 */}
               <Text style={styles.headerTitle}>{storeData?.storeName}</Text>
             </Animated.View>
             <View style={{ width: 28 }} />
@@ -169,11 +167,16 @@ export default function StoreInformationPage() {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-        <Image source={backgroundSrc} style={styles.headerImage} />
+        <Image
+          source={{ uri: storeData?.backImg }}
+          style={styles.headerImage}
+        />
         <YStack backgroundColor="$background" style={styles.content}>
-          <Image source={profileSrc} style={styles.profileImage} />
+          <Image
+            source={{ uri: storeData?.profileImg }}
+            style={styles.profileImage}
+          />
           <YStack alignItems="center" gap="$1.5">
-            {/* --- 4. Skeleton과 자식 컴포넌트에 isLoading을 직접 전달합니다 --- */}
             <Skeleton show={isLoading} width={80}>
               <Text fontSize={28} fontWeight="bold">
                 {storeData?.storeName}

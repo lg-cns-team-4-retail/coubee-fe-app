@@ -30,9 +30,12 @@ const LoginScreen = () => {
           response.data.data.accessRefreshToken.access.token,
           response.data.data.accessRefreshToken.access.expiresIn,
           response.data.data.accessRefreshToken.refresh.token,
-          response.data.data.userInfo.userId
+          response.data.data.userInfo.userId,
+          response.data.data.userInfo.nickname
         );
-        toast.show("로그인 성공", { message: "환영합니다" });
+        toast.show("로그인 성공", {
+          message: `환영합니다 ${response.data.data.userInfo.nickname}님`,
+        });
       }
     } catch (error) {
       const errorMessage = error.message || "알 수 없는 오류가 발생했습니다.";

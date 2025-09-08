@@ -26,17 +26,12 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import GlobalModal from "../components/GlobalModal";
 import QRCodeModal from "../components/OrderHistory/QRCodeModal";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -46,19 +41,16 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    // 알림 권한만 미리 요청 (토큰 등록은 로그인 후)
     const setupNotifications = async () => {
       await requestNotificationPermissions();
     };
 
     setupNotifications();
 
-    // 알림 수신 리스너
     const notificationListener = addNotificationListener((notification) => {
       console.log("Notification received:", notification);
     });
 
-    // 알림 응답 리스너 (사용자가 알림을 탭했을 때)
     const responseListener = addNotificationResponseListener((response) => {
       handleNotificationNavigation(response);
     });
@@ -71,7 +63,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (interLoaded || interError) {
-      // Hide the splash screen after the fonts have loaded (or an error was returned) and the UI is ready.
       SplashScreen.hideAsync();
     }
   }, [interLoaded, interError]);
@@ -108,8 +99,13 @@ function RootLayoutNav() {
               name="(tabs)"
               options={{
                 headerShown: false,
+                headerStyle: {
+                  backgroundColor: theme.primary?.val,
+                },
+                headerTintColor: "#fff",
               }}
             />
+
             <Stack.Screen
               name="(auth)/login"
               options={{
@@ -187,6 +183,16 @@ function RootLayoutNav() {
                 },
                 headerTintColor: "#fff",
                 headerBackTitle: "뒤로",
+                headerShadowVisible: false,
+              }}
+            />
+
+            <Stack.Screen
+              name="myList/index"
+              options={{
+                title: "찜한 매장 & 추천",
+                headerShown: false,
+
                 headerShadowVisible: false,
               }}
             />

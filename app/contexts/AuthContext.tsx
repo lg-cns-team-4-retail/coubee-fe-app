@@ -7,8 +7,10 @@ import { openModal } from "../../redux/slices/modalSlice";
 interface AuthContextType extends AuthState {
   login: (
     token: string,
+    expiresIn?: number,
     refreshToken?: string,
-    userId?: string
+    userId?: string,
+    nickname?: string
   ) => Promise<void>;
   logout: () => Promise<void>;
   checkAuthStatus: () => Promise<void>;

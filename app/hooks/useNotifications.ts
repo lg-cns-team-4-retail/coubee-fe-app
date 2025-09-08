@@ -28,6 +28,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   useEffect(() => {
     // 알림 권한 요청 및 토큰 등록
     const setupNotifications = async () => {
+      console.log("im calling");
       const permission = await requestNotificationPermissions();
       setHasPermission(permission);
 
