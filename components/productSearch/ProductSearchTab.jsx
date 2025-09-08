@@ -1,5 +1,5 @@
 // components/productSearch/ProductSearchTab.jsx
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { YStack, Text, Spinner } from "tamagui";
 import { FlatList } from "react-native";
 import ProductItem from "../ProductItem";
@@ -12,6 +12,11 @@ const ProductSearchTab = ({ searchKeyword, userLocation }) => {
   const router = useRouter();
 
   const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    console.log("current keyword", searchKeyword, page);
+    setPage(0);
+  }, [searchKeyword]);
 
   const { data, isLoading, isFetching } = useSearchProductsQuery(
     { keyword: searchKeyword, page, ...userLocation },

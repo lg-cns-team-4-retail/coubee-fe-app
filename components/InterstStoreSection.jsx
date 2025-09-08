@@ -5,9 +5,13 @@ import { ChevronRight } from "@tamagui/lucide-icons";
 import StoreResult from "./storeSearch/StoreResult";
 import { router } from "expo-router";
 import ListEmptyComponent from "./ListEmptyComponent";
+import { useAuthContext } from "../app/contexts/AuthContext";
 
 const InterestStoreSection = ({ userName, stores, isLoading }) => {
-  const handleStoreRedirect = (storeId) => {};
+  const handleStoreRedirect = (storeId) => {
+    router.push(`/store/${storeId}`);
+  };
+  const { isAuthenticated, nickname } = useAuthContext();
 
   if (isLoading) {
     return (
@@ -20,7 +24,7 @@ const InterestStoreSection = ({ userName, stores, isLoading }) => {
   const renderItem = ({ item }) => (
     <YStack width="350" mr="$3">
       <StoreResult
-        onPress={handleStoreRedirect}
+        onPress={() => handleStoreRedirect(item.storeId)}
         key={item.storeId}
         store={item}
       />
@@ -33,7 +37,8 @@ const InterestStoreSection = ({ userName, stores, isLoading }) => {
         {/* 왼쪽: 텍스트 영역 */}
         <YStack>
           <Paragraph size="$8" fontWeight="bold">
-            <Text color="$info">{userName}</Text>님이
+            <Text color="$info">{isAuthenticated ? nickname : "사용자"}</Text>
+            님이
           </Paragraph>
           <Paragraph size="$8" fontWeight="bold" color="$gray11">
             관심있어 하는 매장이에요

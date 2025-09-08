@@ -19,7 +19,11 @@ export default function OrderHistoryScreen() {
   const [searchQuery, setSearchQuery] = useState(""); // 사용자의 즉각적인 입력을 위한 상태
   const [debouncedKeyword, setDebouncedKeyword] = useState(""); // API 호출을 위한 디바운싱된 상태
 
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuthContext();
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    nickname,
+  } = useAuthContext();
 
   const { data, error, isLoading, isFetching, refetch } = useGetOrdersQuery(
     {
@@ -127,7 +131,7 @@ export default function OrderHistoryScreen() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <OrderHistoryHeader
-        userName={"환진"}
+        userName={isAuthenticated ? nickname : "사용자"}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />

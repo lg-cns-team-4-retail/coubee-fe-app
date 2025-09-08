@@ -114,6 +114,7 @@ export default function CheckoutPage() {
                 salePrice={item.salePrice}
                 originPrice={item.originPrice}
                 quantity={item.quantity}
+                availableStock={item.availableStock}
               />
             ))
           ) : (

@@ -9,6 +9,7 @@ const initialState = {
   hotdeal: null,
 };
 
+// 이 헬퍼 함수는 수정할 필요가 없습니다.
 const recalculateTotals = (state) => {
   state.totalQuantity = state.items.reduce(
     (sum, item) => sum + item.quantity,
@@ -33,15 +34,27 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addItem: (state, action) => {
+      // action.payload에 반드시 availableStock (가용 재고)이 포함.
       const { hotdeal, ...newItemData } = action.payload;
       const existingItem = state.items.find(
         (item) => item.productId === newItemData.productId
       );
 
       if (existingItem) {
-        existingItem.quantity += newItemData.quantity;
+        //  이미 상품이 있을 경우, 재고를 넘지 않도록 수량을 제한합니다.
+        const newQuantity = existingItem.quantity + newItemData.quantity;
+        // 기존 상품의 availableStock을 사용해야 하므로, 처음 추가 시 저장되는지 확인.
+        existingItem.quantity = Math.min(
+          newQuantity,
+          existingItem.availableStock
+        );
       } else {
-        state.items.push({ ...newItemData });
+        //  새 상품을 추가할 때도 재고를 넘지 않도록 합니다.
+        const quantityToAdd = Math.min(
+          newItemData.quantity,
+          newItemData.availableStock
+        );
+        state.items.push({ ...newItemData, quantity: quantityToAdd });
       }
 
       state.storeId = newItemData.storeId;
@@ -57,7 +70,9 @@ const cartSlice = createSlice({
     increaseQuantity: (state, action) => {
       const { productId } = action.payload;
       const item = state.items.find((item) => item.productId === productId);
-      if (item) {
+
+      // 수량 증가 시, 저장된 availableStock과 비교하여 재고를 초과하지 못하게.
+      if (item && item.quantity < item.availableStock) {
         item.quantity++;
         recalculateTotals(state);
       }
@@ -73,12 +88,15 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       return initialState;
     },
-
     replaceCart: (state, action) => {
-      // addItem과 동일한 로직을 적용합니다.
       const { hotdeal, ...newItemData } = action.payload;
+      // 다른 가게 상품으로 교체할 때도 재고 확인.
+      const quantityToAdd = Math.min(
+        newItemData.quantity,
+        newItemData.availableStock
+      );
 
-      state.items = [{ ...newItemData }];
+      state.items = [{ ...newItemData, quantity: quantityToAdd }];
       state.storeId = newItemData.storeId;
       state.hotdeal = hotdeal;
       recalculateTotals(state);
@@ -98,5 +116,4 @@ export const {
 export default cartSlice.reducer;
 
 export const selectCartItems = (state) => state.cart.items;
-// selector 로직 수정
 export const selectTotalQuantity = (state) => state.cart.totalQuantity;

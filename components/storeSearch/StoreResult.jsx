@@ -132,9 +132,13 @@ export const StoreResult = ({ store, onPress }) => {
         {/* 주소 정보 */}
         <XStack alignItems="center" gap="$2">
           <MapPin size={16} color="$gray10" />
-          <Text color="$green10" fontWeight="bold">
-            {Math.round(store.distance)}m
-          </Text>
+
+          {store?.distance > 0 && (
+            <Text color="green" fontWeight="bold">
+              {Math.round(store.distance)}m
+            </Text>
+          )}
+
           <Text color="$gray10" numberOfLines={1}>
             {store.storeAddress}
           </Text>

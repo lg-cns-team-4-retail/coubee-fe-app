@@ -10,12 +10,14 @@ import {
 } from "tamagui";
 import { ShoppingCart, Tag, CheckCircle2 } from "@tamagui/lucide-icons";
 import CoubeeSvgClick from "../components/icons/CoubeeSvgClick";
+import { useAuthContext } from "../app/contexts/AuthContext";
 const formatCurrency = (amount) => {
   if (typeof amount !== "number") return "0원";
   return `${amount.toLocaleString()}원`;
 };
 
 export function PurchaseSummaryCard({ data, isLoading }) {
+  const { isAuthenticated, nickname } = useAuthContext();
   if (isLoading || !data) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center">
@@ -37,7 +39,8 @@ export function PurchaseSummaryCard({ data, isLoading }) {
         {/* 왼쪽: 텍스트 영역 */}
         <YStack>
           <Paragraph size="$8" fontWeight="bold">
-            <Text color="$info">{"환진"}</Text>님이
+            <Text color="$info">{isAuthenticated ? nickname : "사용자"}</Text>
+            님이
           </Paragraph>
           <Paragraph size="$8" fontWeight="bold" color="$gray11">
             받으신 혜택이에요

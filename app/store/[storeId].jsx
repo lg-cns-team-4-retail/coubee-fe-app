@@ -231,7 +231,9 @@ export default function StorePage() {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Text style={styles.storeTitle}>{storeDetail?.storeName}</Text>
+            <Text flex={1} numberOfLines={2} style={styles.storeTitle}>
+              {storeDetail?.storeName}
+            </Text>
 
             <XStack ai="center" gap="$2">
               <Button

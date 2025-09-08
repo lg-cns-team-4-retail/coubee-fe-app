@@ -124,7 +124,6 @@ export default function TabTwoScreen() {
           />
 
           <InterestStoreSection
-            userName={"환진"}
             stores={stores}
             isLoading={isInterstStoresLoading}
           />

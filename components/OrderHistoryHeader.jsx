@@ -1,14 +1,17 @@
 import React from "react";
 import { YStack, XStack, Text, Input, Button, Paragraph } from "tamagui";
 import { Search, ChevronDown } from "@tamagui/lucide-icons";
+import { useAuthContext } from "../app/contexts/AuthContext";
 
 const OrderHistoryHeader = ({ userName, searchQuery, onSearchChange }) => {
+  const { isAuthenticated, nickname } = useAuthContext();
+
   return (
     <YStack space="$4" p="$4" backgroundColor="$cardBg">
       {/* 제목 */}
       <YStack>
         <Paragraph size="$8" fontWeight="bold">
-          <Text color="$info">{userName}</Text>님이
+          <Text color="$info">{isAuthenticated ? nickname : "사용자"}</Text>님이
         </Paragraph>
         <Paragraph size="$8" fontWeight="bold" color="$gray11">
           구매한 내역이에요

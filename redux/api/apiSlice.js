@@ -318,8 +318,17 @@ export const apiSlice = createApi({
         return rest;
       },
 
-      merge: (currentCache, newItems) => {
-        currentCache.content.push(...newItems.content);
+      merge: (currentCache, newItems, { arg }) => {
+        if (arg.page === 0) {
+          return newItems;
+        }
+        const existingProductIds = new Set(
+          currentCache.content.map((p) => p.productId)
+        );
+        const uniqueNewItems = newItems.content.filter(
+          (p) => !existingProductIds.has(p.productId)
+        );
+        currentCache.content.push(...uniqueNewItems);
         currentCache.last = newItems.last;
       },
 
