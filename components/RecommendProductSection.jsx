@@ -48,6 +48,21 @@ const RecommendedProductSection = ({ userName, products, isLoading }) => {
             추천하는 물품이에요
           </Paragraph>
         </YStack>
+        {products && products.length > 0 && (
+          <Button
+            size="$3"
+            chromeless
+            iconAfter={ChevronRight}
+            onPress={() =>
+              router.push({
+                pathname: "/myList",
+                params: { initialTab: "products" },
+              })
+            }
+          >
+            더보기
+          </Button>
+        )}
       </XStack>
 
       {!products || products.length === 0 ? (

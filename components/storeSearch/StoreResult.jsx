@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { YStack, XStack, Text, Image, Button, Paragraph } from "tamagui";
 import { MapPin, Heart } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
@@ -7,12 +7,19 @@ import { useAuthContext } from "../../app/contexts/AuthContext";
 import { useDispatch } from "react-redux";
 import { openModal } from "../../redux/slices/modalSlice";
 import { router } from "expo-router";
+
 export const StoreResult = ({ store, onPress }) => {
   const toast = useToastController();
   const dispatch = useDispatch();
   const [toggleInterest, { isLoading: isToggling }] =
     useToggleInterestMutation();
   const { isAuthenticated } = useAuthContext();
+
+  const [isLiked, setIsLiked] = useState(store.interest);
+
+  useEffect(() => {
+    setIsLiked(store.interest);
+  }, [store.interest]);
 
   const handleLikePress = React.useCallback(
     async (e) => {
@@ -32,17 +39,21 @@ export const StoreResult = ({ store, onPress }) => {
           })
         );
       } else {
-        const isCurrentlyLiked = store.interest;
+        // UI를 먼저 업데이트 (낙관적 업데이트)
+        const newLikedState = !isLiked;
+        setIsLiked(newLikedState);
 
         try {
           await toggleInterest(store.storeId).unwrap();
 
           toast.show(
-            isCurrentlyLiked
-              ? "관심 가게에서 삭제했어요."
-              : "관심 가게로 등록했어요."
+            newLikedState
+              ? "관심 가게로 등록했어요."
+              : "관심 가게에서 삭제했어요."
           );
         } catch (error) {
+          // 에러 발생 시 원래 상태로 복원
+          setIsLiked(!newLikedState);
           console.error("관심 가게 변경 실패:", error);
           toast.show("요청에 실패했습니다.", {
             message: "잠시 후 다시 시도해주세요.",
@@ -50,14 +61,7 @@ export const StoreResult = ({ store, onPress }) => {
         }
       }
     },
-    [
-      isAuthenticated,
-      dispatch,
-      store.storeId,
-      store.interest,
-      toggleInterest,
-      toast,
-    ]
+    [isAuthenticated, dispatch, store.storeId, isLiked, toggleInterest, toast]
   );
 
   return (
@@ -71,7 +75,7 @@ export const StoreResult = ({ store, onPress }) => {
       pressStyle={{ scale: 0.985 }}
       animation="bouncy"
     >
-      {/* 1. 이미지 영역 (배경 + 프로필) */}
+      {/* ... (이하 동일) ... */}
       <YStack position="relative">
         <Image
           source={{
@@ -96,8 +100,8 @@ export const StoreResult = ({ store, onPress }) => {
           icon={
             <Heart
               size={20}
-              color={store.interest ? "red" : "white"}
-              fill={store.interest ? "red" : "transparent"}
+              color={isLiked ? "red" : "white"}
+              fill={isLiked ? "red" : "transparent"}
             />
           }
         />
@@ -117,8 +121,7 @@ export const StoreResult = ({ store, onPress }) => {
           zIndex={10}
         />
       </YStack>
-
-      {/* 2. 정보 영역 */}
+      {/* ... (이하 동일) ... */}
       <YStack padding="$4" gap="$2.5" mt="$6">
         <Text fontSize="$4" fontWeight="bold" numberOfLines={1}>
           {store.storeName}

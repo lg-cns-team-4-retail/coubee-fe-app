@@ -29,7 +29,6 @@ const RegisterScreen = () => {
     const { username, password, nickName } = formData;
 
     if (!username || !password || !nickName) {
-      console.log(nickName, username, password);
       Alert.alert("오류", "모든 정보를 입력해주세요.");
       return;
     }

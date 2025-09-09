@@ -2,7 +2,6 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 import { config } from "../app/config/env";
-// 이 부분은 전하의 환경에 맞게 설정하셔야 합니다.
 // import { config } from "../app/config/env";
 // const KAKAO_MAP_JS_KEY = config.kakaoJSKey;
 const KAKAO_MAP_JS_KEY = config.kakaoJSKey;
