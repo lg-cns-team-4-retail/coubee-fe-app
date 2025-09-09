@@ -14,7 +14,6 @@ const ProductSearchTab = ({ searchKeyword, userLocation }) => {
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    console.log("current keyword", searchKeyword, page);
     setPage(0);
   }, [searchKeyword]);
 
