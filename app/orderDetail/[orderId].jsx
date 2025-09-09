@@ -4,7 +4,7 @@ import { RefreshControl } from "react-native";
 
 import OrderDetailCard from "../../components/OrderDetailCard";
 import { useGetOrderDetailQuery } from "../../redux/api/apiSlice";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useFocusEffect } from "expo-router";
 
 const OrderHistoryScreen = () => {
   const { orderId } = useLocalSearchParams();
@@ -30,6 +30,11 @@ const OrderHistoryScreen = () => {
   } = useGetOrderDetailQuery(orderId, {
     pollingInterval: 150000,
   });
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const onRefresh = useCallback(async () => {
     setIsRefreshing(true);

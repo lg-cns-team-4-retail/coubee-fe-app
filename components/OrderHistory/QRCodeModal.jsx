@@ -6,7 +6,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { closeQRCodeModal } from "../../redux/slices/uiSlice";
 import axiosInstance from "../../app/services/api";
 import { encode as btoa } from "base-64"; // Base64 인코딩을 위함
-
+import { useToastController } from "@tamagui/toast";
+import { useGetOrderDetailQuery, apiSlice } from "../../redux/api/apiSlice";
 // ArrayBuffer를 Base64로 변환하는 헬퍼 함수
 function arrayBufferToBase64(buffer) {
   let binary = "";
@@ -20,6 +21,7 @@ function arrayBufferToBase64(buffer) {
 
 export default function QRCodeModal() {
   const dispatch = useDispatch();
+  const toast = useToastController();
   const { isQRCodeModalVisible, qrCodeOrderId } = useSelector(
     (state) => state.ui
   );
@@ -54,6 +56,21 @@ export default function QRCodeModal() {
       fetchQRCode();
     }
   }, [isQRCodeModalVisible, qrCodeOrderId]);
+
+  const { data: orderDetail } = useGetOrderDetailQuery(qrCodeOrderId, {
+    skip: !isQRCodeModalVisible || !qrCodeOrderId,
+    pollingInterval: 1500,
+  });
+
+  useEffect(() => {
+    if (orderDetail?.status === "RECEIVED") {
+      dispatch(closeQRCodeModal());
+      toast.show("픽업 완료!", {
+        message: "주문하신 상품의 픽업이 완료되었습니다.",
+      });
+      dispatch(apiSlice.util.invalidateTags([{ type: "Orders", id: "LIST" }]));
+    }
+  }, [orderDetail, dispatch, toast]);
 
   const handleClose = () => {
     dispatch(closeQRCodeModal());

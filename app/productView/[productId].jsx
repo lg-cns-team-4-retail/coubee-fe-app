@@ -288,12 +288,15 @@ export default function ProductDetailPage() {
  */}
                   <Button
                     size="$5"
-                    bg="$primary"
+                    bg={item?.stock === 0 ? "grey" : "$primary"}
                     color="white"
                     fontWeight={700}
                     onPress={handleAddToCart}
+                    disabled={item?.stock === 0 ? true : false}
                   >
-                    {totalPrice.toLocaleString() + "원 담기"}
+                    {item?.stock > 0
+                      ? totalPrice.toLocaleString() + "원 담기"
+                      : "품절"}
                   </Button>
                 </YStack>
               </YStack>
