@@ -11,11 +11,13 @@ import CoubeeSvgClick from "../../components/icons/CoubeeSvgClick";
 import CoubeeSvgUnclick from "../../components/icons/CoubeeSvgUnclick";
 import CoubeeSvgUnclickLeft from "../../components/icons/CoubeeSvgUnclickLeft";
 import { useAuthContext } from "app/contexts/AuthContext";
-
+import { useDispatch } from "react-redux";
+import { clearSearchState } from "../../redux/slices/searchSlice";
 const TAB_ICON_SIZE = 24;
 
 export default function TabLayout() {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const { isAuthenticated, nickname } = useAuthContext();
 
   return (
@@ -49,10 +51,16 @@ export default function TabLayout() {
           tabBarStyle: {
             display: "none",
           },
-          presentation: "modal", // iOS에서 아래에서 위로 올라오는 효과
-          animation: "fade", // 모든 플랫폼에서 부드럽게 나타나는 효과
+          presentation: "modal", //슬라이드 이펙트
+          animation: "fade",
           headerShown: false,
         }}
+        /* listeners={{
+          blur: () => {
+            //포커스 지웠을때 검색어 키워드 초기화
+            dispatch(clearSearchState());
+          },
+        }} */
       />
       <Tabs.Screen
         name="History"

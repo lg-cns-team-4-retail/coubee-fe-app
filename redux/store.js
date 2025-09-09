@@ -16,12 +16,14 @@ import { apiSlice } from "./api/apiSlice";
 import uiReducer from "./slices/uiSlice";
 import cartReducer from "./slices/cartSlice";
 import modalReducer from "./slices/modalSlice";
+import searchReducer from "./slices/searchSlice";
 
 const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   ui: uiReducer,
   cart: cartReducer,
   modal: modalReducer,
+  search: searchReducer,
 });
 
 const persistConfig = {

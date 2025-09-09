@@ -9,12 +9,17 @@ import { useTheme } from "tamagui";
 import StoreSearchTab from "./storeSearch/StoreSearchTab";
 import { useLocation } from "../app/hooks/useLocation";
 import ProductSearchTab from "./productSearch/ProductSearchTab";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setSearchState,
+  setActiveTab,
+  clearSearchState,
+} from "../redux/slices/searchSlice";
 
 export const SearchComponent = () => {
   const router = useRouter();
   const theme = useTheme();
-
-  const [activeTab, setActiveTab] = useState("store");
+  const dispatch = useDispatch();
 
   const { location } = useLocation();
 
@@ -22,28 +27,35 @@ export const SearchComponent = () => {
 
   useEffect(() => {
     if (location) {
-      /* setUserLocation({
+      setUserLocation({
         lat: location.latitude,
         lng: location.longitude,
-      }); */
-      setUserLocation({
+      });
+      /* setUserLocation({
         lat: 37.559661293097975,
         lng: 127.0053580437816,
-      });
+      }); */
     }
   }, [location]);
+  const {
+    keyword: searchKeyword,
+    inputValue,
+    activeTab,
+  } = useSelector((state) => state.search);
 
-  useFocusEffect(
-    useCallback(() => {
-      setInputValue("");
-      setSearchKeyword("");
-      setActiveTab("store");
+  const handleInputChange = (text) => {
+    dispatch(setSearchState({ inputValue: text, keyword: searchKeyword }));
+  };
 
-      return () => {};
-    }, [])
-  );
+  const handleSearch = () => {
+    dispatch(setSearchState({ inputValue, keyword: inputValue }));
+  };
 
-  const [inputValue, setInputValue] = useState("");
+  const handleTabChange = (tab) => {
+    dispatch(setActiveTab(tab));
+  };
+
+  /*   const [inputValue, setInputValue] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const handleSearch = () => {
@@ -51,7 +63,11 @@ export const SearchComponent = () => {
 
     setSearchKeyword(newKeyword);
   };
+ */
 
+  const handleBackClick = () => {
+    dispatch(clearSearchState());
+  };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background?.val }}>
       <YStack flex={1} backgroundColor="$background">
@@ -59,7 +75,7 @@ export const SearchComponent = () => {
           <XStack gap="$2" alignItems="center">
             <Button
               icon={<ChevronLeft size="$2" />}
-              onPress={() => router.back()}
+              onPress={handleBackClick}
               chromeless
               circular
             />
@@ -73,7 +89,7 @@ export const SearchComponent = () => {
               borderWidth={1}
               focusStyle={{ borderColor: "$primary" }}
               value={inputValue}
-              onChangeText={setInputValue}
+              onChangeText={handleInputChange}
               onSubmitEditing={handleSearch}
               returnKeyType="search"
             />
@@ -83,7 +99,7 @@ export const SearchComponent = () => {
           {/* 상점/상품 검색 버튼 그룹 */}
           <XStack gap="$2">
             <Button
-              onPress={() => setActiveTab("store")}
+              onPress={() => handleTabChange("store")}
               backgroundColor={
                 activeTab === "store" ? "$primary" : "transparent"
               }
@@ -100,7 +116,7 @@ export const SearchComponent = () => {
               </Text>
             </Button>
             <Button
-              onPress={() => setActiveTab("product")}
+              onPress={() => handleTabChange("product")}
               backgroundColor={
                 activeTab === "product" ? "$primary" : "transparent"
               }
