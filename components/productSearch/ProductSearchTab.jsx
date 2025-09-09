@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "expo-router";
 import { useSearchProductsQuery } from "../../redux/api/apiSlice";
 import ListEmptyComponent from "../ListEmptyComponent";
-
+import { useSelector } from "react-redux";
 const ProductSearchTab = ({ searchKeyword, userLocation }) => {
   const router = useRouter();
 
@@ -18,7 +18,7 @@ const ProductSearchTab = ({ searchKeyword, userLocation }) => {
   }, [searchKeyword]);
 
   const { data, isLoading, isFetching } = useSearchProductsQuery(
-    { keyword: searchKeyword, page, ...userLocation },
+    { keyword: searchKeyword ? searchKeyword : "", page, ...userLocation },
     {
       skip: !userLocation,
     }

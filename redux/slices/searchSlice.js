@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { router } from "expo-router";
 
 const initialState = {
   keyword: "",
@@ -22,7 +21,6 @@ const searchSlice = createSlice({
       state.keyword = initialState.keyword;
       state.inputValue = initialState.inputValue;
       state.activeTab = initialState.activeTab;
-      router.replace("/(tabs)");
     },
   },
 });

@@ -51,6 +51,7 @@ export default function TabLayout() {
           tabBarStyle: {
             display: "none",
           },
+          href: "/Search",
           presentation: "modal", //슬라이드 이펙트
           animation: "fade",
           headerShown: false,

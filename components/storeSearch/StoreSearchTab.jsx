@@ -7,6 +7,7 @@ import SearchResultsSheet from "./SearchResultsSheet";
 import ListEmptyComponent from "../ListEmptyComponent";
 import { useSearchStoresQuery } from "../../redux/api/apiSlice";
 import StoreSkeleton from "./StoreSkeleton";
+import { useSelector } from "react-redux";
 
 /**
  * 상점 검색 탭의 UI와 데이터 로직을 담당하는 컴포넌트
@@ -15,9 +16,13 @@ import StoreSkeleton from "./StoreSkeleton";
 
 const StoreSearchTab = ({ searchKeyword, userLocation }) => {
   const [page, setPage] = useState(0);
-
   const { data, isLoading, isFetching, isError } = useSearchStoresQuery(
-    { keyword: searchKeyword, page, ...userLocation, size: 5 },
+    {
+      keyword: searchKeyword ? searchKeyword : "",
+      page,
+      ...userLocation,
+      size: 5,
+    },
     {
       skip: !userLocation,
     }
@@ -31,7 +36,7 @@ const StoreSearchTab = ({ searchKeyword, userLocation }) => {
 
   const searchResults = data?.content || [];
 
-  /* if (isLoading && page === 0) {
+  if (isLoading && page === 0) {
     return (
       <YStack flex={1} jc="center" ai="center">
         <StoreSkeleton />
@@ -39,7 +44,7 @@ const StoreSearchTab = ({ searchKeyword, userLocation }) => {
       </YStack>
     );
   }
- */
+
   // 에러 발생 시
   if (isError) {
     return (
@@ -71,7 +76,7 @@ const StoreSearchTab = ({ searchKeyword, userLocation }) => {
         onLoadMore={loadMore}
         isFetching={isFetching}
         isLoading={isLoading && page === 0} //
-        totalResults={data?.totalElements} // 👈 이 prop을 추가합니다.
+        totalResults={data?.totalElements || 0}
       />
     </View>
   );

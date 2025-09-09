@@ -3,20 +3,21 @@ import { YStack, XStack, Input, Button, Text } from "tamagui";
 import MapComponentContainer from "./storeSearch/MapComponentContainer";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Search } from "@tamagui/lucide-icons";
-import { useFocusEffect, useRouter } from "expo-router";
+import {
+  useFocusEffect,
+  useRouter,
+  useLocalSearchParams,
+  usePathname,
+} from "expo-router";
 import SearchResultsSheet from "./storeSearch/SearchResultsSheet";
 import { useTheme } from "tamagui";
 import StoreSearchTab from "./storeSearch/StoreSearchTab";
 import { useLocation } from "../app/hooks/useLocation";
 import ProductSearchTab from "./productSearch/ProductSearchTab";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  setSearchState,
-  setActiveTab,
-  clearSearchState,
-} from "../redux/slices/searchSlice";
+import { clearSearchState, setActiveTab } from "../redux/slices/searchSlice";
 
-export const SearchComponent = () => {
+export const SearchComponent = ({ searchKeywordFromParam }) => {
   const router = useRouter();
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -37,36 +38,33 @@ export const SearchComponent = () => {
       }); */
     }
   }, [location]);
-  const {
-    keyword: searchKeyword,
-    inputValue,
-    activeTab,
-  } = useSelector((state) => state.search);
-
-  const handleInputChange = (text) => {
-    dispatch(setSearchState({ inputValue: text, keyword: searchKeyword }));
-  };
+  const { activeTab } = useSelector((state) => state.search);
+  const { keyword: searchKeyword } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const pathname = usePathname();
+  const [inputValue, setInputValue] = useState(searchKeyword || "");
 
   const handleSearch = () => {
-    dispatch(setSearchState({ inputValue, keyword: inputValue }));
+    const newKeyword = inputValue.trim();
+    if (newKeyword) {
+      router.push(`/Search?keyword=${newKeyword}`);
+    }
   };
 
   const handleTabChange = (tab) => {
     dispatch(setActiveTab(tab));
   };
 
-  /*   const [inputValue, setInputValue] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState("");
-
-  const handleSearch = () => {
-    const newKeyword = inputValue.trim();
-
-    setSearchKeyword(newKeyword);
-  };
- */
+  useEffect(() => {
+    setInputValue(searchKeyword || "");
+    if (!searchKeyword) {
+      console.log(searchKeyword);
+      dispatch(clearSearchState());
+    }
+  }, [searchKeyword]);
 
   const handleBackClick = () => {
-    dispatch(clearSearchState());
+    router.back();
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background?.val }}>
@@ -88,9 +86,9 @@ export const SearchComponent = () => {
               borderColor="$borderColor"
               borderWidth={1}
               focusStyle={{ borderColor: "$primary" }}
-              value={inputValue}
-              onChangeText={handleInputChange}
+              onChangeText={setInputValue}
               onSubmitEditing={handleSearch}
+              value={inputValue}
               returnKeyType="search"
             />
             <Button icon={<Search />} onPress={handleSearch} circular />
@@ -140,7 +138,7 @@ export const SearchComponent = () => {
             <>
               <StoreSearchTab
                 key={`store-${searchKeyword}`}
-                searchKeyword={searchKeyword}
+                searchKeyword={searchKeyword || ""}
                 userLocation={userLocation}
               />
             </>
@@ -150,7 +148,7 @@ export const SearchComponent = () => {
             <>
               <ProductSearchTab
                 key={`product-${searchKeyword}`}
-                searchKeyword={searchKeyword}
+                searchKeyword={searchKeyword || ""}
                 userLocation={userLocation}
               />
             </>
