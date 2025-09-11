@@ -18,7 +18,6 @@ import { ChevronLeft } from "@tamagui/lucide-icons";
 import { useTheme, Button, XStack, YStack, Text } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
 
-// --- RTK Query 훅을 import 합니다 ---
 import { useGetStoreDetailQuery } from "../../redux/api/apiSlice";
 
 import backgroundSrc from "../../assets/images/background.jpg";
@@ -27,12 +26,10 @@ import Skeleton from "../../components/Skeleton";
 import StoreTags from "./StoreTag";
 import StoreInfo from "./StoreInfo";
 
-// --- 설정 값 (기존과 동일) ---
 const HEADER_IMAGE_HEIGHT = 250;
 const ANIMATION_START_Y = HEADER_IMAGE_HEIGHT * 0.5;
 const ANIMATION_END_Y = HEADER_IMAGE_HEIGHT * 0.8;
 
-// CrossfadingIcon 컴포넌트 (기존과 동일)
 const CrossfadingIcon = ({
   WhiteIcon,
   BlackIcon,
@@ -113,7 +110,6 @@ export default function StoreInformationPage() {
     ),
   }));
 
-  // --- 3. 로딩 및 에러 상태를 처리합니다 ---
   if (isLoading) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center">

@@ -430,7 +430,6 @@ export const apiSlice = createApi({
                 type: "InterestStore",
                 id: storeId,
               })),
-              // 2. 이 '목록' 자체에도 꼬리표를 붙입니다.
               { type: "InterestStore", id: "LIST" },
             ]
           : [{ type: "InterestStore", id: "LIST" }],

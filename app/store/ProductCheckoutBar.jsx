@@ -15,7 +15,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
  */
 const formatCurrency = (amount) => {
   if (typeof amount !== "number") return "0원";
-  return amount.toLocaleString(); // '원'은 필요한 곳에서 붙입니다.
+  return amount.toLocaleString();
 };
 
 const ProductCheckoutBar = ({ currentStoreId, onPress }) => {

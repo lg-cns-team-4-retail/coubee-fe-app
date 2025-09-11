@@ -53,7 +53,6 @@ export default function CheckoutPage() {
       const orderData = {
         storeId: storeId,
         recipientName: userId,
-        // 2. 하드코딩된 'CARD' 대신, 선택된 결제 수단(selectedMethod)을 사용
         paymentMethod: selectedMethod,
         totalAmount: totalSalePrice,
         items: items.map((item) => ({

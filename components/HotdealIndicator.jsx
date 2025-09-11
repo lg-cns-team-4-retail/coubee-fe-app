@@ -50,11 +50,11 @@ const ModernHotdealBanner = ({ hotdeal }) => {
 
   return (
     <Card
-      flexDirection="row" // Card 자체를 Flex 컨테이너로 사용
+      flexDirection="row"
       alignItems="center"
       paddingVertical="$3"
       paddingHorizontal="$4"
-      borderRadius="$5" // 조금 더 각진 모서리
+      borderRadius="$5"
       color="white"
       bg="$error"
       gap="$4"

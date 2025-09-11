@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AuthService } from "../services/auth";
-import { useDispatch } from "react-redux"; // 👈 1. useDispatch import
-import { apiSlice } from "../../redux/api/apiSlice"; // 👈 2. apiSlice import
+import { useDispatch } from "react-redux";
+import { apiSlice } from "../../redux/api/apiSlice";
 import { router } from "expo-router";
 
 export interface AuthState {

@@ -9,7 +9,6 @@ const initialState = {
   hotdeal: null,
 };
 
-// 이 헬퍼 함수는 수정할 필요가 없습니다.
 const recalculateTotals = (state) => {
   state.totalQuantity = state.items.reduce(
     (sum, item) => sum + item.quantity,

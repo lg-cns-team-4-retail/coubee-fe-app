@@ -68,5 +68,4 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   };
 }
 
-// Default export for Expo Router compatibility
 export default useNotifications;

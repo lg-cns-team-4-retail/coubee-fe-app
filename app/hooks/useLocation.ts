@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import * as Location from 'expo-location';
+import { useState, useEffect } from "react";
+import * as Location from "expo-location";
 
 interface LocationData {
   latitude: number;
@@ -24,13 +24,13 @@ export function useLocation(): UseLocationReturn {
   const requestPermission = async (): Promise<boolean> => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setError('위치 권한이 거부되었습니다.');
+      if (status !== "granted") {
+        setError("위치 권한이 거부되었습니다.");
         return false;
       }
       return true;
     } catch (err) {
-      setError('권한 요청 중 오류가 발생했습니다.');
+      setError("권한 요청 중 오류가 발생했습니다.");
       return false;
     }
   };
@@ -61,7 +61,7 @@ export function useLocation(): UseLocationReturn {
       setLoading(false);
       return locationData;
     } catch (err) {
-      const errorMessage = '위치 정보를 가져올 수 없습니다.';
+      const errorMessage = "위치 정보를 가져올 수 없습니다.";
       setError(errorMessage);
       setLoading(false);
       return null;
@@ -82,5 +82,4 @@ export function useLocation(): UseLocationReturn {
   };
 }
 
-// Default export for Expo Router compatibility
 export default useLocation;
