@@ -25,7 +25,9 @@ import { store, persistor } from "../redux/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import GlobalModal from "../components/GlobalModal";
 import QRCodeModal from "../components/OrderHistory/QRCodeModal";
-
+import { AppState } from "react-native";
+import { useDispatch } from "react-redux";
+import { apiSlice } from "../redux/api/apiSlice";
 export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
@@ -87,6 +89,35 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 };
 
 function RootLayoutNav() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    // 앱 상태 변경을 감시하는 리스너를 등록합니다.
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      // 앱이 비활성/백그라운드 상태에 있다가 '활성' 상태로 돌아왔을 때
+      if (nextAppState === "active") {
+        console.log("App has come to the foreground!"); // 동작 확인용 로그
+
+        // 우리가 갱신하길 원하는 모든 데이터의 태그를 강제로 무효화시킵니다.
+        // 이 명령은 "이 태그가 붙은 데이터는 모두 낡았으니, 다음에 필요할 때 새로 가져오라!"는 의미입니다.
+        dispatch(
+          apiSlice.util.invalidateTags([
+            "Store",
+            "Products",
+            "Product",
+            "Orders",
+            "Search",
+            "InterestStore", // 이전 대화에서 추가했던 태그
+          ])
+        );
+      }
+    });
+
+    // 컴포넌트가 사라질 때 리스너를 정리합니다.
+    return () => {
+      subscription.remove();
+    };
+  }, [dispatch]);
+
   const colorScheme = useColorScheme();
   const theme = useTheme();
   return (

@@ -13,7 +13,7 @@ import {
   ScrollView,
 } from "tamagui";
 import { ChevronLeft, Plus, Minus } from "@tamagui/lucide-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
@@ -58,11 +58,20 @@ export default function ProductDetailPage() {
     isFetching,
     isSuccess,
     error,
+    refetch,
   } = useGetProductDetailQuery(productId, { skip: !productId });
 
   const { data: storeDetail } = useGetStoreDetailQuery(item?.storeId, {
     skip: !item?.storeId,
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      if (productId) {
+        refetch();
+      }
+    }, [productId, refetch])
+  );
 
   //view count용
   useEffect(() => {
@@ -71,7 +80,7 @@ export default function ProductDetailPage() {
     }
   }, [productId]);
 
-  if (isLoading || isFetching) {
+  if (isLoading) {
     <YStack flex={1} justifyContent="center" alignItems="center">
       <Spinner />
     </YStack>;

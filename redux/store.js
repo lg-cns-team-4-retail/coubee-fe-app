@@ -11,6 +11,7 @@ import {
 } from "redux-persist";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import devToolsEnhancer from "redux-devtools-expo-dev-plugin";
+import { setupListeners } from "@reduxjs/toolkit/query"; //디스패치 리스너용
 
 import { apiSlice } from "./api/apiSlice";
 import uiReducer from "./slices/uiSlice";
@@ -48,5 +49,5 @@ export const store = configureStore({
       },
     }).concat(apiSlice.middleware),
 });
-
+setupListeners(store.dispatch);
 export const persistor = persistStore(store);

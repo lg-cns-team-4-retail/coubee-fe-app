@@ -29,7 +29,14 @@ export const apiSlice = createApi({
   baseQuery: axiosBaseQuery({
     baseUrl: "",
   }),
-  tagTypes: ["Store", "Products", "Product", "Orders", "Search"],
+  tagTypes: [
+    "Store",
+    "Products",
+    "Product",
+    "Orders",
+    "Search",
+    "InterestStore",
+  ],
 
   endpoints: (builder) => ({
     toggleInterest: builder.mutation({
@@ -94,6 +101,7 @@ export const apiSlice = createApi({
       },
       invalidatesTags: (result, error, storeId) => [
         { type: "Store", id: storeId },
+        { type: "InterestStore", id: "LIST" },
       ],
     }),
 
@@ -114,6 +122,9 @@ export const apiSlice = createApi({
         url: `/store/detail/${storeId}`,
         method: "GET",
       }),
+      refetchOnMountOrArgChange: true,
+      //다른앱을 보고있다가 다시 돌아오면 업데이트가됨
+      refetchOnFocus: true,
       transformResponse: (response) => response.data,
       providesTags: (result, error, storeId) => [
         { type: "Store", id: storeId },
@@ -129,6 +140,10 @@ export const apiSlice = createApi({
       providesTags: (result, error, productId) => [
         { type: "Product", id: productId },
       ],
+      //새로고침안하고 이창을 들어왔을때 업데이트가됨
+      refetchOnMountOrArgChange: true,
+      //다른앱을 보고있다가 다시 돌아오면 업데이트가됨
+      refetchOnFocus: true,
     }),
     //
     getProducts: builder.query({
@@ -142,16 +157,39 @@ export const apiSlice = createApi({
         const { page, ...rest } = queryArgs;
         return rest;
       },
-      merge: (currentCache, newItems) => {
-        const existingProductIds = new Set(
-          currentCache.content.map((p) => p.productId)
+      //새로고침안하고 이창을 들어왔을때 업데이트가됨
+      refetchOnMountOrArgChange: true,
+      //다른앱을 보고있다가 다시 돌아오면 업데이트가됨
+      refetchOnFocus: true,
+      merge: (currentCache, newItems, { arg }) => {
+        if (arg.page > 0) {
+          currentCache.content.push(...newItems.content);
+          currentCache.last = newItems.last;
+          return;
+        }
+        const cacheMap = new Map(
+          currentCache.content.map((item) => [item.productId, item])
         );
-        const uniqueNewItems = newItems.content.filter(
-          (p) => !existingProductIds.has(p.productId)
-        );
-        currentCache.content.push(...uniqueNewItems);
+
+        // 새로 도착한 아이템들로 기존 캐시를 추가 후 비교
+        newItems.content.forEach((item) => {
+          cacheMap.set(item.productId, item); // 새 아이템으로 기존 아이템을 덮어쓰거나, 없으면 추가합니다.
+        });
+
+        // 3. Map을 다시 배열로 변환하여 캐시를 업데이트합니다.
+        currentCache.content = Array.from(cacheMap.values());
         currentCache.last = newItems.last;
       },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.content.map(({ productId }) => ({
+                type: "Product",
+                id: productId,
+              })),
+              { type: "Product", id: "LIST" },
+            ]
+          : [{ type: "Product", id: "LIST" }],
       forceRefetch({ currentArg, previousArg }) {
         return currentArg !== previousArg;
       },
@@ -238,7 +276,7 @@ export const apiSlice = createApi({
       pollingInterval: 15000,
     }),
 
-    //
+    //주변 매장 검색 api
     searchStores: builder.query({
       query: ({ keyword, lat, lng, page = 0, size = 10 }) => ({
         url: `/store/near`,
@@ -385,21 +423,22 @@ export const apiSlice = createApi({
         return response.data;
       },
 
-      providesTags: (result) => [{ type: "Search", id: "LIST" }],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ storeId }) => ({
+                type: "InterestStore",
+                id: storeId,
+              })),
+              // 2. 이 '목록' 자체에도 꼬리표를 붙입니다.
+              { type: "InterestStore", id: "LIST" },
+            ]
+          : [{ type: "InterestStore", id: "LIST" }],
 
       serializeQueryArgs: ({ queryArgs }) => {
         const { page, ...rest } = queryArgs;
         return rest;
       },
-
-      /*       merge: (currentCache, newItems) => {
-        currentCache.content.push(...newItems.content);
-        currentCache.last = newItems.last;
-      },
-
-      forceRefetch({ currentArg, previousArg }) {
-        return currentArg !== previousArg;
-      }, */
     }),
     //유저 주변에 인기 있는 매장용
     getPopularInterestStore: builder.query({
