@@ -296,7 +296,7 @@ export const apiSlice = createApi({
     //
     searchProducts: builder.query({
       query: ({ keyword, lat, lng, page = 0, size = 10 }) => ({
-        url: `/product/search/es`,
+        url: `/product/search/es/smart`,
         method: "GET",
         params: { keyword, latitude: lat, longitude: lng, page, size },
       }),

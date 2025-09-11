@@ -89,7 +89,7 @@ export default function TabTwoScreen() {
     }
   };
 
-  useFocusEffect(
+  /* useFocusEffect(
     useCallback(() => {
       if (isAuthenticated) {
         refetchSummary();
@@ -97,7 +97,7 @@ export default function TabTwoScreen() {
         refetchProducts();
       }
     }, [isAuthenticated, refetchSummary, refetchStores, refetchProducts])
-  );
+  ); */
 
   if (isAuthLoading) {
     return (

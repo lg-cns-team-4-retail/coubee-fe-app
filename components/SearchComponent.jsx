@@ -28,14 +28,14 @@ export const SearchComponent = ({ searchKeywordFromParam }) => {
 
   useEffect(() => {
     if (location) {
-      setUserLocation({
+      /* setUserLocation({
         lat: location.latitude,
         lng: location.longitude,
-      });
-      /* setUserLocation({
+      }); */
+      setUserLocation({
         lat: 37.559661293097975,
         lng: 127.0053580437816,
-      }); */
+      });
     }
   }, [location]);
   const { activeTab } = useSelector((state) => state.search);

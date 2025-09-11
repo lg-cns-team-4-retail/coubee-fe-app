@@ -85,6 +85,7 @@ export function useAuth() {
       await AuthService.setPushToken(pushToken);
       console.log("Push token saved locally");
       const success = await sendTokenToBackend(pushToken);
+      console.log(pushToken, "check");
       // 서버에 전송: 새 토큰이거나 처음 로그인하는 경우
       if (userId && (storedPushToken !== pushToken || !storedPushToken)) {
         // 토큰이 완전히 저장될 때까지 잠시 대기

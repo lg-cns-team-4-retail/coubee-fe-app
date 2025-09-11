@@ -89,7 +89,10 @@ export function CheckoutItem({
         {isSale ? (
           <XStack ai="flex-end" gap="$2" flexWrap="wrap">
             <Text fos="$4" col="red" fow="bold">
-              {discountRate}%
+              {discountRate === 0 && originPrice !== salePrice
+                ? 1
+                : discountRate}
+              %
             </Text>
             <Text fos="$4" fow="bold">{`${salePrice.toLocaleString(
               "ko-KR"

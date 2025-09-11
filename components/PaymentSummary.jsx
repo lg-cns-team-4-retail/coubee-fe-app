@@ -57,7 +57,7 @@ export function PaymentSummary() {
     const totalDiscountRate =
       totalOriginPrice > 0
         ? Math.round((totalDiscountAmount / totalOriginPrice) * 100)
-        : 0;
+        : 1;
 
     return {
       itemDiscountAmount,
@@ -100,7 +100,10 @@ export function PaymentSummary() {
           </Text>
           <XStack gap="$3" alignItems="center">
             <Text fontSize={18} fontWeight="bold" color="red">
-              {paymentDetails.totalDiscountRate}%
+              {paymentDetails.totalDiscountRate === 0
+                ? 1
+                : paymentDetails.totalDiscountRate}
+              %
             </Text>
             <Text fontSize={22} fontWeight="bold">
               {formatCurrency(paymentDetails.finalAmount)}
