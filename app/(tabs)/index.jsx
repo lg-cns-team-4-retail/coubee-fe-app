@@ -30,15 +30,15 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (location) {
-      /* setUserLocation({
+      setUserLocation({
         lat: location.latitude,
         lng: location.longitude,
-      }); */
+      });
       //집에서 테스트용 박아두기
-      setUserLocation({
+      /* setUserLocation({
         lat: 37.559661293097975,
         lng: 127.0053580437816,
-      });
+      }); */
     }
   }, [location]);
   const [page, setPage] = useState(0);
